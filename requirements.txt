@@ -1,0 +1,3 @@
+django_extensions==1.5.9
+whoosh==2.7.0
+django-haystack==2.4.1

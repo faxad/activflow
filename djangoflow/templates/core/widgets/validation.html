@@ -1,0 +1,14 @@
+{% if formset.non_form_errors or error_messages %}
+<div class="panel panel-danger">
+  <div class="panel-heading">
+    <h3 class="panel-title">Validation Errors</h3>
+  </div>
+  <div class="panel-body">
+    {% if error_messages %}
+        {% for message in error_messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+  </div>
+</div>
+{% endif %}

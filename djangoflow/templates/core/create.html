@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+
+<ol class="breadcrumb">
+  <li><a href="{% url 'main' %}">Home</a></li>
+  <li><a href="{% url 'index' app_title entity_title %}">{{ entity_title }}</a></li>
+  <li class="active">Create</li>
+</ol>
+
+<h4>Create {{ entity_title }}</h4>
+
+{% include "core/widgets/validation.html" with error_messages=error_message %}
+
+<form action="{% url 'create' app_title entity_title %}" method="post" class="form-horizontal">
+    {% include 'core/widgets/form_fields_display.html' %}
+</form>
+{% endblock %}

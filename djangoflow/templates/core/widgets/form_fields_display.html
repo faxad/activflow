@@ -1,0 +1,16 @@
+{% load core_tags %}
+
+{% csrf_token %}
+{% for field in form %}
+<fieldset class="form-group">
+    {{ field|label_with_class:"col-sm-2 control-label" }}
+    <div class="col-sm-10">
+        {{ field }}
+    </div>
+</fieldset>
+{% endfor %}
+<div class="form-group">
+    <div  class="col-sm-offset-2 col-sm-10">
+        <input type="submit" value="Save" class="btn btn-success" />
+    </div>
+</div>

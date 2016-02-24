@@ -1,0 +1,23 @@
+language: python
+
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+
+env:
+  - DJANGO_VERSION=1.9
+
+# command to install dependencies
+install: 
+  - pip install -q Django==$DJANGO_VERSION
+  - pip install -r requirements.txt
+  - pip install pylint
+  - pip install coveralls
+
+# command to run tests
+script:
+  - coverage run --source='.' --omit='*wsgi.py' manage.py test djangoflow.tests
+
+after_success:
+  - coveralls

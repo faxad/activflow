@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block main_content %}
+<div class="login_forms">
+    <form method="post" action=".">
+      {% csrf_token %} 
+      <div id="form_non_errors"></div>
+    
+    {% if form.errors %}
+    <div class="alert alert-error">
+        <button type="button" class="close" data-dismiss="alert">×</button>
+        {% for field in form %} 
+            {% if field.errors %}
+            <li>{{ field.label }}: {{ field.errors|striptags }}</li>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+      <div class="form-group">
+            <div id="label"><label for="id_username">Username:</label></div>
+            <div id="input">{{ form.username }}</div>
+      </div>
+      <div class="form-group">
+            <div id="label"><label for="id_email">Password:</label></div>
+            <div id="input">{{ form.password }}</div>
+      </div>
+
+      <button type="submit" class="btn btn-default">Submit</button>
+    </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load core_tags %}
+
+{% block main_content %}
+
+<ol class="breadcrumb">
+  <li><a href="{% url 'main' %}">Home</a></li>
+  <li><a href="{% url 'index' app_title object.title %}">{{ object.title }}</a></li>
+  <li class="active">Detail</li>
+  <li class="active">{{ object.id }}</li>
+</ol>
+<a data-toggle="modal" href="#confirmation_modal" class="btn btn-danger" role="button">Delete</a>
+{% with object_id=object.id|stringformat:"s" next_action="/"|add:app_title|add:"/"|add:object.title|add:"/Delete/" %}
+    {% include "core/widgets/confirmation_modal.html" with message="Are you sure you want to delete?" title="Confirmation" action=next_action|add:object_id %}
+{% endwith %}
+<a href="{% url 'update' app_title object.title object.id %}" class="btn btn-primary" role="button">Update</a>
+<br></br>
+<h4> {{ object.title }} Detail </h4>
+
+<table class="table table-bordered">
+    {% model_field_values 'display' as entity_instance %}
+    {% for name, value in entity_instance.items %}
+    <tr>
+        <th>{{ name }}</th>
+        <td>{{ value }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
