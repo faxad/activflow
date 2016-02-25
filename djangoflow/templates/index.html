@@ -9,14 +9,10 @@
   <li class="active"><a href="#">Home</a></li>
 </ol>
 <ul>
-{% for app, models in discovered.items %}
-	<h3>{{app}}</h3>
-	<ul>
-		{% for model in models %}
-			{% with model_title=model.title%}
-				<li><a href="{% url 'index' app model_title %}">{{model_title}}</a></li>
-			{% endwith %}
-		{% endfor %}
-	</ul>
-{% endfor %}
+<h3>Workflows</h3>
+<ul>
+	{% for app in workflows %}
+		<li><a href="{% url 'index' app app %}">{{app}}</a></li>
+	{% endfor %}
+</ul>
 {% endblock %}

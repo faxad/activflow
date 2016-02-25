@@ -6,7 +6,7 @@ from importlib import import_module
 from django.apps import apps
 from django.forms.models import modelform_factory
 
-from djangoflow.core.constants import CRUD_APPS
+from djangoflow.core.constants import WORKFLOW_APPS
 
 
 def get_errors(form_errors):
@@ -23,7 +23,7 @@ def get_errors(form_errors):
 def discover():
     """Returns apps and models configured for CRUD operation"""
     discovered = {}
-    for app in CRUD_APPS:
+    for app in WORKFLOW_APPS:
         name = apps.get_app_config(app).name
         discovered[app] = import_module(
             '{}.crud'.format(name)

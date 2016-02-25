@@ -7,6 +7,7 @@ from django.shortcuts import render, render_to_response
 from django.template import RequestContext
 from django.views import generic
 
+from djangoflow.core.constants import WORKFLOW_APPS
 from djangoflow.core.helpers import (
     discover,
     get_errors,
@@ -25,7 +26,7 @@ def index(request):
     return render(
         request,
         'index.html',
-        {'discovered': discover()})
+        {'workflows': WORKFLOW_APPS})
 
 
 class EntityList(AuthMixin, generic.ListView):

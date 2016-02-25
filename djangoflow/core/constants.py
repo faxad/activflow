@@ -11,6 +11,6 @@ CRUD_OPERATIONS = {
 # register apps for CRUD operations
 # enable 'tests' app only for manual testing purpose
 
-CRUD_APPS = [
-    'tests'
+WORKFLOW_APPS = [
+    'sample'
 ]
