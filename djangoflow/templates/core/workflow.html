@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load core_tags %}
+
+{% block title %} Workflow {% endblock %}
+
+{% block main_content %}
+
+<ol class="breadcrumb">
+  <li><a href="{% url 'main' %}">Home</a></li>
+  <li class="active">{{ app_title }}</li>
+</ol>
+<a href="{% url 'create' app_title entity_title %}" class="btn btn-primary" role="button">Create</a>
+<h3>{{ app_title }}</h3>
+{% if activities %}
+<ul>
+	{% for activity in activities %}
+	<li>{{ activity }}</li>
+	<ul>
+		{% for task in activity.request.tasks.all %}
+			<li>{{ task }}</li>
+		{% endfor %}
+	</ul>
+	{% endfor %}
+</ul>
+{% else %}
+    <p>No objects are available.</p>
+{% endif %}
+{% endblock %}
+
