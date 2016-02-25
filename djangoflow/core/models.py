@@ -39,7 +39,7 @@ class Request(AbstractEntity):
 
 
 class Task(AbstractEntity):
-    request = ForeignKey(Request)
+    request = ForeignKey(Request, related_name='tasks')
     status = CharField(verbose_name="Status", max_length=30, choices=(
         ('Not Started', 'Not Started'),
         ('In Progress', 'In Progress'),

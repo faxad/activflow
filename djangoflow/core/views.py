@@ -1,11 +1,14 @@
 """Generic views for CRUD operations"""
 
+from django.apps import apps
 from django.contrib.auth.decorators import login_required
+from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, render_to_response
 from django.template import RequestContext
 from django.views import generic
+from django.views.generic import TemplateView
 
 from djangoflow.core.constants import WORKFLOW_APPS
 from djangoflow.core.helpers import (
@@ -20,13 +23,26 @@ from djangoflow.core.helpers import (
 from djangoflow.core.mixins import AuthMixin
 
 
-@login_required
+#@login_required
 def index(request):
     """Discovers models available for CRUD operations"""
     return render(
         request,
         'index.html',
         {'workflows': WORKFLOW_APPS})
+
+
+class Workflow(TemplateView):
+    """Generic view to list worflow requests & tasks"""
+    template_name = 'core/workflow.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(Workflow, self).get_context_data(**kwargs)
+        app_title = get_app_name(**kwargs)
+        content_type = ContentType.objects.get_for_model(
+            apps.get_model(app_title, 'FirstActivity'))
+        context['activities'] = content_type.get_all_objects_for_this_type()
+        return context
 
 
 class EntityList(AuthMixin, generic.ListView):
