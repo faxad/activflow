@@ -39,7 +39,8 @@ INSTALLED_APPS = (
     'django_extensions',
     'haystack',
     'djangoflow.core',
-    'djangoflow.tests'
+    'djangoflow.tests',
+    'djangoflow.sample'
 )
 
 MIDDLEWARE_CLASSES = (

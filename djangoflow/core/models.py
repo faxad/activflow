@@ -2,7 +2,9 @@
 
 from django.db.models import (
     Model,
-    DateTimeField)
+    CharField,
+    DateTimeField,
+    ForeignKey) 
 
 
 class AbstractEntity(Model):
@@ -21,3 +23,25 @@ class AbstractEntity(Model):
 
     class Meta(object):
         abstract = True
+
+
+class Request(AbstractEntity):
+    status = CharField(verbose_name="Status", max_length=30, choices=(
+        ('Initiated', 'Initiated'),
+        ('Draft', 'Draft'),
+        ('Submitted', 'Submitted'),
+        ('Withdrawn', 'Withdrawn'),
+        ('Completed', 'Completed'))
+    )
+
+    def submit(self):
+        pass
+
+
+class Task(AbstractEntity):
+    request = ForeignKey(Request)
+    status = CharField(verbose_name="Status", max_length=30, choices=(
+        ('Not Started', 'Not Started'),
+        ('In Progress', 'In Progress'),
+        ('Ended', 'Ended'))
+    )
