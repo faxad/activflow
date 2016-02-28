@@ -47,8 +47,47 @@ class Workflow(TemplateView):
         return context
 
 
+# class EntityList(generic.ListView):
+#     """Generic view for List/Display operation"""
+#     template_name = 'core/index.html'
+#     context_object_name = 'objects'
+
+#     def dispatch(self, request, *args, **kwargs):
+#         """Overriding dispatch on ListView"""
+#         self.model = get_model(**kwargs)
+
+#         return super(EntityList, self).dispatch(
+#             request, *args, **kwargs)
+
+
+class ViewActivity(generic.DetailView):
+    """Displays activity details"""
+    template_name = 'core/detail.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        """Overriding dispatch on DetailView"""
+        self.model = get_model(**kwargs)
+
+        return super(ViewActivity, self).dispatch(
+            request, *args, **kwargs)
+
+
+class DeleteActivity(generic.DeleteView):
+    """Deletes activity instance"""
+    def dispatch(self, request, *args, **kwargs):
+        """Overriding dispatch on DeleteView"""
+        self.model = get_model(**kwargs)
+        instance = get_model_instance(**kwargs)
+        app_title = get_app_name(**kwargs)
+        self.success_url = reverse_lazy(
+            'index', args=(app_title, instance.title,))
+
+        return super(DeleteActivity, self).dispatch(
+            request, *args, **kwargs)
+
+
 class CreateActivity(generic.View):
-    """Generic view for creating Activity"""
+    """Creates activity instance"""
     def get(self, request, **kwargs):
         """GET request handler for Create operation"""
         form = get_form_instance(**kwargs)
@@ -90,47 +129,8 @@ class CreateActivity(generic.View):
                 context_instance=RequestContext(request))
 
 
-class EntityList(generic.ListView):
-    """Generic view for List/Display operation"""
-    template_name = 'core/index.html'
-    context_object_name = 'objects'
-
-    def dispatch(self, request, *args, **kwargs):
-        """Overriding dispatch on ListView"""
-        self.model = get_model(**kwargs)
-
-        return super(EntityList, self).dispatch(
-            request, *args, **kwargs)
-
-
-class EntityDetail(generic.DetailView):
-    """Generic view for Detail operation"""
-    template_name = 'core/detail.html'
-
-    def dispatch(self, request, *args, **kwargs):
-        """Overriding dispatch on DetailView"""
-        self.model = get_model(**kwargs)
-
-        return super(EntityDetail, self).dispatch(
-            request, *args, **kwargs)
-
-
-class EntityDelete(generic.DeleteView):
-    """Generic view for Delete operation"""
-    def dispatch(self, request, *args, **kwargs):
-        """Overriding dispatch on DeleteView"""
-        self.model = get_model(**kwargs)
-        instance = get_model_instance(**kwargs)
-        app_title = get_app_name(**kwargs)
-        self.success_url = reverse_lazy(
-            'index', args=(app_title, instance.title,))
-
-        return super(EntityDelete, self).dispatch(
-            request, *args, **kwargs)
-
-
-class EntityUpdate(generic.View):
-    """Generic view for Update operation"""
+class UpdateActivity(generic.View):
+    """Updates an existing activity instance"""
     def get(self, request, **kwargs):
         """GET request handler for Update operation"""
         instance = get_model_instance(**kwargs)
@@ -164,39 +164,5 @@ class EntityUpdate(generic.View):
 
             return render_to_response(
                 'core/update.html',
-                context,
-                context_instance=RequestContext(request))
-
-
-class EntityCreate(generic.View):
-    """Generic view for Create operation"""
-    def get(self, request, **kwargs):
-        """GET request handler for Create operation"""
-        form = get_form_instance(**kwargs)
-        context = {'form': form}
-
-        return render(request, 'core/create.html', context)
-
-    def post(self, request, **kwargs):
-        """POST request handler for Create operation"""
-        model = get_model(**kwargs)
-        form = get_form_instance(**kwargs)(request.POST)
-        app_title = get_app_name(**kwargs)
-
-        if form.is_valid():
-            instance = model(**form.cleaned_data)
-            instance.save()
-
-            return HttpResponseRedirect(
-                reverse('index', args=(
-                    app_title, instance.title,)))
-        else:
-            context = {
-                'form': form,
-                'error_message': get_errors(form.errors)
-            }
-
-            return render_to_response(
-                'core/create.html',
                 context,
                 context_instance=RequestContext(request))

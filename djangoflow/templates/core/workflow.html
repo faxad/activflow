@@ -9,7 +9,7 @@
   <li><a href="{% url 'main' %}">Home</a></li>
   <li class="active">{{ app_title }}</li>
 </ol>
-<a href="{% url 'create' app_title entity_title %}" class="btn btn-primary" role="button">Create</a>
+<a href="{% url 'create' app_title 'FirstActivity' 1 %}" class="btn btn-primary" role="button">Create</a>
 <h3>{{ app_title }}</h3>
 {% if activities %}
 <ul>
