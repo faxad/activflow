@@ -4,10 +4,12 @@ from django.db.models import (
     Model,
     CharField,
     DateTimeField,
-    ForeignKey) 
+    ForeignKey)
+
+from djangoflow.core.mixins import BaseEntityMixin
 
 
-class AbstractEntity(Model):
+class AbstractEntity(Model, BaseEntityMixin):
     """Common properties for all models"""
     creation_date = DateTimeField('Creation Date', auto_now_add=True)
     last_updated = DateTimeField('Last Updated', auto_now=True)
@@ -16,6 +18,11 @@ class AbstractEntity(Model):
     def class_meta(self):
         """Returns class meta"""
         return self._meta
+
+    @property
+    def is_initial_activity(self):
+        """Returns true if is initial activity"""
+        return True if self.title.startswith('First') else False
 
     def __unicode__(self):
         """Returns ID"""

@@ -17,10 +17,12 @@ from djangoflow.core.helpers import (
     get_model,
     get_model_instance,
     get_form_instance,
-    get_app_name
+    get_app_name,
+    get_request_task_id
 )
 
 from djangoflow.core.mixins import AuthMixin
+from djangoflow.core.models import Request, Task
 
 
 #@login_required
@@ -45,7 +47,50 @@ class Workflow(TemplateView):
         return context
 
 
-class EntityList(AuthMixin, generic.ListView):
+class CreateActivity(generic.View):
+    """Generic view for creating Activity"""
+    def get(self, request, **kwargs):
+        """GET request handler for Create operation"""
+        form = get_form_instance(**kwargs)
+        context = {'form': form}
+
+        return render(request, 'core/create_activity.html', context)
+
+    def post(self, request, **kwargs):
+        """POST request handler for Create operation"""
+        model = get_model(**kwargs)
+        form = get_form_instance(**kwargs)(request.POST)
+        app_title = get_app_name(**kwargs)
+        identifier = get_request_task_id(**kwargs)
+        print identifier
+        if form.is_valid():
+            instance = model(**form.cleaned_data)
+
+            if instance.is_initial_activity:
+                r = Request.objects.get(id=identifier)
+                instance.request = r
+            else:
+                t = Task.objects.get(id=identifier)
+                instance.task = t
+
+            instance.save()
+
+            return HttpResponseRedirect(
+                reverse('index', args=(
+                    app_title, instance.title,)))
+        else:
+            context = {
+                'form': form,
+                'error_message': get_errors(form.errors)
+            }
+
+            return render_to_response(
+                'core/create_activity.html',
+                context,
+                context_instance=RequestContext(request))
+
+
+class EntityList(generic.ListView):
     """Generic view for List/Display operation"""
     template_name = 'core/index.html'
     context_object_name = 'objects'
@@ -58,7 +103,7 @@ class EntityList(AuthMixin, generic.ListView):
             request, *args, **kwargs)
 
 
-class EntityDetail(AuthMixin, generic.DetailView):
+class EntityDetail(generic.DetailView):
     """Generic view for Detail operation"""
     template_name = 'core/detail.html'
 
@@ -70,7 +115,7 @@ class EntityDetail(AuthMixin, generic.DetailView):
             request, *args, **kwargs)
 
 
-class EntityDelete(AuthMixin, generic.DeleteView):
+class EntityDelete(generic.DeleteView):
     """Generic view for Delete operation"""
     def dispatch(self, request, *args, **kwargs):
         """Overriding dispatch on DeleteView"""
@@ -84,7 +129,7 @@ class EntityDelete(AuthMixin, generic.DeleteView):
             request, *args, **kwargs)
 
 
-class EntityUpdate(AuthMixin, generic.View):
+class EntityUpdate(generic.View):
     """Generic view for Update operation"""
     def get(self, request, **kwargs):
         """GET request handler for Update operation"""
@@ -123,7 +168,7 @@ class EntityUpdate(AuthMixin, generic.View):
                 context_instance=RequestContext(request))
 
 
-class EntityCreate(AuthMixin, generic.View):
+class EntityCreate(generic.View):
     """Generic view for Create operation"""
     def get(self, request, **kwargs):
         """GET request handler for Create operation"""

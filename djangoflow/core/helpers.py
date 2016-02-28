@@ -37,6 +37,15 @@ def extract_from_url(request, position):
     return request.path.split('/')[position] if request else None
 
 
+def get_request_task_id(request=None, **kwargs):
+    """Returns request/task identifier"""
+    try:
+        return kwargs.get(
+            'pk', extract_from_url(request, 4))
+    except IndexError:
+        pass
+
+
 def get_app_name(request=None, **kwargs):
     """Returns the name of app"""
     return kwargs.get(

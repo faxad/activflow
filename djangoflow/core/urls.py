@@ -5,6 +5,7 @@ from django.views.generic import TemplateView
 
 from djangoflow.core.views import (
     index,
+    CreateActivity,
     Workflow,
     EntityList,
     EntityDetail,
@@ -16,6 +17,11 @@ from djangoflow.core.views import (
 urlpatterns = [
     url(r'^$', index, name='main'),
     url(r'^(?P<app_name>\w+)$', Workflow.as_view(), name='workflow'),
+    url(
+        r'^(?P<app_name>\w+)/(?P<model_name>\w+)/CreateActivity/(?P<pk>\d+)$',
+        CreateActivity.as_view(),
+        name='create_activity'
+    ),
     url(
         r'^(?P<app_name>\w+)/(?P<model_name>\w+)/List/$',
         EntityList.as_view(),
