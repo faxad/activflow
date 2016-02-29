@@ -12,7 +12,7 @@
 <a href="{% url 'create' app_title 'FirstActivity' 'Initial' %}" class="btn btn-primary" role="button">Create New Workflow</a>
 <h3>{{ app_title }}</h3>
 {% if objects %}
-<table class="table table-condensed">
+<table class="table table-bordered">
 	<tr>
 		<th>id</th>
 		<th>status</th>
@@ -28,8 +28,8 @@
 	    </tr>
 	    {% if activity.request.tasks %}
 		    <tr id="demo" class="collapse">
-		    	<td colspan="5">
-				    <table class="table table-condensed">
+		    	<td colspan="4">
+				    <table class="table table-bordered table-hover">
 						<tr>
 							<th>id</th>
 							<th>status</th>
@@ -45,7 +45,7 @@
 						    </tr>
 					    {% endfor %}
 					</table>
-				<td>
+				</td>
 			</tr>
 		{% else %}
 		    <p>No objects are available.</p>
