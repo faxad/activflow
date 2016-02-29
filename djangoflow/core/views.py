@@ -26,7 +26,7 @@ from djangoflow.core.models import Request, Task
 
 
 #@login_required
-def index(request):
+def workflows(request):
     """Discovers models available for CRUD operations"""
     return render(
         request,
@@ -34,16 +34,16 @@ def index(request):
         {'workflows': WORKFLOW_APPS})
 
 
-class Workflow(TemplateView):
+class WorkflowDetail(TemplateView):
     """Generic view to list worflow requests & tasks"""
     template_name = 'core/workflow.html'
 
     def get_context_data(self, **kwargs):
-        context = super(Workflow, self).get_context_data(**kwargs)
+        context = super(WorkflowDetail, self).get_context_data(**kwargs)
         app_title = get_app_name(**kwargs)
         content_type = ContentType.objects.get_for_model(
             apps.get_model(app_title, 'FirstActivity'))
-        context['activities'] = content_type.get_all_objects_for_this_type()
+        context['objects'] = content_type.get_all_objects_for_this_type()
         return context
 
 
@@ -93,7 +93,7 @@ class CreateActivity(generic.View):
         form = get_form_instance(**kwargs)
         context = {'form': form}
 
-        return render(request, 'core/create_activity.html', context)
+        return render(request, 'core/create.html', context)
 
     def post(self, request, **kwargs):
         """POST request handler for Create operation"""
@@ -124,7 +124,7 @@ class CreateActivity(generic.View):
             }
 
             return render_to_response(
-                'core/create_activity.html',
+                'core/create.html',
                 context,
                 context_instance=RequestContext(request))
 

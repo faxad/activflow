@@ -6,22 +6,52 @@
 {% block main_content %}
 
 <ol class="breadcrumb">
-  <li><a href="{% url 'main' %}">Home</a></li>
+  <li><a href="{% url 'workflows' %}">Home</a></li>
   <li class="active">{{ app_title }}</li>
 </ol>
-<a href="{% url 'create' app_title 'FirstActivity' 1 %}" class="btn btn-primary" role="button">Create</a>
+<a href="{% url 'create' app_title 'FirstActivity' 'Initial' %}" class="btn btn-primary" role="button">Create New Workflow</a>
 <h3>{{ app_title }}</h3>
-{% if activities %}
-<ul>
-	{% for activity in activities %}
-	<li>{{ activity }}</li>
-	<ul>
-		{% for task in activity.request.tasks.all %}
-			<li>{{ task }}</li>
-		{% endfor %}
-	</ul>
-	{% endfor %}
-</ul>
+{% if objects %}
+<table class="table table-condensed">
+	<tr>
+		<th>id</th>
+		<th>status</th>
+		<th>created</th>
+		<th>updated</th>
+    </tr>
+    {% for activity in objects %}
+		<tr data-toggle="collapse" data-target="#demo">
+			<td>{{activity.id}}</td>
+			<td>{{activity.status}}</td>
+			<td>{{activity.creation_date}}</td>
+			<td>{{activity.last_updated}}</td>
+	    </tr>
+	    {% if activity.request.tasks %}
+		    <tr id="demo" class="collapse">
+		    	<td colspan="5">
+				    <table class="table table-condensed">
+						<tr>
+							<th>id</th>
+							<th>status</th>
+							<th>created</th>
+							<th>updated</th>
+					    </tr>
+					    {% for task in activity.request.tasks.all %}
+							<tr>
+								<td>{{task.id}}</td>
+								<td>{{task.status}}</td>
+								<td>{{task.creation_date}}</td>
+								<td>{{task.last_updated}}</td>			
+						    </tr>
+					    {% endfor %}
+					</table>
+				<td>
+			</tr>
+		{% else %}
+		    <p>No objects are available.</p>
+		{% endif %}
+    {% endfor %}
+</table>
 {% else %}
     <p>No objects are available.</p>
 {% endif %}
