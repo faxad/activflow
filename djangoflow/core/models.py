@@ -1,5 +1,6 @@
 """Model definition for CRUD operations"""
 
+from django.apps import apps
 from django.db.models import (
     Model,
     CharField,
@@ -7,6 +8,8 @@ from django.db.models import (
     ForeignKey)
 
 from djangoflow.core.mixins import BaseEntityMixin
+from djangoflow.core.constants import WORKFLOW_APPS
+from django.forms.models import modelform_factory
 
 
 class AbstractEntity(Model, BaseEntityMixin):
@@ -41,14 +44,27 @@ class Request(AbstractEntity):
         ('Completed', 'Completed'))
     )
 
+    @property
+    def workflow_module_name(self):
+        return self.activity.class_meta.app_label
+
     def submit(self):
         pass
 
 
 class Task(AbstractEntity):
     request = ForeignKey(Request, related_name='tasks')
+    flow_ref_key = CharField(max_length=100)
     status = CharField(verbose_name="Status", max_length=30, choices=(
         ('Not Started', 'Not Started'),
         ('In Progress', 'In Progress'),
         ('Ended', 'Ended'))
     )
+
+    # @property
+    # def discovered_activity(self):
+    #     name = apps.get_app_config(
+    #         self.request.workflow_module_name).name
+    #     discovered = import_module(
+    #         '{}.flow'.format(name)
+    #     ).FLOW

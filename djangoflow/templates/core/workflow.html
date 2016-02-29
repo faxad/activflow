@@ -18,6 +18,7 @@
 		<th>status</th>
 		<th>created</th>
 		<th>updated</th>
+		<th>tasks</th>
     </tr>
     {% for activity in objects %}
 		<tr data-toggle="collapse" data-target="#demo">
@@ -25,23 +26,26 @@
 			<td>{{activity.status}}</td>
 			<td>{{activity.creation_date}}</td>
 			<td>{{activity.last_updated}}</td>
+			<td><span class="badge">{{ activity.request.tasks.count }}</span></td>
 	    </tr>
 	    {% if activity.request.tasks %}
 		    <tr id="demo" class="collapse">
-		    	<td colspan="4">
+		    	<td colspan="5">
 				    <table class="table table-bordered table-hover">
 						<tr>
 							<th>id</th>
 							<th>status</th>
 							<th>created</th>
 							<th>updated</th>
+							<th>action</th>
 					    </tr>
 					    {% for task in activity.request.tasks.all %}
 							<tr>
 								<td>{{task.id}}</td>
 								<td>{{task.status}}</td>
 								<td>{{task.creation_date}}</td>
-								<td>{{task.last_updated}}</td>			
+								<td>{{task.last_updated}}</td>
+								<td><a class="btn btn-primary btn-xs" href="{% url 'create' app_title entity_title task.id %}">Start Task</a></td>
 						    </tr>
 					    {% endfor %}
 					</table>
