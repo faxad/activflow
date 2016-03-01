@@ -32,18 +32,6 @@ def discover():
     return discovered
 
 
-def discover():
-    """Returns apps and models configured for CRUD operation"""
-    discovered = {}
-    for app in WORKFLOW_APPS:
-        name = apps.get_app_config(app).name
-        discovered[app] = import_module(
-            '{}.crud'.format(name)
-        ).CRUD_MODELS_CONFIG
-
-    return discovered
-
-
 def extract_from_url(request, position):
     """Returns app/model from url"""
     return request.path.split('/')[position] if request else None

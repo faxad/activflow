@@ -50,8 +50,11 @@ class Request(AbstractEntity):
     def workflow_module_name(self):
         return self.activity.class_meta.app_label
 
-    def submit(self):
-        pass
+    def submit(self, next):
+        Task.objects.create(
+            request=self,
+            flow_ref_key=next,
+            status='Not Started')
 
 
 class Task(AbstractEntity):
@@ -74,4 +77,22 @@ class Task(AbstractEntity):
                 '{}.flow'.format(name)
             ).FLOW
 
-            return flow[self.flow_ref_key]['model'].title
+            return flow[self.flow_ref_key]['model']().title
+
+    def initiate(self):
+        pass
+
+    def submit(self, next=None):
+        name = apps.get_app_config(
+            self.request.workflow_module_name).name
+        transitions = import_module(
+            '{}.flow'.format(name)
+        ).FLOW[self.flow_ref_key]['transitions']
+
+        if transitions is not None:
+            Task.objects.create(
+                request=self.request,
+                flow_ref_key=next,
+                status='Not Started')
+        else:
+            pass

@@ -101,13 +101,14 @@ class CreateActivity(generic.View):
         form = get_form_instance(**kwargs)(request.POST)
         app_title = get_app_name(**kwargs)
         identifier = get_request_task_id(**kwargs)
-        print identifier
+        print request.POST
         if form.is_valid():
             instance = model(**form.cleaned_data)
 
             if instance.is_initial_activity:
                 r = Request.objects.get(id=identifier)
                 instance.request = r
+                r.submit('second_activity')
             else:
                 t = Task.objects.get(id=identifier)
                 instance.task = t
