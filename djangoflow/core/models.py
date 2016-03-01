@@ -1,5 +1,7 @@
 """Model definition for CRUD operations"""
 
+from importlib import import_module
+
 from django.apps import apps
 from django.db.models import (
     Model,
@@ -61,10 +63,15 @@ class Task(AbstractEntity):
         ('Ended', 'Ended'))
     )
 
-    # @property
-    # def discovered_activity(self):
-    #     name = apps.get_app_config(
-    #         self.request.workflow_module_name).name
-    #     discovered = import_module(
-    #         '{}.flow'.format(name)
-    #     ).FLOW
+    @property
+    def get_activity_title(self):
+        try:
+            return self.activity.title
+        except AttributeError:
+            name = apps.get_app_config(
+                self.request.workflow_module_name).name
+            flow = import_module(
+                '{}.flow'.format(name)
+            ).FLOW
+
+            return flow[self.flow_ref_key]['model'].title
