@@ -32,6 +32,15 @@ def discover():
     return discovered
 
 
+def get_flow(self, module):
+        """Returns the flow"""
+        module = self.request.workflow_module_name
+
+        return import_module(
+            '{}.flow'.format(apps.get_app_config(module).name)
+        ).FLOW
+
+
 def extract_from_url(request, position):
     """Returns app/model from url"""
     return request.path.split('/')[position] if request else None

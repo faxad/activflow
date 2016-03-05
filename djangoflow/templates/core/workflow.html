@@ -11,7 +11,7 @@
 </ol>
 <a href="{% url 'create' app_title 'FirstActivity' 'Initial' %}" class="btn btn-primary" role="button">Create New Workflow</a>
 <h3>{{ app_title }}</h3>
-{% if objects %}
+{% if instances %}
 <table class="table table-bordered">
 	<tr>
 		<th>id</th>
@@ -20,15 +20,15 @@
 		<th>updated</th>
 		<th>tasks</th>
     </tr>
-    {% for activity in objects %}
+    {% for instance in instances %}
 		<tr data-toggle="collapse" data-target="#demo">
-			<td>{{activity.id}}</td>
-			<td>{{activity.status}}</td>
-			<td>{{activity.creation_date}}</td>
-			<td>{{activity.last_updated}}</td>
-			<td><span class="badge">{{ activity.request.tasks.count }}</span></td>
+			<td>{{instance.task.request.id}}</td>
+			<td>{{instance.task.request.status}}</td>
+			<td>{{instance.task.request.creation_date}}</td>
+			<td>{{instance.task.request.last_updated}}</td>
+			<td><span class="badge">{{ instance.task.request.tasks.count }}</span></td>
 	    </tr>
-	    {% if activity.request.tasks %}
+	    {% if instance.task.request.tasks %}
 		    <tr id="demo" class="collapse">
 		    	<td colspan="5">
 				    <table class="table table-bordered table-hover">
@@ -39,13 +39,14 @@
 							<th>updated</th>
 							<th>action</th>
 					    </tr>
-					    {% for task in activity.request.tasks.all %}
+					    {% for task in instance.task.request.tasks.all %}
 							<tr>
 								<td>{{task.id}}</td>
 								<td>{{task.status}}</td>
 								<td>{{task.creation_date}}</td>
 								<td>{{task.last_updated}}</td>
-								<td><a class="btn btn-primary btn-xs" href="{% url 'create' app_title task.get_activity_title task.id %}">Start Task</a></td>
+								{% activity_title task.flow_ref_key app_title as act_title %}
+								<td><a class="btn btn-primary btn-xs" href="{% url 'create' app_title act_title task.id %}">Start Task</a></td>
 						    </tr>
 					    {% endfor %}
 					</table>

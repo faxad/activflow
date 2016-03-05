@@ -59,3 +59,15 @@ def entity_preview(context):
 def model_label_for_search(obj):
     """Returns entity name"""
     return type(obj).__name__
+
+
+@register.simple_tag
+def activity_title(ref, app):
+    """Returns entity name"""
+    from importlib import import_module
+
+    from django.apps import apps
+
+    return import_module(
+        '{}.flow'.format(apps.get_app_config(app).name)
+    ).FLOW[ref]['model']().title

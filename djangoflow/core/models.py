@@ -29,9 +29,64 @@ class AbstractEntity(Model, BaseEntityMixin):
         """Returns true if is initial activity"""
         return True if self.title.startswith('First') else False
 
+    def get_flow(self, module):
+        """Returns the flow"""
+        return import_module(
+            '{}.flow'.format(apps.get_app_config(module).name)
+        ).FLOW
+
+    # def get_flow(self):
+    #     """Returns the flow"""
+    #     try:
+    #         module = self.request.workflow_module_name
+    #     except AttributeError:
+    #         module = self.task.request.workflow_module_name
+
+    #     return import_module(
+    #         '{}.flow'.format(apps.get_app_config(module).name)
+    #     ).FLOW
+
+    # def next(self):
+    #     transitions = self.get_flow()[self.title]['transitions']
+    #     valid = [transition for transition in transitions if transitions[transition]()]
+    #     return valid
+
     def __unicode__(self):
         """Returns ID"""
         return str(self.id)
+
+    class Meta(object):
+        abstract = True
+
+
+class AbstractActivity(Model, BaseEntityMixin):
+    """Common properties for all models"""
+
+    @property
+    def is_initial_activity(self):
+        """Checks if the activity is initial activity"""
+        return True if self.title.startswith('First') else False
+
+    def next(self):
+        """Compute the next possible activities"""
+        module = self.class_meta.app_label
+        transitions = self.get_flow(module)[
+            self.task.flow_ref_key]['transitions']
+        return [transition for transition in
+                transitions if transitions[transition](self)]
+
+    def initiate_request(self):
+        """Initiates new workflow requests"""
+        request = Request.objects.create(
+            status='Initiated')
+
+        task = Task.objects.create(
+            request=request,
+            flow_ref_key='first_activity',
+            status='In Progress')
+
+        self.task = task
+        self.save()
 
     class Meta(object):
         abstract = True
@@ -50,11 +105,11 @@ class Request(AbstractEntity):
     def workflow_module_name(self):
         return self.activity.class_meta.app_label
 
-    def submit(self, next):
-        Task.objects.create(
-            request=self,
-            flow_ref_key=next,
-            status='Not Started')
+    # def submit(self, next):
+    #     Task.objects.create(
+    #         request=self,
+    #         flow_ref_key=next,
+    #         status='Not Started')
 
 
 class Task(AbstractEntity):
@@ -66,28 +121,15 @@ class Task(AbstractEntity):
         ('Ended', 'Ended'))
     )
 
-    @property
-    def get_activity_title(self):
-        try:
-            return self.activity.title
-        except AttributeError:
-            name = apps.get_app_config(
-                self.request.workflow_module_name).name
-            flow = import_module(
-                '{}.flow'.format(name)
-            ).FLOW
-
-            return flow[self.flow_ref_key]['model']().title
+    # @property
+    # def get_activity_title(self):
+    #     return self.get_flow()[self.flow_ref_key]['model']().title
 
     def initiate(self):
         pass
 
     def submit(self, next=None):
-        name = apps.get_app_config(
-            self.request.workflow_module_name).name
-        transitions = import_module(
-            '{}.flow'.format(name)
-        ).FLOW[self.flow_ref_key]['transitions']
+        transitions = self.get_flow(self)[self.flow_ref_key]['transitions']
 
         if transitions is not None:
             Task.objects.create(

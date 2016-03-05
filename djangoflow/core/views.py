@@ -43,7 +43,7 @@ class WorkflowDetail(TemplateView):
         app_title = get_app_name(**kwargs)
         content_type = ContentType.objects.get_for_model(
             apps.get_model(app_title, 'FirstActivity'))
-        context['objects'] = content_type.get_all_objects_for_this_type()
+        context['instances'] = content_type.get_all_objects_for_this_type()
         return context
 
 
@@ -101,19 +101,20 @@ class CreateActivity(generic.View):
         form = get_form_instance(**kwargs)(request.POST)
         app_title = get_app_name(**kwargs)
         identifier = get_request_task_id(**kwargs)
-        print request.POST
+
         if form.is_valid():
             instance = model(**form.cleaned_data)
 
             if instance.is_initial_activity:
-                r = Request.objects.get(id=identifier)
-                instance.request = r
-                r.submit('second_activity')
-            else:
-                t = Task.objects.get(id=identifier)
-                instance.task = t
+                instance.initiate_request()
+            #     r = Request.objects.get(id=identifier)
+            #     instance.request = r
+            #     r.submit('second_activity')
+            # else:
+            #     t = Task.objects.get(id=identifier)
+            #     instance.task = t
 
-            instance.save()
+            # instance.save()
 
             return HttpResponseRedirect(
                 reverse('index', args=(
