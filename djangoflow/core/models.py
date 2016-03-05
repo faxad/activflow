@@ -41,8 +41,11 @@ class AbstractActivity(Model, BaseEntityMixin):
         module = self.class_meta.app_label
         transitions = get_flow(module)[
             self.task.flow_ref_key]['transitions']
-        return [transition for transition in
-                transitions if transitions[transition](self)]
+        if transitions:
+            return [transition for transition in
+                    transitions if transitions[transition](self)]
+        else:
+            return None
 
     def initiate_request(self):
         """Initiates new workflow requests"""

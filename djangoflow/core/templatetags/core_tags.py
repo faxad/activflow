@@ -5,7 +5,7 @@ import itertools
 from collections import OrderedDict
 from django import template
 
-from djangoflow.core.helpers import discover
+from djangoflow.core.helpers import discover, get_flow
 
 register = template.Library()
 
@@ -71,3 +71,12 @@ def activity_title(ref, app):
     return import_module(
         '{}.flow'.format(apps.get_app_config(app).name)
     ).FLOW[ref]['model']().title
+
+
+@register.assignment_tag
+def activity_identifier(module, task):
+    """Returns activity identifier"""
+    flow = get_flow(module)
+    activity = getattr(task, flow[task.flow_ref_key]['model']().title.lower())
+
+    return activity.id
