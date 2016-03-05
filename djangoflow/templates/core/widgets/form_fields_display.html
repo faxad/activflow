@@ -14,9 +14,13 @@
         <input type="submit" value="Save" name="save" class="btn btn-success" />
     </div>
 </div>
+{% if next %}
 <div class="panel panel-default">
 	<div class="panel-heading">Actions</div>
 	<div class="panel-body">
-		<input type="submit" value="Submit To" name="submit" class="btn btn-primary" />
+        {% for option in next %}
+		  <input type="submit" value={{option}} name="submit" class="btn btn-primary" />
+        {% endfor %}
 	</div>
 </div>
+{% endif %}

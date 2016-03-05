@@ -107,28 +107,24 @@ class CreateActivity(generic.View):
 
             if instance.is_initial_activity:
                 instance.initiate_request()
-            #     r = Request.objects.get(id=identifier)
-            #     instance.request = r
-            #     r.submit('second_activity')
-            # else:
-            #     t = Task.objects.get(id=identifier)
-            #     instance.task = t
 
-            # instance.save()
-
-            return HttpResponseRedirect(
-                reverse('index', args=(
-                    app_title, instance.title,)))
+            # return HttpResponseRedirect(
+            #     reverse('index', args=(
+            #         app_title, instance.title,)))
+            context = {
+                'form': form,
+                'next': instance.next()
+            }
         else:
             context = {
                 'form': form,
                 'error_message': get_errors(form.errors)
             }
 
-            return render_to_response(
-                'core/create.html',
-                context,
-                context_instance=RequestContext(request))
+        return render_to_response(
+            'core/create.html',
+            context,
+            context_instance=RequestContext(request))
 
 
 class UpdateActivity(generic.View):
