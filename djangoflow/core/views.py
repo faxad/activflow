@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 from django.views import generic
 from django.views.generic import TemplateView
@@ -22,7 +22,7 @@ from djangoflow.core.helpers import (
 )
 
 from djangoflow.core.mixins import AuthMixin
-from djangoflow.core.models import Request, Task
+from djangoflow.core.models import Task
 
 
 #@login_required
@@ -44,20 +44,8 @@ class WorkflowDetail(TemplateView):
         content_type = ContentType.objects.get_for_model(
             apps.get_model(app_title, 'FirstActivity'))
         context['instances'] = content_type.get_all_objects_for_this_type()
+
         return context
-
-
-# class EntityList(generic.ListView):
-#     """Generic view for List/Display operation"""
-#     template_name = 'core/index.html'
-#     context_object_name = 'objects'
-
-#     def dispatch(self, request, *args, **kwargs):
-#         """Overriding dispatch on ListView"""
-#         self.model = get_model(**kwargs)
-
-#         return super(EntityList, self).dispatch(
-#             request, *args, **kwargs)
 
 
 class ViewActivity(generic.DetailView):
@@ -121,7 +109,7 @@ class CreateActivity(generic.View):
                 'error_message': get_errors(form.errors)
             }
 
-            render(request, 'core/create.html', context)
+            return render(request, 'core/create.html', context)
 
 
 class UpdateActivity(generic.View):
@@ -133,6 +121,7 @@ class UpdateActivity(generic.View):
         context = {
             'form': form(instance=instance),
             'object': instance,
+            'next': instance.next()
         }
 
         return render(request, 'core/update.html', context)
@@ -148,16 +137,14 @@ class UpdateActivity(generic.View):
             form.save()
 
             return HttpResponseRedirect(
-                reverse('index', args=(
-                    app_title, instance.title,)))
+                reverse('update', args=(
+                    app_title, instance.title, instance.task.id)))
         else:
             context = {
                 'form': form,
                 'object': instance,
+                'next': instance.next(),
                 'error_message': get_errors(form.errors)
             }
 
-            return render_to_response(
-                'core/update.html',
-                context,
-                context_instance=RequestContext(request))
+            return render(request, 'core/update.html', context)
