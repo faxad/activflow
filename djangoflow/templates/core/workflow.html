@@ -21,7 +21,7 @@
 		<th>tasks</th>
     </tr>
     {% for instance in instances %}
-		<tr data-toggle="collapse" data-target="#demo">
+		<tr data-toggle="collapse" data-target="#req{{instance.task.request.id}}">
 			<td>{{instance.task.request.id}}</td>
 			<td>{{instance.task.request.status}}</td>
 			<td>{{instance.task.request.creation_date}}</td>
@@ -29,7 +29,7 @@
 			<td><span class="badge">{{ instance.task.request.tasks.count }}</span></td>
 	    </tr>
 	    {% if instance.task.request.tasks %}
-		    <tr id="demo" class="collapse">
+		    <tr id="req{{instance.task.request.id}}" class="collapse">
 		    	<td colspan="5">
 				    <table class="table table-bordered table-hover">
 						<tr>
