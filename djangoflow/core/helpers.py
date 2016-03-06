@@ -46,8 +46,8 @@ def extract_from_url(request, position):
     return request.path.split('/')[position] if request else None
 
 
-def get_request_task_id(request=None, **kwargs):
-    """Returns request/task identifier"""
+def get_task_id(request=None, **kwargs):
+    """Returns task identifier"""
     try:
         return kwargs.get(
             'pk', extract_from_url(request, 4))

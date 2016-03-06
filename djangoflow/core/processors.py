@@ -3,7 +3,7 @@
 from djangoflow.core.helpers import (
     get_model_name,
     get_app_name,
-    get_request_task_id
+    get_task_id
 )
 
 
@@ -12,5 +12,5 @@ def global_context(request):
     return {
         'entity_title': get_model_name(request),
         'app_title': get_app_name(request),
-        'identifier': get_request_task_id(request)
+        'identifier': get_task_id(request)
     }

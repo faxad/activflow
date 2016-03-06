@@ -18,7 +18,7 @@ from djangoflow.core.helpers import (
     get_model_instance,
     get_form_instance,
     get_app_name,
-    get_request_task_id
+    get_task_id
 )
 
 from djangoflow.core.mixins import AuthMixin
@@ -100,31 +100,28 @@ class CreateActivity(generic.View):
         model = get_model(**kwargs)
         form = get_form_instance(**kwargs)(request.POST)
         app_title = get_app_name(**kwargs)
-        identifier = get_request_task_id(**kwargs)
 
         if form.is_valid():
             instance = model(**form.cleaned_data)
 
             if instance.is_initial_activity:
                 instance.initiate_request()
+            else:
+                task_id = get_task_id(**kwargs)
+                task = Task.objects.get(id=task_id)
+                instance.task = task
+                instance.save()
 
-            # return HttpResponseRedirect(
-            #     reverse('index', args=(
-            #         app_title, instance.title,)))
-            context = {
-                'form': form,
-                'next': instance.next()
-            }
+            return HttpResponseRedirect(
+                reverse('update', args=(
+                    app_title, instance.title, instance.task.id)))
         else:
             context = {
                 'form': form,
                 'error_message': get_errors(form.errors)
             }
 
-        return render_to_response(
-            'core/create.html',
-            context,
-            context_instance=RequestContext(request))
+            render(request, 'core/create.html', context)
 
 
 class UpdateActivity(generic.View):
