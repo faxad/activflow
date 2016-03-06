@@ -1,17 +1,13 @@
-"""Model definition for CRUD operations"""
+"""Model definition for workflow operations"""
 
-from importlib import import_module
-
-from django.apps import apps
 from django.db.models import (
     Model,
     CharField,
     DateTimeField,
     ForeignKey)
 
+from djangoflow.core.helpers import get_flow
 from djangoflow.core.mixins import BaseEntityMixin
-from djangoflow.core.constants import WORKFLOW_APPS
-from django.forms.models import modelform_factory
 
 
 class AbstractEntity(Model, BaseEntityMixin):
@@ -23,33 +19,6 @@ class AbstractEntity(Model, BaseEntityMixin):
     def class_meta(self):
         """Returns class meta"""
         return self._meta
-
-    @property
-    def is_initial_activity(self):
-        """Returns true if is initial activity"""
-        return True if self.title.startswith('First') else False
-
-    def get_flow(self, module):
-        """Returns the flow"""
-        return import_module(
-            '{}.flow'.format(apps.get_app_config(module).name)
-        ).FLOW
-
-    # def get_flow(self):
-    #     """Returns the flow"""
-    #     try:
-    #         module = self.request.workflow_module_name
-    #     except AttributeError:
-    #         module = self.task.request.workflow_module_name
-
-    #     return import_module(
-    #         '{}.flow'.format(apps.get_app_config(module).name)
-    #     ).FLOW
-
-    # def next(self):
-    #     transitions = self.get_flow()[self.title]['transitions']
-    #     valid = [transition for transition in transitions if transitions[transition]()]
-    #     return valid
 
     def __unicode__(self):
         """Returns ID"""
@@ -70,7 +39,7 @@ class AbstractActivity(Model, BaseEntityMixin):
     def next(self):
         """Compute the next possible activities"""
         module = self.class_meta.app_label
-        transitions = self.get_flow(module)[
+        transitions = get_flow(module)[
             self.task.flow_ref_key]['transitions']
         return [transition for transition in
                 transitions if transitions[transition](self)]
@@ -105,11 +74,8 @@ class Request(AbstractEntity):
     def workflow_module_name(self):
         return self.activity.class_meta.app_label
 
-    # def submit(self, next):
-    #     Task.objects.create(
-    #         request=self,
-    #         flow_ref_key=next,
-    #         status='Not Started')
+    def submit(self, next):
+        pass
 
 
 class Task(AbstractEntity):
@@ -121,15 +87,11 @@ class Task(AbstractEntity):
         ('Ended', 'Ended'))
     )
 
-    # @property
-    # def get_activity_title(self):
-    #     return self.get_flow()[self.flow_ref_key]['model']().title
-
     def initiate(self):
         pass
 
     def submit(self, module, next=None):
-        transitions = self.get_flow(module)[self.flow_ref_key]['transitions']
+        transitions = get_flow(module)[self.flow_ref_key]['transitions']
 
         if transitions is not None:
             Task.objects.create(

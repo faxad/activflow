@@ -14,7 +14,11 @@ from djangoflow.core.views import (
 
 urlpatterns = [
     url(r'^$', workflows, name='workflows'),
-    url(r'^(?P<app_name>\w+)$', WorkflowDetail.as_view(), name='workflow-detail'),
+    url(
+        r'^(?P<app_name>\w+)$',
+        WorkflowDetail.as_view(),
+        name='workflow-detail'
+    ),
     url(
         r'^(?P<app_name>\w+)/(?P<model_name>\w+)/Create/(?P<pk>\d+|Initial)$',
         CreateActivity.as_view(),
@@ -37,15 +41,3 @@ urlpatterns = [
     ),
     url(r'^Denied/$', TemplateView.as_view(template_name='core/denied.html'))
 ]
-
-
-"""
-/
-/<workflow>/
-/<workflow>/<activity>/Create/<None>
-/<workflow>/<activity>/Create/<pk> where pk=request/task id
-/<workflow>/<activity>/Update/<pk> where pk=activity instance id
-/<workflow>/<activity>/View/<pk> where pk=activity instance id
-/<workflow>/<activity>/Delete/<pk> where pk=activity instance id
-
-"""

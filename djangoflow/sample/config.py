@@ -3,7 +3,7 @@
 from collections import OrderedDict as odict
 
 
-CRUD_MODELS_CONFIG = odict([
+ACTIVITY_CONFIG = odict([
     ('FirstActivity', odict([
         ('bar', ['create', 'update', 'display', 'preview']),
         ('baz', ['create', 'update', 'display', 'preview']),

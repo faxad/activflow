@@ -7,7 +7,6 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.template import RequestContext
 from django.views import generic
 from django.views.generic import TemplateView
 

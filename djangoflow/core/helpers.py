@@ -21,24 +21,24 @@ def get_errors(form_errors):
 
 
 def discover():
-    """Returns apps and models configured for CRUD operation"""
+    """Returns activity configuration for all registered
+    workflow apps
+    """
     discovered = {}
     for app in WORKFLOW_APPS:
         name = apps.get_app_config(app).name
         discovered[app] = import_module(
-            '{}.crud'.format(name)
-        ).CRUD_MODELS_CONFIG
+            '{}.config'.format(name)
+        ).ACTIVITY_CONFIG
 
     return discovered
 
 
-def get_flow(self, module):
-        """Returns the flow"""
-        module = self.request.workflow_module_name
-
-        return import_module(
-            '{}.flow'.format(apps.get_app_config(module).name)
-        ).FLOW
+def get_flow(module):
+    """Returns the flow"""
+    return import_module(
+        '{}.flow'.format(apps.get_app_config(module).name)
+    ).FLOW
 
 
 def extract_from_url(request, position):
@@ -74,8 +74,7 @@ def get_model(**kwargs):
     """Returns model"""
     return apps.get_model(
         get_app_name(**kwargs),
-        get_model_name(**kwargs)
-    )
+        get_model_name(**kwargs))
 
 
 def get_model_instance(**kwargs):

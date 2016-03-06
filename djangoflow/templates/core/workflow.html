@@ -14,30 +14,34 @@
 {% if instances %}
 <table class="table table-bordered">
 	<tr>
+		<th><span class=" glyphicon glyphicon-menu-hamburger"></span></th>
 		<th>id</th>
 		<th>status</th>
 		<th>created</th>
 		<th>updated</th>
-		<th>tasks</th>
     </tr>
     {% for instance in instances %}
-		<tr data-toggle="collapse" data-target="#req{{instance.task.request.id}}">
+		<tr class="active">
+			<td>
+				<button class="btn btn-default btn-xs" type="button" data-toggle="collapse" data-target="#req{{instance.task.request.id}}">
+					View Tasks <span class="badge">{{ instance.task.request.tasks.count }}</span>
+				</button>
+			</td>
 			<td>{{instance.task.request.id}}</td>
 			<td>{{instance.task.request.status}}</td>
 			<td>{{instance.task.request.creation_date}}</td>
 			<td>{{instance.task.request.last_updated}}</td>
-			<td><span class="badge">{{ instance.task.request.tasks.count }}</span></td>
 	    </tr>
 	    {% if instance.task.request.tasks %}
 		    <tr id="req{{instance.task.request.id}}" class="collapse">
 		    	<td colspan="5">
-				    <table class="table table-bordered table-hover">
+				    <table class="table table-condensed">
 						<tr>
 							<th>id</th>
 							<th>status</th>
 							<th>created</th>
 							<th>updated</th>
-							<th>action</th>
+							<th></th>
 					    </tr>
 					    {% for task in instance.task.request.tasks.all %}
 							<tr>
@@ -48,7 +52,7 @@
 								{% activity_title task.flow_ref_key app_title as act_title %}
 								<td>
 									<a class="btn btn-primary btn-xs" href="{% url 'view' app_title act_title instance.id %}">View</a>
-									<a class="btn btn-primary btn-xs" href="{% url 'create' app_title act_title task.id %}">Create</a>
+									<a class="btn btn-primary btn-xs disabled" href="{% url 'create' app_title act_title task.id %}">Create</a>
 									<a class="btn btn-primary btn-xs" href="{% url 'update' app_title act_title instance.id %}">Update</a>
 								</td>
 						    </tr>
