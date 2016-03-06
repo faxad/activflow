@@ -7,9 +7,8 @@ from django.db.models import (
     TextField)
 
 from djangoflow.core.mixins import BaseEntityMixin
-from djangoflow.core.models import AbstractEntity, AbstractActivity, Request, Task
+from djangoflow.core.models import AbstractEntity, AbstractActivity, Task
 from djangoflow.tests.validators import validate_initial_cap
-
 
 
 class FirstActivity(AbstractEntity, AbstractActivity):

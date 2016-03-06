@@ -128,8 +128,8 @@ class Task(AbstractEntity):
     def initiate(self):
         pass
 
-    def submit(self, next=None):
-        transitions = self.get_flow(self)[self.flow_ref_key]['transitions']
+    def submit(self, module, next=None):
+        transitions = self.get_flow(module)[self.flow_ref_key]['transitions']
 
         if transitions is not None:
             Task.objects.create(

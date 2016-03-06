@@ -4,6 +4,7 @@ from django.apps import apps
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse, reverse_lazy
+from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.template import RequestContext
@@ -83,6 +84,7 @@ class CreateActivity(generic.View):
 
         return render(request, 'core/create.html', context)
 
+    @transaction.atomic
     def post(self, request, **kwargs):
         """POST request handler for Create operation"""
         model = get_model(**kwargs)
@@ -102,7 +104,7 @@ class CreateActivity(generic.View):
 
             return HttpResponseRedirect(
                 reverse('update', args=(
-                    app_title, instance.title, instance.task.id)))
+                    app_title, instance.title, instance.id)))
         else:
             context = {
                 'form': form,
@@ -126,6 +128,7 @@ class UpdateActivity(generic.View):
 
         return render(request, 'core/update.html', context)
 
+    @transaction.atomic
     def post(self, request, **kwargs):
         """POST request handler for Update operation"""
         instance = get_model_instance(**kwargs)
@@ -136,9 +139,18 @@ class UpdateActivity(generic.View):
         if form.is_valid():
             form.save()
 
-            return HttpResponseRedirect(
-                reverse('update', args=(
-                    app_title, instance.title, instance.task.id)))
+            if 'save' in request.POST:
+                return HttpResponseRedirect(
+                    reverse('update', args=(
+                        app_title, instance.title, instance.task.id)))
+            else:
+                next = request.POST['submit']
+                task_id = instance.task.id
+                task = Task.objects.get(id=task_id)
+                task.submit(app_title, next)
+
+                return HttpResponseRedirect(
+                    reverse('workflow-detail', args=[app_title]))
         else:
             context = {
                 'form': form,

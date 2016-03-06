@@ -26,7 +26,7 @@ urlpatterns = [
         name='update'
     ),
     url(
-        r'^(?P<app_name>\w+)/(?P<model_name>\w+)/View/$',
+        r'^(?P<app_name>\w+)/(?P<model_name>\w+)/View/(?P<pk>\d+)/$',
         ViewActivity.as_view(),
         name='view'
     ),

@@ -46,7 +46,11 @@
 								<td>{{task.creation_date}}</td>
 								<td>{{task.last_updated}}</td>
 								{% activity_title task.flow_ref_key app_title as act_title %}
-								<td><a class="btn btn-primary btn-xs" href="{% url 'create' app_title act_title task.id %}">Start Task</a></td>
+								<td>
+									<a class="btn btn-primary btn-xs" href="{% url 'view' app_title act_title instance.id %}">View</a>
+									<a class="btn btn-primary btn-xs" href="{% url 'create' app_title act_title task.id %}">Create</a>
+									<a class="btn btn-primary btn-xs" href="{% url 'update' app_title act_title instance.id %}">Update</a>
+								</td>
 						    </tr>
 					    {% endfor %}
 					</table>
