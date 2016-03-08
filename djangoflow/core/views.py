@@ -98,6 +98,7 @@ class CreateActivity(generic.View):
             else:
                 task_id = get_task_id(**kwargs)
                 task = Task.objects.get(id=task_id)
+                task.initiate()
                 instance.task = task
                 instance.save()
 
@@ -141,7 +142,7 @@ class UpdateActivity(generic.View):
             if 'save' in request.POST:
                 return HttpResponseRedirect(
                     reverse('update', args=(
-                        app_title, instance.title, instance.task.id)))
+                        app_title, instance.title, instance.id)))
             else:
                 next = request.POST['submit']
                 task_id = instance.task.id

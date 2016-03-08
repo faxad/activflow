@@ -25,12 +25,12 @@ urlpatterns = [
         name='create'
     ),
     url(
-        r'^(?P<app_name>\w+)/(?P<model_name>\w+)/Update/(?P<pk>\d+)/$',
+        r'^(?P<app_name>\w+)/(?P<model_name>\w+)/Update/(?P<pk>\d+|None)/$',
         UpdateActivity.as_view(),
         name='update'
     ),
     url(
-        r'^(?P<app_name>\w+)/(?P<model_name>\w+)/View/(?P<pk>\d+)/$',
+        r'^(?P<app_name>\w+)/(?P<model_name>\w+)/View/(?P<pk>\d+|None)/$',
         ViewActivity.as_view(),
         name='view'
     ),

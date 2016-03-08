@@ -74,9 +74,8 @@ def activity_title(ref, app):
 
 
 @register.assignment_tag
-def activity_identifier(module, task):
+def activity_identifier(task):
     """Returns activity identifier"""
-    flow = get_flow(module)
-    activity = getattr(task, flow[task.flow_ref_key]['model']().title.lower())
+    activity_identifier = task.activity
 
-    return activity.id
+    return activity_identifier if activity_identifier else None

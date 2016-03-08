@@ -4,6 +4,7 @@ from django.db.models import (
     Model,
     CharField,
     DateTimeField,
+    OneToOneField,
     ForeignKey)
 
 from djangoflow.core.helpers import get_flow
@@ -28,8 +29,62 @@ class AbstractEntity(Model, BaseEntityMixin):
         abstract = True
 
 
+class Request(AbstractEntity):
+    status = CharField(verbose_name="Status", max_length=30, choices=(
+        ('Initiated', 'Initiated'),
+        ('Draft', 'Draft'),
+        ('Submitted', 'Submitted'),
+        ('Withdrawn', 'Withdrawn'),
+        ('Completed', 'Completed'))
+    )
+
+    @property
+    def workflow_module_name(self):
+        return self.tasks.all()[0].firstactivity.class_meta.app_label
+
+    def submit(self, next):
+        pass
+
+
+class Task(AbstractEntity):
+    request = ForeignKey(Request, related_name='tasks')
+    flow_ref_key = CharField(max_length=100)
+    status = CharField(verbose_name="Status", max_length=30, choices=(
+        ('Not Started', 'Not Started'),
+        ('In Progress', 'In Progress'),
+        ('Ended', 'Ended'))
+    )
+
+    @property
+    def activity(self):
+        module = self.request.workflow_module_name
+        flow = get_flow(module)
+        return getattr(
+            self, flow[self.flow_ref_key]['model']().title.lower(), None)
+
+    def initiate(self):
+        self.status = 'In Progress'
+        self.save()
+
+    def submit(self, module, next=None):
+        transitions = get_flow(module)[self.flow_ref_key]['transitions']
+
+        self.status = 'Ended'
+        self.save()
+
+        if transitions is not None:
+            Task.objects.create(
+                request=self.request,
+                flow_ref_key=next,
+                status='Not Started')
+        else:
+            self.request.status = 'Completed'
+            self.request.save()
+
+
 class AbstractActivity(Model, BaseEntityMixin):
     """Common properties for all models"""
+    task = OneToOneField(Task)
 
     @property
     def is_initial_activity(self):
@@ -62,44 +117,3 @@ class AbstractActivity(Model, BaseEntityMixin):
 
     class Meta(object):
         abstract = True
-
-
-class Request(AbstractEntity):
-    status = CharField(verbose_name="Status", max_length=30, choices=(
-        ('Initiated', 'Initiated'),
-        ('Draft', 'Draft'),
-        ('Submitted', 'Submitted'),
-        ('Withdrawn', 'Withdrawn'),
-        ('Completed', 'Completed'))
-    )
-
-    @property
-    def workflow_module_name(self):
-        return self.activity.class_meta.app_label
-
-    def submit(self, next):
-        pass
-
-
-class Task(AbstractEntity):
-    request = ForeignKey(Request, related_name='tasks')
-    flow_ref_key = CharField(max_length=100)
-    status = CharField(verbose_name="Status", max_length=30, choices=(
-        ('Not Started', 'Not Started'),
-        ('In Progress', 'In Progress'),
-        ('Ended', 'Ended'))
-    )
-
-    def initiate(self):
-        pass
-
-    def submit(self, module, next=None):
-        transitions = get_flow(module)[self.flow_ref_key]['transitions']
-
-        if transitions is not None:
-            Task.objects.create(
-                request=self.request,
-                flow_ref_key=next,
-                status='Not Started')
-        else:
-            pass
