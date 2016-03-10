@@ -8,7 +8,14 @@ from django.db.models import Q
 from django.shortcuts import render
 
 from djangoflow.core.constants import CRUD_OPERATIONS
-from djangoflow.core.helpers import get_model_name, get_app_name, get_model
+from djangoflow.core.helpers import (
+    get_model_name,
+    get_app_name,
+    get_model,
+    get_flow,
+    get_task_id,
+    get_initial_activity
+)
 
 
 class BaseEntityMixin(object):
@@ -42,20 +49,31 @@ class PermissionDeniedMixin(object):
         - TODO: Historical activities cannot be updated
         """
         model = get_model(**kwargs)
+        view = self.__class__.__name__
+        groups = list(self.request.user.groups.all())
 
         if self.request.user.is_superuser:
             return
 
-        groups = list(self.request.user.groups.all())
-
-        if self.__class__.__name__ == "ViewActivity":
-            if model.objects.filter(
+        def check_for_view():
+            return model.objects.filter(
                 Q(task__assignee__in=groups) |
                 Q(task__request__requester=self.request.user)
-            ).count() != 0:
-                    return
-        else:
-            if model.objects.filter(task__assignee__in=groups).count() != 0:
-                return
+            ).count() != 0
 
-        return render(request, 'core/denied.html')
+        def check_for_create():
+            module = get_app_name(request, **kwargs)
+            flow = get_flow(module)
+            initial = get_initial_activity(module)
+            activity = initial if get_task_id(
+                request, **kwargs) == 'Initial' else self.task.flow_ref_key
+            return flow[activity]['role'] in [group.name for group in groups]
+
+        def check_for_update():
+            return model.objects.filter(task__assignee__in=groups).count() != 0
+
+        return None if {
+            'ViewActivity': check_for_view,
+            'CreateActivity': check_for_create,
+            'UpdateActivity': check_for_update,
+        }.get(view)() else render(request, 'core/denied.html')

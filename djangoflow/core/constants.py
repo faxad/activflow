@@ -8,6 +8,8 @@ CRUD_OPERATIONS = {
     'detail': 'view'
     }
 
+INITIAL_REQUEST_IDENTIFIER = 'Initial'
+
 # register apps for CRUD operations
 # enable 'tests' app only for manual testing purpose
 

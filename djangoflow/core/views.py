@@ -54,8 +54,8 @@ class ViewActivity(generic.DetailView, PermissionDeniedMixin):
     def dispatch(self, request, *args, **kwargs):
         """Overriding dispatch on DetailView"""
         self.model = get_model(**kwargs)
-        result = self.check(request, **kwargs)
-        return result if result else super(ViewActivity, self).dispatch(
+        denied = self.check(request, **kwargs)
+        return denied if denied else super(ViewActivity, self).dispatch(
             request, *args, **kwargs)
 
 
@@ -73,14 +73,16 @@ class DeleteActivity(generic.DeleteView):
             request, *args, **kwargs)
 
 
-class CreateActivity(generic.View):
+class CreateActivity(generic.View, PermissionDeniedMixin):
     """Creates activity instance"""
     def get(self, request, **kwargs):
         """GET request handler for Create operation"""
         form = get_form_instance(**kwargs)
         context = {'form': form}
 
-        return render(request, 'core/create.html', context)
+        denied = self.check(request, **kwargs)
+        return denied if denied else render(
+            request, 'core/create.html', context)
 
     @transaction.atomic
     def post(self, request, **kwargs):
@@ -125,8 +127,8 @@ class UpdateActivity(generic.View, PermissionDeniedMixin):
             'next': instance.next()
         }
 
-        result = self.check(request, **kwargs)
-        return result if result else render(
+        denied = self.check(request, **kwargs)
+        return denied if denied else render(
             request, 'core/update.html', context)
 
     @transaction.atomic

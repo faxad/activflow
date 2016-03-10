@@ -42,6 +42,13 @@ def get_flow(module):
     ).FLOW
 
 
+def get_initial_activity(module):
+    """Returns the initial activity"""
+    return import_module(
+        '{}.flow'.format(apps.get_app_config(module).name)
+    ).INITIAL
+
+
 def extract_from_url(request, position):
     """Returns app/model from url"""
     return request.path.split('/')[position] if request else None

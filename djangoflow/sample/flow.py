@@ -24,3 +24,5 @@ FLOW = {
         'transitions': None
     }
 }
+
+INITIAL = 'first_activity'
