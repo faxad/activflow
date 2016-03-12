@@ -5,7 +5,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.db import transaction
-from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views import generic
@@ -13,7 +12,6 @@ from django.views.generic import TemplateView
 
 from djangoflow.core.constants import WORKFLOW_APPS
 from djangoflow.core.helpers import (
-    discover,
     get_errors,
     get_model,
     get_model_instance,

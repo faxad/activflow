@@ -35,7 +35,12 @@ class AuthMixin(LoginRequiredMixin, PermissionRequiredMixin):
 class PermissionDeniedMixin(object):
     """Checks the permission"""
     def check(self, request, **kwargs):
-        """N/A"""
+        """
+        - Super user can view/update all activities
+        - Requester can view all activities
+        - Task assignee can update activity
+        - TODO: Historical activities cannot be updated
+        """
         model = get_model(**kwargs)
 
         if self.request.user.is_superuser:

@@ -39,5 +39,9 @@ urlpatterns = [
         DeleteActivity.as_view(),
         name='delete'
     ),
-    url(r'^Denied/$', TemplateView.as_view(template_name='core/denied.html'), name='denied')
+    url(
+        r'^Denied/$',
+        TemplateView.as_view(template_name='core/denied.html'),
+        name='denied'
+    )
 ]
