@@ -80,13 +80,7 @@ def get_model(**kwargs):
 
 def get_model_instance(request, **kwargs):
     """Returns model instance"""
-    instance = get_model(**kwargs).objects.filter(id=kwargs.get("pk"))
-
-    if not request.user.is_superuser:
-        return instance.filter(task__assignee__in=list(
-            request.user.groups.all())).latest('id')
-    else:
-        return instance.latest('id')
+    return get_model(**kwargs).objects.get(id=kwargs.get("pk"))
 
 
 def get_form_instance(**kwargs):

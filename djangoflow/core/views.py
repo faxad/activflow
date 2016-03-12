@@ -22,7 +22,7 @@ from djangoflow.core.helpers import (
     get_task_id
 )
 
-from djangoflow.core.mixins import AuthMixin
+from djangoflow.core.mixins import AuthMixin, PermissionDeniedMixin
 from djangoflow.core.models import Task
 
 
@@ -49,26 +49,15 @@ class WorkflowDetail(TemplateView):
         return context
 
 
-class ViewActivity(generic.DetailView):
+class ViewActivity(generic.DetailView, PermissionDeniedMixin):
     """Displays activity details"""
     template_name = 'core/detail.html'
-
-    def get_queryset(self):
-        """Custom queryset"""
-        if not self.request.user.is_superuser:
-            query = (Q(task__assignee__in=list(
-                        self.request.user.groups.all())) |
-                     Q(task__request__requester=self.request.user))
-
-            return self.model.objects.filter(query)
-        else:
-            return super(ViewActivity, self).get_queryset()
 
     def dispatch(self, request, *args, **kwargs):
         """Overriding dispatch on DetailView"""
         self.model = get_model(**kwargs)
-
-        return super(ViewActivity, self).dispatch(
+        result = self.check(request, **kwargs)
+        return result if result else super(ViewActivity, self).dispatch(
             request, *args, **kwargs)
 
 
@@ -126,7 +115,7 @@ class CreateActivity(generic.View):
             return render(request, 'core/create.html', context)
 
 
-class UpdateActivity(generic.View):
+class UpdateActivity(generic.View, PermissionDeniedMixin):
     """Updates an existing activity instance"""
     def get(self, request, **kwargs):
         """GET request handler for Update operation"""
@@ -138,7 +127,9 @@ class UpdateActivity(generic.View):
             'next': instance.next()
         }
 
-        return render(request, 'core/update.html', context)
+        result = self.check(request, **kwargs)
+        return result if result else render(
+            request, 'core/update.html', context)
 
     @transaction.atomic
     def post(self, request, **kwargs):
