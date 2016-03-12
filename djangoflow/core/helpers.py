@@ -5,6 +5,7 @@ from importlib import import_module
 
 from django.apps import apps
 from django.forms.models import modelform_factory
+from django.db.models import Q
 
 from djangoflow.core.constants import WORKFLOW_APPS
 
@@ -77,9 +78,15 @@ def get_model(**kwargs):
         get_model_name(**kwargs))
 
 
-def get_model_instance(**kwargs):
+def get_model_instance(request, **kwargs):
     """Returns model instance"""
-    return get_model(**kwargs).objects.get(id=kwargs.get("pk"))
+    instance = get_model(**kwargs).objects.filter(id=kwargs.get("pk"))
+
+    if not request.user.is_superuser:
+        return instance.filter(task__assignee__in=list(
+            request.user.groups.all())).latest('id')
+    else:
+        return instance.latest('id')
 
 
 def get_form_instance(**kwargs):

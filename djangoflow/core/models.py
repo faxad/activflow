@@ -1,5 +1,6 @@
 """Model definition for workflow operations"""
 
+from django.contrib.auth.models import User, Group
 from django.db.models import (
     Model,
     CharField,
@@ -30,6 +31,7 @@ class AbstractEntity(Model, BaseEntityMixin):
 
 
 class Request(AbstractEntity):
+    requester = ForeignKey(User, related_name='requests')
     status = CharField(verbose_name="Status", max_length=30, choices=(
         ('Initiated', 'Initiated'),
         ('Draft', 'Draft'),
@@ -48,6 +50,8 @@ class Request(AbstractEntity):
 
 class Task(AbstractEntity):
     request = ForeignKey(Request, related_name='tasks')
+    assignee = ForeignKey(Group)
+    updated_by = ForeignKey(User)
     flow_ref_key = CharField(max_length=100)
     status = CharField(verbose_name="Status", max_length=30, choices=(
         ('Not Started', 'Not Started'),

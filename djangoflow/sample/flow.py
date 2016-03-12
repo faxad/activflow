@@ -12,7 +12,7 @@ FLOW = {
     'first_activity': {
         'name': 'First Activity',
         'model': FirstActivity,
-        'role': None,
+        'role': 'Submitter',
         'transitions': {
             'second_activity': first_to_second,
         }
@@ -20,7 +20,7 @@ FLOW = {
     'second_activity': {
         'name': 'Second Activity',
         'model': SecondActivity,
-        'role': None,
+        'role': 'Reviewer',
         'transitions': None
     }
 }

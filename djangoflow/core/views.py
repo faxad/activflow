@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.db import transaction
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views import generic
@@ -52,6 +53,17 @@ class ViewActivity(generic.DetailView):
     """Displays activity details"""
     template_name = 'core/detail.html'
 
+    def get_queryset(self):
+        """Custom queryset"""
+        if not self.request.user.is_superuser:
+            query = (Q(task__assignee__in=list(
+                        self.request.user.groups.all())) |
+                     Q(task__request__requester=self.request.user))
+
+            return self.model.objects.filter(query)
+        else:
+            return super(ViewActivity, self).get_queryset()
+
     def dispatch(self, request, *args, **kwargs):
         """Overriding dispatch on DetailView"""
         self.model = get_model(**kwargs)
@@ -65,7 +77,7 @@ class DeleteActivity(generic.DeleteView):
     def dispatch(self, request, *args, **kwargs):
         """Overriding dispatch on DeleteView"""
         self.model = get_model(**kwargs)
-        instance = get_model_instance(**kwargs)
+        instance = get_model_instance(request, **kwargs)
         app_title = get_app_name(**kwargs)
         self.success_url = reverse_lazy(
             'index', args=(app_title, instance.title,))
@@ -118,7 +130,7 @@ class UpdateActivity(generic.View):
     """Updates an existing activity instance"""
     def get(self, request, **kwargs):
         """GET request handler for Update operation"""
-        instance = get_model_instance(**kwargs)
+        instance = get_model_instance(request, **kwargs)
         form = get_form_instance(**kwargs)
         context = {
             'form': form(instance=instance),
@@ -131,7 +143,7 @@ class UpdateActivity(generic.View):
     @transaction.atomic
     def post(self, request, **kwargs):
         """POST request handler for Update operation"""
-        instance = get_model_instance(**kwargs)
+        instance = get_model_instance(request, **kwargs)
         app_title = get_app_name(**kwargs)
         form = get_form_instance(
             **kwargs)(request.POST, instance=instance)
