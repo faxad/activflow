@@ -5,7 +5,6 @@ from importlib import import_module
 
 from django.apps import apps
 from django.forms.models import modelform_factory
-from django.db.models import Q
 
 from djangoflow.core.constants import WORKFLOW_APPS
 
@@ -35,18 +34,10 @@ def discover():
     return discovered
 
 
-def get_flow(module):
-    """Returns the flow"""
+def flow_config(module):
+    """Returns flow configuration"""
     return import_module(
-        '{}.flow'.format(apps.get_app_config(module).name)
-    ).FLOW
-
-
-def get_initial_activity(module):
-    """Returns the initial activity"""
-    return import_module(
-        '{}.flow'.format(apps.get_app_config(module).name)
-    ).INITIAL
+        '{}.flow'.format(apps.get_app_config(module).name))
 
 
 def extract_from_url(request, position):

@@ -5,7 +5,7 @@ import itertools
 from collections import OrderedDict
 from django import template
 
-from djangoflow.core.helpers import discover, get_flow
+from djangoflow.core.helpers import discover
 
 register = template.Library()
 

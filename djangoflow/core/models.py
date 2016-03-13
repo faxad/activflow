@@ -8,7 +8,7 @@ from django.db.models import (
     OneToOneField,
     ForeignKey)
 
-from djangoflow.core.helpers import get_flow
+from djangoflow.core.helpers import flow_config
 from djangoflow.core.mixins import BaseEntityMixin
 
 
@@ -62,7 +62,7 @@ class Task(AbstractEntity):
     @property
     def activity(self):
         module = self.request.workflow_module_name
-        flow = get_flow(module)
+        flow = flow_config(module).FLOW
         return getattr(
             self, flow[self.flow_ref_key]['model']().title.lower(), None)
 
@@ -71,7 +71,8 @@ class Task(AbstractEntity):
         self.save()
 
     def submit(self, module, next=None):
-        transitions = get_flow(module)[self.flow_ref_key]['transitions']
+        transitions = flow_config(
+            module).FLOW[self.flow_ref_key]['transitions']
 
         self.status = 'Ended'
         self.save()
@@ -98,7 +99,7 @@ class AbstractActivity(Model, BaseEntityMixin):
     def next(self):
         """Compute the next possible activities"""
         module = self.class_meta.app_label
-        transitions = get_flow(module)[
+        transitions = flow_config(module).FLOW[
             self.task.flow_ref_key]['transitions']
         if transitions:
             return [transition for transition in

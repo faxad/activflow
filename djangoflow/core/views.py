@@ -10,7 +10,7 @@ from django.shortcuts import render
 from django.views import generic
 from django.views.generic import TemplateView
 
-from djangoflow.core.constants import WORKFLOW_APPS
+from djangoflow.core.constants import WORKFLOW_APPS, REQUEST_IDENTIFIER
 from djangoflow.core.helpers import (
     get_errors,
     get_model,
@@ -43,6 +43,7 @@ class WorkflowDetail(TemplateView):
         content_type = ContentType.objects.get_for_model(
             apps.get_model(app_title, 'FirstActivity'))
         context['instances'] = content_type.get_all_objects_for_this_type()
+        context['request_identifier'] = REQUEST_IDENTIFIER
 
         return context
 

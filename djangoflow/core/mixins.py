@@ -7,14 +7,17 @@ from django.contrib.auth.mixins import (
 from django.db.models import Q
 from django.shortcuts import render
 
-from djangoflow.core.constants import CRUD_OPERATIONS
+from djangoflow.core.constants import (
+    CRUD_OPERATIONS,
+    REQUEST_IDENTIFIER
+)
+
 from djangoflow.core.helpers import (
     get_model_name,
     get_app_name,
     get_model,
-    get_flow,
-    get_task_id,
-    get_initial_activity
+    flow_config,
+    get_task_id
 )
 
 
@@ -63,10 +66,10 @@ class PermissionDeniedMixin(object):
 
         def check_for_create():
             module = get_app_name(request, **kwargs)
-            flow = get_flow(module)
-            initial = get_initial_activity(module)
+            flow = flow_config(module).FLOW
+            initial = flow_config(module).INITIAL
             activity = initial if get_task_id(
-                request, **kwargs) == 'Initial' else self.task.flow_ref_key
+                request, **kwargs) == REQUEST_IDENTIFIER else self.task.flow_ref_key
             return flow[activity]['role'] in [group.name for group in groups]
 
         def check_for_update():

@@ -3,6 +3,7 @@
 from django.conf.urls import url
 from django.views.generic import TemplateView
 
+from djangoflow.core.constants import REQUEST_IDENTIFIER
 from djangoflow.core.views import (
     workflows,
     WorkflowDetail,
@@ -20,7 +21,8 @@ urlpatterns = [
         name='workflow-detail'
     ),
     url(
-        r'^(?P<app_name>\w+)/(?P<model_name>\w+)/Create/(?P<pk>\d+|Initial)$',
+        r'^(?P<app_name>\w+)/(?P<model_name>\w+)/Create/(?P<pk>\d+|{})$'.
+        format(REQUEST_IDENTIFIER),
         CreateActivity.as_view(),
         name='create'
     ),
