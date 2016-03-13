@@ -95,7 +95,7 @@ class CreateActivity(generic.View, PermissionDeniedMixin):
         if form.is_valid():
             instance = model(**form.cleaned_data)
 
-            if instance.is_initial_activity:
+            if instance.is_initial:
                 instance.initiate_request()
             else:
                 task_id = get_task_id(**kwargs)

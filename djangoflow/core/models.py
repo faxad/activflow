@@ -22,6 +22,11 @@ class AbstractEntity(Model, BaseEntityMixin):
         """Returns class meta"""
         return self._meta
 
+    @property
+    def module(self):
+        """Returns module label"""
+        return self.class_meta.app_label
+
     def __unicode__(self):
         """Returns ID"""
         return str(self.id)
@@ -41,7 +46,7 @@ class Request(AbstractEntity):
     )
 
     @property
-    def workflow_module_name(self):
+    def workflow_module_title(self):
         return self.tasks.all()[0].firstactivity.class_meta.app_label
 
     def submit(self, next):
@@ -61,7 +66,7 @@ class Task(AbstractEntity):
 
     @property
     def activity(self):
-        module = self.request.workflow_module_name
+        module = self.request.workflow_module_title
         flow = flow_config(module).FLOW
         return getattr(
             self, flow[self.flow_ref_key]['model']().title.lower(), None)
@@ -87,19 +92,20 @@ class Task(AbstractEntity):
             self.request.save()
 
 
-class AbstractActivity(Model, BaseEntityMixin):
+class AbstractActivity(AbstractEntity):
     """Common properties for all models"""
     task = OneToOneField(Task)
 
     @property
-    def is_initial_activity(self):
+    def is_initial(self):
         """Checks if the activity is initial activity"""
-        return True if self.title.startswith('First') else False
+        config = flow_config(self.module)
+        return True if self.title == config.FLOW[
+            config.INITIAL]['model']().title else False
 
     def next(self):
         """Compute the next possible activities"""
-        module = self.class_meta.app_label
-        transitions = flow_config(module).FLOW[
+        transitions = flow_config(self.module).FLOW[
             self.task.flow_ref_key]['transitions']
         if transitions:
             return [transition for transition in

@@ -6,12 +6,11 @@ from django.db.models import (
     OneToOneField,
     TextField)
 
-from djangoflow.core.mixins import BaseEntityMixin
-from djangoflow.core.models import AbstractEntity, AbstractActivity
+from djangoflow.core.models import AbstractActivity
 from djangoflow.tests.validators import validate_initial_cap
 
 
-class FirstActivity(AbstractEntity, AbstractActivity):
+class FirstActivity(AbstractActivity):
     """Sample first activity"""
     bar = CharField("Bar", max_length=200, validators=[validate_initial_cap])
     baz = CharField(verbose_name="Baz", max_length=30, choices=(
@@ -22,7 +21,7 @@ class FirstActivity(AbstractEntity, AbstractActivity):
         pass
 
 
-class SecondActivity(AbstractEntity, AbstractActivity):
+class SecondActivity(AbstractActivity):
     """Sample second activity"""
     qux = TextField("Qux", blank=True)
 
