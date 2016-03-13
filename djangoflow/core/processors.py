@@ -1,16 +1,14 @@
 """Common template processors"""
 
-from djangoflow.core.helpers import (
-    get_model_name,
-    get_app_name,
-    get_task_id
-)
+from djangoflow.core.helpers import get_request_params
 
 
 def global_context(request):
     """Returns the title of the model"""
+    def get_value(key): return get_request_params(key, request)
+
     return {
-        'entity_title': get_model_name(request),
-        'app_title': get_app_name(request),
-        'identifier': get_task_id(request)
+        'entity_title': get_value('model_name'),
+        'app_title': get_value('app_name'),
+        'identifier': get_value('pk')
     }

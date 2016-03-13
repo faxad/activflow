@@ -1,23 +1,14 @@
 """Mixins"""
 
-from django.contrib.auth.mixins import (
-    LoginRequiredMixin,
-    PermissionRequiredMixin)
-
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.shortcuts import render
 
-from djangoflow.core.constants import (
-    CRUD_OPERATIONS,
-    REQUEST_IDENTIFIER
-)
-
+from djangoflow.core.constants import REQUEST_IDENTIFIER
 from djangoflow.core.helpers import (
-    get_model_name,
-    get_app_name,
     get_model,
     flow_config,
-    get_task_id
+    get_request_params
 )
 
 
@@ -31,18 +22,7 @@ class BaseEntityMixin(object):
         return self.__class__.__name__
 
 
-class AuthMixin(LoginRequiredMixin, PermissionRequiredMixin):
-    """Sets permission required check"""
-    def get_permission_required(self):
-        """Returns permission names used by the mixin"""
-        return ['{0}.{1}_{2}'.format(
-            get_app_name(request=self.request),
-            CRUD_OPERATIONS[self.__class__.__name__.replace(
-                'Entity', '').lower()],
-            get_model_name(request=self.request).lower())]
-
-
-class AccessDeniedMixin(object):
+class AccessDeniedMixin(LoginRequiredMixin, object):
     """Checks the permission"""
     def check(self, request, **kwargs):
         """
@@ -65,11 +45,12 @@ class AccessDeniedMixin(object):
             ).count() != 0
 
         def check_for_create():
-            module = get_app_name(request, **kwargs)
+            module = get_request_params('app_name', request, **kwargs)
             flow = flow_config(module).FLOW
             initial = flow_config(module).INITIAL
-            activity = initial if get_task_id(
-                request, **kwargs) == REQUEST_IDENTIFIER else self.task.flow_ref_key
+            activity = initial if get_request_params(
+                'pk', request, **kwargs
+            ) == REQUEST_IDENTIFIER else self.task.flow_ref_key
             return flow[activity]['role'] in [group.name for group in groups]
 
         def check_for_update():

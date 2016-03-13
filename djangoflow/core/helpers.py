@@ -40,31 +40,14 @@ def flow_config(module):
         '{}.flow'.format(apps.get_app_config(module).name))
 
 
-def extract_from_url(request, position):
-    """Returns app/model from url"""
-    return request.path.split('/')[position] if request else None
+def get_request_params(what, request=None, **kwargs):
+    """Returns provided argument value"""
+    args = {'app_name': 1, 'model_name': 2, 'pk': 4}
 
-
-def get_task_id(request=None, **kwargs):
-    """Returns task identifier"""
     try:
         return kwargs.get(
-            'pk', extract_from_url(request, 4))
-    except IndexError:
-        pass
-
-
-def get_app_name(request=None, **kwargs):
-    """Returns the name of app"""
-    return kwargs.get(
-        'app_name', extract_from_url(request, 1))
-
-
-def get_model_name(request=None, **kwargs):
-    """Returns the name of model"""
-    try:
-        return kwargs.get(
-            'model_name', extract_from_url(request, 2))
+            what, request.path.split('/')[
+                args[what]] if request else None)
     except IndexError:
         pass
 
@@ -72,8 +55,8 @@ def get_model_name(request=None, **kwargs):
 def get_model(**kwargs):
     """Returns model"""
     return apps.get_model(
-        get_app_name(**kwargs),
-        get_model_name(**kwargs))
+        get_request_params('app_name', **kwargs),
+        get_request_params('model_name', **kwargs))
 
 
 def get_model_instance(request, **kwargs):
@@ -84,8 +67,8 @@ def get_model_instance(request, **kwargs):
 def get_form_instance(**kwargs):
     """Returns form instance"""
     fields = []
-    field_config = discover()[get_app_name(
-        **kwargs)][get_model_name(**kwargs)]
+    field_config = discover()[get_request_params(
+        'app_name', **kwargs)][get_request_params('model_name', **kwargs)]
     callee = type(inspect.currentframe().f_back.f_locals['self']).__name__
     operation = 'create' if 'Create' in callee else 'update'
 

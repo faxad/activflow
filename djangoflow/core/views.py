@@ -2,13 +2,13 @@
 
 from django.apps import apps
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views import generic
-from django.views.generic import TemplateView
 
 from djangoflow.core.constants import WORKFLOW_APPS, REQUEST_IDENTIFIER
 from djangoflow.core.helpers import (
@@ -16,30 +16,29 @@ from djangoflow.core.helpers import (
     get_model,
     get_model_instance,
     get_form_instance,
-    get_app_name,
-    get_task_id,
+    get_request_params,
     flow_config
 )
 
-from djangoflow.core.mixins import AuthMixin, AccessDeniedMixin
+from djangoflow.core.mixins import AccessDeniedMixin
 
 
-#@login_required
+@login_required
 def workflows(request):
-    """Discovers models available for CRUD operations"""
+    """Discovers workflows"""
     return render(
         request,
         'index.html',
         {'workflows': WORKFLOW_APPS})
 
 
-class WorkflowDetail(TemplateView):
+class WorkflowDetail(LoginRequiredMixin, generic.TemplateView):
     """Generic view to list worflow requests & tasks"""
     template_name = 'core/workflow.html'
 
     def get_context_data(self, **kwargs):
         context = super(WorkflowDetail, self).get_context_data(**kwargs)
-        app_title = get_app_name(**kwargs)
+        app_title = get_request_params('app_name', **kwargs)
         config = flow_config(app_title)
         model = config.FLOW[config.INITIAL]['model']().title
         content_type = ContentType.objects.get_for_model(
@@ -50,7 +49,7 @@ class WorkflowDetail(TemplateView):
         return context
 
 
-class ViewActivity(generic.DetailView, AccessDeniedMixin):
+class ViewActivity(AccessDeniedMixin, generic.DetailView):
     """Displays activity details"""
     template_name = 'core/detail.html'
 
@@ -68,7 +67,7 @@ class DeleteActivity(generic.DeleteView):
         """Overriding dispatch on DeleteView"""
         self.model = get_model(**kwargs)
         instance = get_model_instance(request, **kwargs)
-        app_title = get_app_name(**kwargs)
+        app_title = get_request_params('app_name', **kwargs)
         self.success_url = reverse_lazy(
             'index', args=(app_title, instance.title,))
 
@@ -76,7 +75,7 @@ class DeleteActivity(generic.DeleteView):
             request, *args, **kwargs)
 
 
-class CreateActivity(generic.View, AccessDeniedMixin):
+class CreateActivity(AccessDeniedMixin, generic.View):
     """Creates activity instance"""
     def get(self, request, **kwargs):
         """GET request handler for Create operation"""
@@ -92,7 +91,7 @@ class CreateActivity(generic.View, AccessDeniedMixin):
         """POST request handler for Create operation"""
         model = get_model(**kwargs)
         form = get_form_instance(**kwargs)(request.POST)
-        app_title = get_app_name(**kwargs)
+        app_title = get_request_params('app_name', **kwargs)
 
         if form.is_valid():
             instance = model(**form.cleaned_data)
@@ -101,7 +100,7 @@ class CreateActivity(generic.View, AccessDeniedMixin):
                 instance.initiate_request(request.user)
             else:
                 instance.assign_task(
-                    get_task_id(**kwargs))
+                    get_request_params('pk', **kwargs))
                 instance.task.initiate()
 
             return HttpResponseRedirect(
@@ -116,7 +115,7 @@ class CreateActivity(generic.View, AccessDeniedMixin):
             return render(request, 'core/create.html', context)
 
 
-class UpdateActivity(generic.View, AccessDeniedMixin):
+class UpdateActivity(AccessDeniedMixin, generic.View):
     """Updates an existing activity instance"""
     def get(self, request, **kwargs):
         """GET request handler for Update operation"""
@@ -136,7 +135,7 @@ class UpdateActivity(generic.View, AccessDeniedMixin):
     def post(self, request, **kwargs):
         """POST request handler for Update operation"""
         instance = get_model_instance(request, **kwargs)
-        app_title = get_app_name(**kwargs)
+        app_title = get_request_params('app_name', **kwargs)
         form = get_form_instance(
             **kwargs)(request.POST, instance=instance)
 
