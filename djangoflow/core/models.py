@@ -23,7 +23,7 @@ class AbstractEntity(Model, BaseEntityMixin):
         return self._meta
 
     @property
-    def module(self):
+    def module_label(self):
         """Returns module label"""
         return self.class_meta.app_label
 
@@ -46,8 +46,9 @@ class Request(AbstractEntity):
     )
 
     @property
-    def workflow_module_title(self):
-        return self.tasks.all()[0].firstactivity.class_meta.app_label
+    def workflow_module(self):
+        return (self.tasks.first().class_meta.
+                get_all_related_objects()[0].related_model())
 
     def submit(self, next):
         pass
@@ -66,7 +67,7 @@ class Task(AbstractEntity):
 
     @property
     def activity(self):
-        module = self.request.workflow_module_title
+        module = self.request.workflow_module.module_label
         flow = flow_config(module).FLOW
         return getattr(
             self, flow[self.flow_ref_key]['model']().title.lower(), None)
@@ -99,13 +100,13 @@ class AbstractActivity(AbstractEntity):
     @property
     def is_initial(self):
         """Checks if the activity is initial activity"""
-        config = flow_config(self.module)
+        config = flow_config(self.module_label)
         return True if self.title == config.FLOW[
             config.INITIAL]['model']().title else False
 
     def next(self):
         """Compute the next possible activities"""
-        transitions = flow_config(self.module).FLOW[
+        transitions = flow_config(self.module_label).FLOW[
             self.task.flow_ref_key]['transitions']
         if transitions:
             return [transition for transition in
