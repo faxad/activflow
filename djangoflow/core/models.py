@@ -17,7 +17,7 @@ class AbstractEntity(Model, BaseEntityMixin):
     creation_date = DateTimeField('Creation Date', auto_now_add=True)
     last_updated = DateTimeField('Last Updated', auto_now=True)
 
-    class Meta(object):
+    class Meta:
         abstract = True
 
     @property
@@ -50,9 +50,6 @@ class Request(AbstractEntity):
     def workflow_module(self):
         return (self.tasks.first().class_meta.
                 get_all_related_objects()[0].related_model())
-
-    def submit(self, next):
-        pass
 
 
 class Task(AbstractEntity):
@@ -135,7 +132,7 @@ class AbstractActivity(AbstractEntity):
 class AbstractInitialActivity(AbstractActivity):
     """Common attributes for initial activity"""
 
-    class Meta(object):
+    class Meta:
         abstract = True
 
     def initiate_request(self, user):

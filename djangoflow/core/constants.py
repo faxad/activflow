@@ -10,9 +10,6 @@ CRUD_OPERATIONS = {
 
 REQUEST_IDENTIFIER = 'Initial'
 
-URL_ARGS = 'pk'
-#URL_ARGS.
-
 # register apps for CRUD operations
 # enable 'tests' app only for manual testing purpose
 

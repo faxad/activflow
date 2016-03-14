@@ -6,38 +6,24 @@ from importlib import import_module
 from django.apps import apps
 from django.forms.models import modelform_factory
 
-from djangoflow.core.constants import WORKFLOW_APPS
 
+# Configuration Loaders
 
-def get_errors(form_errors):
-    """Returns compiled form errors"""
-    error_list = []
-    errors = form_errors.as_data().copy()
-    errors = [error_list.append(
-        e + ': ' + str(
-            list(errors[e][0])[0])) for e in errors]
-
-    return list(set(error_list))
-
-
-def discover():
-    """Returns activity configuration for all registered
-    workflow apps
-    """
-    discovered = {}
-    for app in WORKFLOW_APPS:
-        name = apps.get_app_config(app).name
-        discovered[app] = import_module(
-            '{}.config'.format(name)
-        ).ACTIVITY_CONFIG
-
-    return discovered
+def activity_config(module, model):
+    """Returns activity configuration"""
+    return import_module(
+        '{}.config'.format(
+            apps.get_app_config(module).name)
+    ).ACTIVITY_CONFIG[model]
 
 
 def flow_config(module):
     """Returns flow configuration"""
     return import_module(
         '{}.flow'.format(apps.get_app_config(module).name))
+
+
+# Request Helpers
 
 
 def get_request_params(what, request=None, **kwargs):
@@ -52,11 +38,15 @@ def get_request_params(what, request=None, **kwargs):
         pass
 
 
+# Model and Form Helpers
+
+
 def get_model(**kwargs):
     """Returns model"""
-    return apps.get_model(
-        get_request_params('app_name', **kwargs),
-        get_request_params('model_name', **kwargs))
+    args = [get_request_params(
+        key, **kwargs) for key in ('app_name', 'model_name')]
+
+    return apps.get_model(*args)
 
 
 def get_model_instance(request, **kwargs):
@@ -66,14 +56,22 @@ def get_model_instance(request, **kwargs):
 
 def get_form_instance(**kwargs):
     """Returns form instance"""
-    fields = []
-    field_config = discover()[get_request_params(
-        'app_name', **kwargs)][get_request_params('model_name', **kwargs)]
     callee = type(inspect.currentframe().f_back.f_locals['self']).__name__
     operation = 'create' if 'Create' in callee else 'update'
-
-    for field in field_config:
-        if operation in field_config[field]:
-            fields.append(field)
+    field_config = activity_config(*[get_request_params(
+        key, **kwargs) for key in ('app_name', 'model_name')])
+    fields = [field for field in field_config
+              if operation in field_config[field]]
 
     return modelform_factory(get_model(**kwargs), fields=fields)
+
+
+def get_errors(form_errors):
+    """Returns compiled form errors"""
+    error_list = []
+    errors = form_errors.as_data().copy()
+    errors = [error_list.append(
+        e + ': ' + str(
+            list(errors[e][0])[0])) for e in errors]
+
+    return list(set(error_list))

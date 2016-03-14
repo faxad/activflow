@@ -7,7 +7,7 @@ from collections import OrderedDict
 from django.apps import apps
 from django import template
 
-from djangoflow.core.helpers import discover
+from djangoflow.core.helpers import activity_config
 
 register = template.Library()
 
@@ -15,7 +15,7 @@ register = template.Library()
 def get_entity_data(instance, app, option):
     """Prepares the fields/data for display"""
     model = type(instance)
-    field_config = discover()[app][model.__name__]
+    field_config = activity_config(app, model.__name__)
 
     def compute(field_config):
         for field_name in field_config:

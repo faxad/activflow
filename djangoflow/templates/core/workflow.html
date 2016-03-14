@@ -15,10 +15,11 @@
 <table class="table table-bordered">
 	<tr>
 		<th><span class=" glyphicon glyphicon-menu-hamburger"></span></th>
-		<th>id</th>
-		<th>status</th>
-		<th>created</th>
-		<th>updated</th>
+		<th>ID</th>
+		<th>Status</th>
+		<th>Requester</th>
+		<th>Created</th>
+		<th>Last Updated</th>
     </tr>
     {% for instance in instances %}
 		<tr class="active">
@@ -29,31 +30,34 @@
 			</td>
 			<td>{{instance.task.request.id}}</td>
 			<td>{{instance.task.request.status}}</td>
+			<td>{{instance.task.request.requester.username}}</td>
 			<td>{{instance.task.request.creation_date}}</td>
 			<td>{{instance.task.request.last_updated}}</td>
 	    </tr>
 	    {% if instance.task.request.tasks %}
 		    <tr id="req{{instance.task.request.id}}" class="collapse">
-		    	<td colspan="5">
+		    	<td colspan="6">
 				    <table class="table table-condensed">
 						<tr>
-							<th>id</th>
-							<th>status</th>
-							<th>created</th>
-							<th>updated</th>
+							<th>ID</th>
+							<th>Status</th>
+							<th>Assignee</th>
+							<th>Date Assigned</th>
+							<th>Last Updated</th>
 							<th></th>
 					    </tr>
 					    {% for task in instance.task.request.tasks.all %}
 							<tr>
 								<td>{{task.id}}</td>
 								<td>{{task.status}}</td>
+								<td>{{task.assignee.name}}</td>
 								<td>{{task.creation_date}}</td>
 								<td>{{task.last_updated}}</td>
 								{% activity_title task.flow_ref_key app_title as act_title %}
 								<td>
 									{% activity_identifier task as identifier %}
 									<a class="btn btn-primary btn-xs" href="{% url 'view' app_title act_title identifier %}">View</a>
-									<a class="btn btn-primary btn-xs" href="{% url 'create' app_title act_title task.id %}">Create</a>
+									<a class="btn btn-primary btn-xs {% if task.activity %} disabled {% endif %}" href="{% url 'create' app_title act_title task.id %}">Create</a>
 									<a class="btn btn-primary btn-xs" href="{% url 'update' app_title act_title identifier %}">Update</a>
 								</td>
 						    </tr>
