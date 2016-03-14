@@ -17,11 +17,11 @@ from djangoflow.core.helpers import (
     get_model_instance,
     get_form_instance,
     get_app_name,
-    get_task_id
+    get_task_id,
+    flow_config
 )
 
-from djangoflow.core.mixins import AuthMixin, PermissionDeniedMixin
-from djangoflow.core.models import Task
+from djangoflow.core.mixins import AuthMixin, AccessDeniedMixin
 
 
 #@login_required
@@ -40,15 +40,17 @@ class WorkflowDetail(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(WorkflowDetail, self).get_context_data(**kwargs)
         app_title = get_app_name(**kwargs)
+        config = flow_config(app_title)
+        model = config.FLOW[config.INITIAL]['model']().title
         content_type = ContentType.objects.get_for_model(
-            apps.get_model(app_title, 'FirstActivity'))
+            apps.get_model(app_title, model))
         context['instances'] = content_type.get_all_objects_for_this_type()
         context['request_identifier'] = REQUEST_IDENTIFIER
 
         return context
 
 
-class ViewActivity(generic.DetailView, PermissionDeniedMixin):
+class ViewActivity(generic.DetailView, AccessDeniedMixin):
     """Displays activity details"""
     template_name = 'core/detail.html'
 
@@ -74,7 +76,7 @@ class DeleteActivity(generic.DeleteView):
             request, *args, **kwargs)
 
 
-class CreateActivity(generic.View, PermissionDeniedMixin):
+class CreateActivity(generic.View, AccessDeniedMixin):
     """Creates activity instance"""
     def get(self, request, **kwargs):
         """GET request handler for Create operation"""
@@ -96,13 +98,11 @@ class CreateActivity(generic.View, PermissionDeniedMixin):
             instance = model(**form.cleaned_data)
 
             if instance.is_initial:
-                instance.initiate_request()
+                instance.initiate_request(request.user)
             else:
-                task_id = get_task_id(**kwargs)
-                task = Task.objects.get(id=task_id)
-                task.initiate()
-                instance.task = task
-                instance.save()
+                instance.assign_task(
+                    get_task_id(**kwargs))
+                instance.task.initiate()
 
             return HttpResponseRedirect(
                 reverse('update', args=(
@@ -116,7 +116,7 @@ class CreateActivity(generic.View, PermissionDeniedMixin):
             return render(request, 'core/create.html', context)
 
 
-class UpdateActivity(generic.View, PermissionDeniedMixin):
+class UpdateActivity(generic.View, AccessDeniedMixin):
     """Updates an existing activity instance"""
     def get(self, request, **kwargs):
         """GET request handler for Update operation"""
@@ -148,10 +148,8 @@ class UpdateActivity(generic.View, PermissionDeniedMixin):
                     reverse('update', args=(
                         app_title, instance.title, instance.id)))
             else:
-                next = request.POST['submit']
-                task_id = instance.task.id
-                task = Task.objects.get(id=task_id)
-                task.submit(app_title, next)
+                self.task.submit(
+                    app_title, self.request.user, request.POST['submit'])
 
                 return HttpResponseRedirect(
                     reverse('workflow-detail', args=[app_title]))

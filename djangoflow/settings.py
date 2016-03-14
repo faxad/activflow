@@ -37,7 +37,6 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
-    'haystack',
     'djangoflow.core',
     'djangoflow.tests',
     'djangoflow.sample'
@@ -119,15 +118,6 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
-
-HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
-        'PATH': os.path.join(BASE_DIR, 'indexes'),
-        'INCLUDE_SPELLING': 300,
-        'BATCH_SIZE': 100,
-    }
-}
 
 # Auth
 

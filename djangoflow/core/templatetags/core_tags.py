@@ -1,8 +1,10 @@
 """Template Tags"""
 
 import itertools
-
+from importlib import import_module
 from collections import OrderedDict
+
+from django.apps import apps
 from django import template
 
 from djangoflow.core.helpers import discover
@@ -55,18 +57,9 @@ def entity_preview(context):
     return _parent
 
 
-@register.assignment_tag
-def model_label_for_search(obj):
-    """Returns entity name"""
-    return type(obj).__name__
-
-
 @register.simple_tag
 def activity_title(ref, app):
     """Returns entity name"""
-    from importlib import import_module
-
-    from django.apps import apps
 
     return import_module(
         '{}.flow'.format(apps.get_app_config(app).name)

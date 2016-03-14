@@ -6,11 +6,11 @@ from django.db.models import (
     OneToOneField,
     TextField)
 
-from djangoflow.core.models import AbstractActivity
+from djangoflow.core.models import AbstractActivity, AbstractInitialActivity
 from djangoflow.tests.validators import validate_initial_cap
 
 
-class FirstActivity(AbstractActivity):
+class FirstActivity(AbstractInitialActivity):
     """Sample first activity"""
     bar = CharField("Bar", max_length=200, validators=[validate_initial_cap])
     baz = CharField(verbose_name="Baz", max_length=30, choices=(

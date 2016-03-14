@@ -42,7 +42,7 @@ class AuthMixin(LoginRequiredMixin, PermissionRequiredMixin):
             get_model_name(request=self.request).lower())]
 
 
-class PermissionDeniedMixin(object):
+class AccessDeniedMixin(object):
     """Checks the permission"""
     def check(self, request, **kwargs):
         """

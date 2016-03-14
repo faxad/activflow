@@ -13,9 +13,12 @@ from djangoflow.core.mixins import BaseEntityMixin
 
 
 class AbstractEntity(Model, BaseEntityMixin):
-    """Common properties for all models"""
+    """Common attributes for all models"""
     creation_date = DateTimeField('Creation Date', auto_now_add=True)
     last_updated = DateTimeField('Last Updated', auto_now=True)
+
+    class Meta(object):
+        abstract = True
 
     @property
     def class_meta(self):
@@ -31,11 +34,9 @@ class AbstractEntity(Model, BaseEntityMixin):
         """Returns ID"""
         return str(self.id)
 
-    class Meta(object):
-        abstract = True
-
 
 class Request(AbstractEntity):
+    """Defines the workflow request"""
     requester = ForeignKey(User, related_name='requests')
     status = CharField(verbose_name="Status", max_length=30, choices=(
         ('Initiated', 'Initiated'),
@@ -55,6 +56,7 @@ class Request(AbstractEntity):
 
 
 class Task(AbstractEntity):
+    """Defines the workflow task"""
     request = ForeignKey(Request, related_name='tasks')
     assignee = ForeignKey(Group)
     updated_by = ForeignKey(User)
@@ -67,18 +69,23 @@ class Task(AbstractEntity):
 
     @property
     def activity(self):
+        """Returns the activity associated with the task"""
         module = self.request.workflow_module.module_label
         flow = flow_config(module).FLOW
         return getattr(
             self, flow[self.flow_ref_key]['model']().title.lower(), None)
 
     def initiate(self):
+        """Initializes the task"""
         self.status = 'In Progress'
         self.save()
 
-    def submit(self, module, next=None):
-        transitions = flow_config(
-            module).FLOW[self.flow_ref_key]['transitions']
+    def submit(self, module, user, next=None):
+        """Submits the task"""
+        config = flow_config(module)
+        transitions = config.FLOW[self.flow_ref_key]['transitions']
+        role = Group.objects.get(
+            name=config.FLOW[next]['role'])
 
         self.status = 'Ended'
         self.save()
@@ -86,6 +93,8 @@ class Task(AbstractEntity):
         if transitions is not None:
             Task.objects.create(
                 request=self.request,
+                assignee=role,
+                updated_by=user,
                 flow_ref_key=next,
                 status='Not Started')
         else:
@@ -94,8 +103,11 @@ class Task(AbstractEntity):
 
 
 class AbstractActivity(AbstractEntity):
-    """Common properties for all models"""
+    """Common attributes for all activities"""
     task = OneToOneField(Task)
+
+    class Meta:
+        abstract = True
 
     @property
     def is_initial(self):
@@ -114,18 +126,34 @@ class AbstractActivity(AbstractEntity):
         else:
             return None
 
-    def initiate_request(self):
+    def assign_task(self, identifier):
+        """Link activity with task"""
+        self.task = Task.objects.get(id=identifier)
+        self.save()
+
+
+class AbstractInitialActivity(AbstractActivity):
+    """Common attributes for initial activity"""
+
+    class Meta(object):
+        abstract = True
+
+    def initiate_request(self, user):
         """Initiates new workflow requests"""
+        config = flow_config(self.module_label)
+        role = Group.objects.get(
+            name=config.FLOW[config.INITIAL]['role'])
+
         request = Request.objects.create(
+            requester=user,
             status='Initiated')
 
         task = Task.objects.create(
             request=request,
-            flow_ref_key='first_activity',
+            assignee=role,
+            updated_by=user,
+            flow_ref_key=config.INITIAL,
             status='In Progress')
 
         self.task = task
         self.save()
-
-    class Meta(object):
-        abstract = True
