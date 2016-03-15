@@ -56,9 +56,9 @@
 								{% activity_title task.flow_ref_key app_title as act_title %}
 								<td>
 									{% activity_identifier task as identifier %}
-									<a class="btn btn-primary btn-xs" href="{% url 'view' app_title act_title identifier %}">View</a>
+									<a class="btn btn-primary btn-xs {% if not task.activity %} disabled {% endif %}" href="{% url 'view' app_title act_title identifier %}">View</a>
 									<a class="btn btn-primary btn-xs {% if task.activity %} disabled {% endif %}" href="{% url 'create' app_title act_title task.id %}">Create</a>
-									<a class="btn btn-primary btn-xs" href="{% url 'update' app_title act_title identifier %}">Update</a>
+									<a class="btn btn-primary btn-xs {% if not task.activity or not task.is_active %} disabled {% endif %}" href="{% url 'update' app_title act_title identifier %}">Update</a>
 								</td>
 						    </tr>
 					    {% endfor %}

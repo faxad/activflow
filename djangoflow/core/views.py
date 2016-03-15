@@ -66,10 +66,9 @@ class DeleteActivity(generic.DeleteView):
     def dispatch(self, request, *args, **kwargs):
         """Overriding dispatch on DeleteView"""
         self.model = get_model(**kwargs)
-        instance = get_model_instance(request, **kwargs)
-        app_title = get_request_params('app_name', **kwargs)
         self.success_url = reverse_lazy(
-            'index', args=(app_title, instance.title,))
+            'workflow-detail', args=[get_request_params(
+                'app_name', **kwargs)])
 
         return super(DeleteActivity, self).dispatch(
             request, *args, **kwargs)

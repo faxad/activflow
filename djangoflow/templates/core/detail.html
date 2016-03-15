@@ -9,7 +9,7 @@
   <li class="active">Detail</li>
   <li class="active">{{ object.id }}</li>
 </ol>
-<a data-toggle="modal" href="#confirmation_modal" class="btn btn-danger" role="button">Delete</a>
+<a data-toggle="modal" href="#confirmation_modal" class="btn btn-danger {% if not object.task.is_active %} disabled {% endif %}" role="button">Delete</a>
 {% with object_id=object.id|stringformat:"s" next_action="/"|add:app_title|add:"/"|add:object.title|add:"/Delete/" %}
     {% include "core/widgets/confirmation_modal.html" with message="Are you sure you want to delete?" title="Confirmation" action=next_action|add:object_id %}
 {% endwith %}

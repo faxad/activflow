@@ -72,6 +72,11 @@ class Task(AbstractEntity):
         return getattr(
             self, flow[self.flow_ref_key]['model']().title.lower(), None)
 
+    @property
+    def is_active(self):
+        """Checks if the current task is active / most recent"""
+        return self == self.request.tasks.latest('id')
+
     def initiate(self):
         """Initializes the task"""
         self.status = 'In Progress'
