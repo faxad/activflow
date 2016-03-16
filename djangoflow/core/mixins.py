@@ -56,8 +56,12 @@ class AccessDeniedMixin(LoginRequiredMixin, object):
         def check_for_update():
             return model.objects.filter(task__assignee__in=groups).count() != 0
 
+        def check_for_rollback():
+            return
+
         return None if {
             'ViewActivity': check_for_view,
             'CreateActivity': check_for_create,
             'UpdateActivity': check_for_update,
+            'RollBackActivity': check_for_rollback,
         }.get(view)() else render(request, 'core/denied.html')

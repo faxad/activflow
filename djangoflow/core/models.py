@@ -61,6 +61,7 @@ class Task(AbstractEntity):
     status = CharField(verbose_name="Status", max_length=30, choices=(
         ('Not Started', 'Not Started'),
         ('In Progress', 'In Progress'),
+        ('Rolled Back', 'Rolled Back'),
         ('Ended', 'Ended'))
     )
 
@@ -76,6 +77,11 @@ class Task(AbstractEntity):
     def is_active(self):
         """Checks if the current task is active / most recent"""
         return self == self.request.tasks.latest('id')
+
+    @property
+    def previous(self):
+        return Task.objects.filter(
+            request=self.request, id__lt=self.id).latest('id')
 
     def initiate(self):
         """Initializes the task"""
@@ -102,6 +108,23 @@ class Task(AbstractEntity):
         else:
             self.request.status = 'Completed'
             self.request.save()
+
+    def rollback(self):
+        """Rollback to previous task"""
+        self.status = 'Roll Back'
+        self.save()
+
+        # Clone Task
+        task = self.previous
+        task.id = None
+        task.status = 'Not Started'
+        task.save()
+
+        # Clone Activity
+        activity = self.previous.activity
+        activity.id = None
+        activity.task = task
+        activity.save()
 
 
 class AbstractActivity(AbstractEntity):

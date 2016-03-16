@@ -9,7 +9,7 @@
   <li class="active">Detail</li>
   <li class="active">{{ object.id }}</li>
 </ol>
-<form action="{% url 'view' app_title entity_title object.id %}" method="POST">
+<form action="{% url 'rollback' app_title entity_title object.id %}" method="POST">
   {% csrf_token %}
   <a data-toggle="modal" href="#confirmation_modal" class="btn btn-danger {% if not object.task.is_active %} disabled {% endif %}" role="button">Delete</a>
   <button type="submit" name="rollback" class="btn btn-warning">Rollback</button>

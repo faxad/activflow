@@ -60,21 +60,20 @@ class ViewActivity(AccessDeniedMixin, generic.DetailView):
         return denied if denied else super(ViewActivity, self).dispatch(
             request, *args, **kwargs)
 
+
+class RollBackActivity(AccessDeniedMixin, generic.View):
+    """Rollback the task"""
     @transaction.atomic
     def post(self, request, **kwargs):
-        """POST request handler for operations"""
+        """POST request handler for rollback"""
         app_title = get_request_params('app_name', **kwargs)
         instance = get_model_instance(request, **kwargs)
-        is_rollback = 'rollback' in request.POST
-        if is_rollback:
-            pass  # TODO: Call to Rollback
 
-        (to, args) = ('workflow-detail', [
-            get_request_params(
-                'app_name', **kwargs)]) if is_rollback else (
-                    'view', (app_title, instance.title, instance.id))
+        instance.task.rollback()
 
-        return HttpResponseRedirect(reverse(to, args=args))
+        denied = self.check(request, **kwargs)
+        return denied if denied else HttpResponseRedirect(
+            reverse('workflow-detail', args=[app_title]))
 
 
 class DeleteActivity(generic.DeleteView):
@@ -162,7 +161,7 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
                     reverse('update', args=(
                         app_title, instance.title, instance.id)))
             else:
-                self.task.submit(
+                instance.task.submit(
                     app_title, self.request.user, request.POST['submit'])
 
                 return HttpResponseRedirect(

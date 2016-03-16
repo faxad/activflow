@@ -11,6 +11,7 @@ from djangoflow.core.views import (
     ViewActivity,
     UpdateActivity,
     DeleteActivity,
+    RollBackActivity,
 )
 
 urlpatterns = [
@@ -40,6 +41,11 @@ urlpatterns = [
         r'^(?P<app_name>\w+)/(?P<model_name>\w+)/Delete/(?P<pk>\d+)$',
         DeleteActivity.as_view(),
         name='delete'
+    ),
+    url(
+        r'^(?P<app_name>\w+)/(?P<model_name>\w+)/RollBack/(?P<pk>\d+)/$',
+        RollBackActivity.as_view(),
+        name='rollback'
     ),
     url(
         r'^Denied/$',
