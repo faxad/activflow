@@ -157,6 +157,7 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
             form.save()
 
             if 'save' in request.POST:
+                instance.update()
                 return HttpResponseRedirect(
                     reverse('update', args=(
                         app_title, instance.title, instance.id)))

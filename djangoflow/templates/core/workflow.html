@@ -22,6 +22,7 @@
 		<th>Last Updated</th>
     </tr>
     {% for instance in instances %}
+    {% if not instance.task.status == 'Rolled Back'%}
 		<tr class="active">
 			<td>
 				<button class="btn btn-default btn-xs" type="button" data-toggle="collapse" data-target="#req{{instance.task.request.id}}">
@@ -68,6 +69,7 @@
 		{% else %}
 		    <p>No objects are available.</p>
 		{% endif %}
+	{% endif %}
     {% endfor %}
 </table>
 {% else %}

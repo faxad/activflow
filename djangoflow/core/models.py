@@ -40,8 +40,6 @@ class Request(AbstractEntity):
     requester = ForeignKey(User, related_name='requests')
     status = CharField(verbose_name="Status", max_length=30, choices=(
         ('Initiated', 'Initiated'),
-        ('Draft', 'Draft'),
-        ('Submitted', 'Submitted'),
         ('Withdrawn', 'Withdrawn'),
         ('Completed', 'Completed'))
     )
@@ -62,7 +60,7 @@ class Task(AbstractEntity):
         ('Not Started', 'Not Started'),
         ('In Progress', 'In Progress'),
         ('Rolled Back', 'Rolled Back'),
-        ('Ended', 'Ended'))
+        ('Completed', 'Completed'))
     )
 
     @property
@@ -111,7 +109,8 @@ class Task(AbstractEntity):
 
     def rollback(self):
         """Rollback to previous task"""
-        self.status = 'Roll Back'
+        self.status = self.previous.status = 'Rolled Back'
+        self.previous.save()
         self.save()
 
         # Clone Task
@@ -155,6 +154,11 @@ class AbstractActivity(AbstractEntity):
         """Link activity with task"""
         self.task = Task.objects.get(id=identifier)
         self.save()
+
+    def update(self):
+        """On activity save"""
+        self.task.status = 'In Progress'
+        self.task.save()
 
 
 class AbstractInitialActivity(AbstractActivity):
