@@ -14,13 +14,16 @@
         <input type="submit" value="Save" name="save" class="btn btn-success" />
     </div>
 </div>
-{% if next %}
+{% if next or object.task.is_final %}
 <div class="panel panel-default">
 	<div class="panel-heading">Actions</div>
 	<div class="panel-body">
         {% for option in next %}
 		  <input type="submit" value={{option}} name="submit" class="btn btn-primary" />
         {% endfor %}
+        {% if object.task.is_final %}
+          <input type="submit" value="Finish" name="finish" class="btn btn-primary" />
+        {% endif %}
 	</div>
 </div>
 {% endif %}

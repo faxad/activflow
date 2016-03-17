@@ -77,6 +77,13 @@ class Task(AbstractEntity):
         return self == self.request.tasks.latest('id')
 
     @property
+    def is_final(self):
+        """Checks if the current task is final / end task"""
+        flow = flow_config(
+            self.request.workflow_module.module_label).FLOW
+        return not flow[self.flow_ref_key]['transitions']
+
+    @property
     def previous(self):
         return Task.objects.filter(
             request=self.request, id__lt=self.id).latest('id')
@@ -93,7 +100,7 @@ class Task(AbstractEntity):
         role = Group.objects.get(
             name=config.FLOW[next]['role'])
 
-        self.status = 'Ended'
+        self.status = 'Completed'
         self.save()
 
         if transitions is not None:
@@ -109,8 +116,10 @@ class Task(AbstractEntity):
 
     def rollback(self):
         """Rollback to previous task"""
-        self.status = self.previous.status = 'Rolled Back'
-        self.previous.save()
+        previous = self.previous
+        previous.status = 'Rolled Back'
+        previous.save()
+        self.status = 'Rolled Back'
         self.save()
 
         # Clone Task
@@ -159,6 +168,13 @@ class AbstractActivity(AbstractEntity):
         """On activity save"""
         self.task.status = 'In Progress'
         self.task.save()
+
+    def finish(self):
+        """On activity finish"""
+        self.task.status = 'Completed'
+        self.task.save()
+        self.task.request.status = 'Completed'
+        self.task.request.save()
 
 
 class AbstractInitialActivity(AbstractActivity):

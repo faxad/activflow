@@ -161,12 +161,14 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
                 return HttpResponseRedirect(
                     reverse('update', args=(
                         app_title, instance.title, instance.id)))
+            elif 'finish' in request.POST:
+                instance.finish()
             else:
                 instance.task.submit(
                     app_title, self.request.user, request.POST['submit'])
 
-                return HttpResponseRedirect(
-                    reverse('workflow-detail', args=[app_title]))
+            return HttpResponseRedirect(
+                reverse('workflow-detail', args=[app_title]))
         else:
             context = {
                 'form': form,
