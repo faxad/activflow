@@ -1,0 +1,11 @@
+{% load core_tags %}
+
+<table class="table table-condensed">
+    {% model_field_values object 'display' as entity_instance %}
+    {% for name, value in entity_instance.items %}
+    <tr>
+        <th>{{ name }}</th>
+        <td>{{ value }}</td>
+    </tr>
+    {% endfor %}
+</table>
