@@ -1,0 +1,32 @@
+{% load core_tags %}
+
+<table class="table table-bordered">
+    <tr>
+        <th>Request History</th>
+    </tr>
+    {% for task in object.task.request.tasks.all %}
+    {% if not task.activity.id == object.id %}
+        <tr data-toggle="collapse" data-target="#req{{task.activity.id}}" class="active">
+            <td>
+                <div class="row">
+                  <div class="col-md-8"><span class=" glyphicon glyphicon glyphicon-plus"> </span> <strong>{{task.activity.title}}</strong> - <small>{{task.assignee.name}}</small></div>
+                  <div class="col-md-4 text-right"><small>{{task.activity.last_updated}}</small></div>
+                </div>
+            </td>
+        </tr>
+        <tr id="req{{task.activity.id}}" class="collapse">
+            <td>
+                <table class="table table-condensed">
+                    {% model_field_values task.activity 'display' as entity_instance %}
+                    {% for name, value in entity_instance.items %}
+                    <tr>
+                        <th>{{ name }}</th>
+                        <td>{{ value }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </td>
+        </tr>
+    {% endif %}
+    {% endfor %}
+</table>

@@ -8,9 +8,10 @@
   <li class="active">Create Activity</li>
 </ol>
 
-<h4>Create {{ entity_title }}</h4>
-
 {% include "core/widgets/validation.html" with error_messages=error_message %}
+{% include "core/widgets/history.html" %}
+
+<h4>Create {{ entity_title }}</h4>
 
 <form action="{% url 'create' app_title entity_title identifier %}" method="post" class="form-horizontal">
     {% include 'core/widgets/form_fields_display.html' %}

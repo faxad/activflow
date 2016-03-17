@@ -8,9 +8,10 @@
   <li class="active">Update</li>
 </ol>
 
-<h4>Update {{ entity_title }}</h4>
-
 {% include "core/widgets/validation.html" with formset=formset error_messages=error_message %}
+{% include "core/widgets/history.html" %}
+
+<h4>Update {{ entity_title }}</h4>
 
 <form action="{% url 'update' app_title entity_title object.id %}" method="post" class="form-horizontal">
     {% include 'core/widgets/form_fields_display.html' %}
