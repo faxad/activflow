@@ -111,7 +111,7 @@ class CreateActivity(AccessDeniedMixin, generic.View):
             instance = model(**form.cleaned_data)
 
             if instance.is_initial:
-                instance.initiate_request(request.user)
+                instance.initiate_request(request.user, app_title)
             else:
                 instance.assign_task(
                     get_request_params('pk', **kwargs))

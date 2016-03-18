@@ -38,16 +38,11 @@ class AbstractEntity(Model, BaseEntityMixin):
 class Request(AbstractEntity):
     """Defines the workflow request"""
     requester = ForeignKey(User, related_name='requests')
+    module_ref = CharField(max_length=100)
     status = CharField(verbose_name="Status", max_length=30, choices=(
         ('Initiated', 'Initiated'),
         ('Withdrawn', 'Withdrawn'),
         ('Completed', 'Completed')))
-
-    @property
-    def workflow_module(self):
-        """Returns the workflow module"""
-        return (self.tasks.first().class_meta.
-                get_all_related_objects()[0].related_model())
 
 
 class Task(AbstractEntity):
@@ -65,8 +60,7 @@ class Task(AbstractEntity):
     @property
     def activity(self):
         """Returns the activity associated with the task"""
-        module = self.request.workflow_module.module_label
-        flow = flow_config(module).FLOW
+        flow = flow_config(self.request.module_ref).FLOW
         return getattr(
             self, flow[self.flow_ref_key]['model']().title.lower(), None)
 
@@ -79,7 +73,7 @@ class Task(AbstractEntity):
     def is_final(self):
         """Checks if the current task is final / end task"""
         flow = flow_config(
-            self.request.workflow_module.module_label).FLOW
+            self.request.module_ref).FLOW
         return not flow[self.flow_ref_key]['transitions']
 
     @property
@@ -183,7 +177,7 @@ class AbstractInitialActivity(AbstractActivity):
     class Meta:
         abstract = True
 
-    def initiate_request(self, user):
+    def initiate_request(self, user, module):
         """Initiates new workflow requests"""
         config = flow_config(self.module_label)
         role = Group.objects.get(
@@ -191,6 +185,7 @@ class AbstractInitialActivity(AbstractActivity):
 
         request = Request.objects.create(
             requester=user,
+            module_ref=module,
             status='Initiated')
 
         task = Task.objects.create(
