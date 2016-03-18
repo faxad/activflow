@@ -41,11 +41,11 @@ class Request(AbstractEntity):
     status = CharField(verbose_name="Status", max_length=30, choices=(
         ('Initiated', 'Initiated'),
         ('Withdrawn', 'Withdrawn'),
-        ('Completed', 'Completed'))
-    )
+        ('Completed', 'Completed')))
 
     @property
     def workflow_module(self):
+        """Returns the workflow module"""
         return (self.tasks.first().class_meta.
                 get_all_related_objects()[0].related_model())
 
@@ -60,8 +60,7 @@ class Task(AbstractEntity):
         ('Not Started', 'Not Started'),
         ('In Progress', 'In Progress'),
         ('Rolled Back', 'Rolled Back'),
-        ('Completed', 'Completed'))
-    )
+        ('Completed', 'Completed')))
 
     @property
     def activity(self):
@@ -85,6 +84,7 @@ class Task(AbstractEntity):
 
     @property
     def previous(self):
+        """Returns previous task"""
         return Task.objects.filter(
             request=self.request, id__lt=self.id).latest('id')
 

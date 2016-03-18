@@ -9,7 +9,7 @@
   <li><a href="{% url 'workflows' %}">Home</a></li>
   <li class="active">{{ app_title }}</li>
 </ol>
-<a href="{% url 'create' app_title 'FirstActivity' request_identifier %}" class="btn btn-primary" role="button">Create New Workflow</a>
+<a href="{% url 'create' app_title 'FirstActivity' request_identifier %}" class="btn btn-primary" role="button">Initiate Request</a>
 <h3>{{ app_title }}</h3>
 {% if instances %}
 <table class="table table-bordered">
