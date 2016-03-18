@@ -80,8 +80,9 @@ class CoreTests(TestCase):
             kwargs=request_args),
             {'bar': 'Example - big E', 'baz': 'WL', 'qux': 'Nothing'})
 
-        instance = Foo.objects.all()
-        self.assertEqual(instance.count(), 1)
+        instances = Foo.objects.all()
+        instance = instances.first()
+        self.assertEqual(instances.count(), 1)
 
         self.assertRedirects(
             response,
@@ -90,11 +91,63 @@ class CoreTests(TestCase):
                 kwargs={
                     'app_name': 'tests',
                     'model_name': 'Foo',
-                    'pk': instance.first().id
+                    'pk': instance.id
                 }),
             status_code=302,
             target_status_code=200)
 
+        # Update activity
+
+        for verb in ('get', 'post'):
+            response = getattr(self.client, verb)(reverse(
+                'update',
+                kwargs={
+                    'app_name': 'tests',
+                    'model_name': 'Foo',
+                    'pk': instance.id
+                }))
+
+            self.assertEqual(response.context['form']._meta.model, Foo)
+
+        response = self.client.post(reverse(
+            'update',
+            kwargs={
+                'app_name': 'tests',
+                'model_name': 'Foo',
+                'pk': instance.id
+            }),
+            {'bar': 'Example', 'baz': 'WL', 'qux': 'Nothing', 'save': 'Save'})
+
+        self.assertRedirects(
+            response,
+            reverse(
+                'update',
+                kwargs={
+                    'app_name': 'tests',
+                    'model_name': 'Foo',
+                    'pk': instance.id
+                }))
+
+        response = self.client.post(reverse(
+            'update',
+            kwargs={
+                'app_name': 'tests',
+                'model_name': 'Foo',
+                'pk': instance.id
+            }),
+            {
+                'bar': 'Example',
+                'baz': 'WL',
+                'qux': 'Nothing',
+                'submit': 'corge_activity'
+            })
+
+        self.assertRedirects(
+            response,
+            reverse(
+                'workflow-detail',
+                kwargs={
+                    'app_name': 'tests'}))
 
     # def test_list_view(self):
     #     """Tests for list view"""
