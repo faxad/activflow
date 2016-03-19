@@ -14,5 +14,5 @@ REQUEST_IDENTIFIER = 'Initial'
 # enable 'tests' app only for manual testing purpose
 
 WORKFLOW_APPS = [
-    'sample'
+    'tests'
 ]

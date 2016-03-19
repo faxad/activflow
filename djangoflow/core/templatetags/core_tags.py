@@ -37,7 +37,6 @@ def label_with_class(value, arg):
 @register.assignment_tag(takes_context=True)
 def model_field_values(context, instance, option):
     """Returns pair for field/values for display"""
-    #instance = context['object']
     app = context['app_title']
 
     return get_entity_data(instance, app, option)

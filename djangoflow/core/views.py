@@ -45,6 +45,7 @@ class WorkflowDetail(LoginRequiredMixin, generic.TemplateView):
             apps.get_model(app_title, model))
         context['instances'] = content_type.get_all_objects_for_this_type()
         context['request_identifier'] = REQUEST_IDENTIFIER
+        context['initial'] = model
 
         return context
 

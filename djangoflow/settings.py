@@ -38,8 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django_extensions',
     'djangoflow.core',
-    'djangoflow.tests',
-    'djangoflow.sample'
+    'djangoflow.tests'
 )
 
 MIDDLEWARE_CLASSES = (
