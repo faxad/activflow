@@ -1,11 +1,11 @@
 """Tests for Core app"""
 from django.contrib.auth.models import User, Group
-from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test import Client
 
-from djangoflow.tests.models import Foo
+from djangoflow.core.models import Request
+from djangoflow.tests.models import Foo, Corge
 
 
 class CoreTests(TestCase):
@@ -44,8 +44,8 @@ class CoreTests(TestCase):
         self.assertQuerysetEqual(
             response.context['instances'], [])
 
-    def test_initiate_request(self):
-        """Tests request initiation"""
+    def test_workflow_initiation_to_finish(self):
+        """Tests the entire workflow cycle"""
         request_args = {
             'app_name': 'tests',
             'model_name': 'Foo',
@@ -58,7 +58,9 @@ class CoreTests(TestCase):
                 kwargs=request_args))
 
             if verb == 'get':
+                # Permission Denied
                 self.assertTrue('Permission Denied' in response.content)
+                # Adds user to the group with permission
                 self.submitter.user_set.add(self.john_doe)
 
             response = getattr(self.client, verb)(reverse(
@@ -67,14 +69,17 @@ class CoreTests(TestCase):
 
             self.assertEqual(response.context['form']._meta.model, Foo)
 
+        # Post the form with validation failure
         response = self.client.post(reverse(
             'create',
             kwargs=request_args),
             {'bar': 'example - small e', 'baz': 'WL', 'qux': 'Nothing'})
 
         self.assertEqual(response.status_code, 200)
+        # No instance gets created because form is invalid
         self.assertEqual(Foo.objects.count(), 0)
 
+        # Post the form again without any validation failure
         response = self.client.post(reverse(
             'create',
             kwargs=request_args),
@@ -82,59 +87,48 @@ class CoreTests(TestCase):
 
         instances = Foo.objects.all()
         instance = instances.first()
+
+        # Instance gets saved successfully against form submit
         self.assertEqual(instances.count(), 1)
+
+        # Redirects the control to update form
+        request_args = {
+            'app_name': 'tests',
+            'model_name': 'Foo',
+            'pk': instance.id
+        }
 
         self.assertRedirects(
             response,
-            reverse(
-                'update',
-                kwargs={
-                    'app_name': 'tests',
-                    'model_name': 'Foo',
-                    'pk': instance.id
-                }),
+            reverse('update', kwargs=request_args),
             status_code=302,
             target_status_code=200)
 
         # Update activity
-
         for verb in ('get', 'post'):
             response = getattr(self.client, verb)(reverse(
                 'update',
-                kwargs={
-                    'app_name': 'tests',
-                    'model_name': 'Foo',
-                    'pk': instance.id
-                }))
+                kwargs=request_args))
 
             self.assertEqual(response.context['form']._meta.model, Foo)
 
+        # Post the form with SAVE action
         response = self.client.post(reverse(
             'update',
-            kwargs={
-                'app_name': 'tests',
-                'model_name': 'Foo',
-                'pk': instance.id
-            }),
+            kwargs=request_args),
             {'bar': 'Example', 'baz': 'WL', 'qux': 'Nothing', 'save': 'Save'})
 
+        # Control redirects to update after save
         self.assertRedirects(
             response,
             reverse(
                 'update',
-                kwargs={
-                    'app_name': 'tests',
-                    'model_name': 'Foo',
-                    'pk': instance.id
-                }))
+                kwargs=request_args))
 
+        # Post the form with SUBMIT action (to next activity)
         response = self.client.post(reverse(
             'update',
-            kwargs={
-                'app_name': 'tests',
-                'model_name': 'Foo',
-                'pk': instance.id
-            }),
+            kwargs=request_args),
             {
                 'bar': 'Example',
                 'baz': 'WL',
@@ -142,12 +136,154 @@ class CoreTests(TestCase):
                 'submit': 'corge_activity'
             })
 
+        # Control redirects to workflow detail
         self.assertRedirects(
             response,
             reverse(
                 'workflow-detail',
                 kwargs={
                     'app_name': 'tests'}))
+
+        # Initiate task for next (last) activity
+        final_task = instance.task.request.tasks.latest('id')
+
+        # Posts the form for last (final) activity
+        response = self.client.post(reverse(
+            'create',
+            kwargs={
+                'app_name': 'tests',
+                'model_name': 'Corge',
+                'pk': final_task.id
+                }),
+            {'grault': 'Example - big E', 'thud': 23})
+
+        instances = Corge.objects.all()
+        instance = instances.first()
+
+        # New instance for last activity gets created
+        self.assertEqual(instances.count(), 1)
+
+        request_args = {
+            'app_name': 'tests',
+            'model_name': 'Corge',
+            'pk': instance.id
+        }
+
+        # Control redirects to update after save
+        self.assertRedirects(
+            response,
+            reverse('update', kwargs=request_args),
+            status_code=302,
+            target_status_code=200)
+
+        # Finish the workflow cycle
+        response = self.client.post(reverse(
+            'update', kwargs=request_args),
+            {'grault': 'Example - big E', 'thud': 23, 'finish': 'Finish'})
+
+    def test_rollback(self):
+        """Tests rollback feature"""
+        request_args = {
+            'app_name': 'tests',
+            'model_name': 'Foo',
+            'pk': 'Initial'
+        }
+
+        # Post the form again without any validation failure
+        response = self.client.post(reverse(
+            'create',
+            kwargs=request_args),
+            {'bar': 'Example - big E', 'baz': 'WL', 'qux': 'Nothing'})
+
+        instances = Foo.objects.all()
+        instance = instances.first()
+
+        # Redirects the control to update form
+        request_args = {
+            'app_name': 'tests',
+            'model_name': 'Foo',
+            'pk': instance.id
+        }
+
+        self.assertRedirects(
+            response,
+            reverse('update', kwargs=request_args),
+            status_code=302,
+            target_status_code=200)
+
+        # Post the form with SAVE action
+        response = self.client.post(reverse(
+            'update',
+            kwargs=request_args),
+            {'bar': 'Example', 'baz': 'WL', 'qux': 'Nothing', 'save': 'Save'})
+
+        # Control redirects to update after save
+        self.assertRedirects(
+            response,
+            reverse(
+                'update',
+                kwargs=request_args))
+
+        # Post the form with SUBMIT action (to next activity)
+        response = self.client.post(reverse(
+            'update',
+            kwargs=request_args),
+            {
+                'bar': 'Example',
+                'baz': 'WL',
+                'qux': 'Nothing',
+                'submit': 'corge_activity'
+            })
+
+        # Control redirects to workflow detail
+        self.assertRedirects(
+            response,
+            reverse(
+                'workflow-detail',
+                kwargs={
+                    'app_name': 'tests'}))
+
+        # Initiate task for next (last) activity
+        final_task = instance.task.request.tasks.latest('id')
+
+        # Posts the form for last (final) activity
+        response = self.client.post(reverse(
+            'create',
+            kwargs={
+                'app_name': 'tests',
+                'model_name': 'Corge',
+                'pk': final_task.id
+                }),
+            {'grault': 'Example - big E', 'thud': 23})
+
+        instances = Corge.objects.all()
+        instance = instances.latest('id')
+
+        request_args = {
+            'app_name': 'tests',
+            'model_name': 'Corge',
+            'pk': instance.id
+        }
+
+        # Control redirects to update after save
+        self.assertRedirects(
+            response,
+            reverse('update', kwargs=request_args),
+            status_code=302,
+            target_status_code=200)
+
+        self.client.post(reverse(
+            'rollback',
+            kwargs={
+                'app_name': 'tests',
+                'model_name': 'Corge',
+                'pk': instance.id
+            }))
+
+        request = Request.objects.all().latest('id')
+        final_task = request.tasks.latest('id')
+        self.assertEqual(final_task.flow_ref_key, 'foo_activity')
+
 
     # def test_list_view(self):
     #     """Tests for list view"""
@@ -181,62 +317,3 @@ class CoreTests(TestCase):
     #     count = Foo.objects.filter(id=self.foo.id).count()
 
     #     self.assertEqual(count, 0)
-
-    # def test_create_view(self):
-    #     """Tests for create view"""
-    #     for verb in ('get', 'post'):
-    #         response = getattr(self.client, verb)(reverse(
-    #             'create',
-    #             kwargs={'app_name': 'tests', 'model_name': 'Foo'}))
-
-    #         self.assertEqual(response.context['form']._meta.model, Foo)
-
-    #     response = self.client.post(reverse(
-    #         'create',
-    #         kwargs={'app_name': 'tests', 'model_name': 'Foo'}),
-    #         {'bar': 'example - small e', 'baz': 'WL', 'qux': 'Nothing'})
-
-    #     self.assertEqual(response.status_code, 200)
-
-    #     response = self.client.post(reverse(
-    #         'create',
-    #         kwargs={'app_name': 'tests', 'model_name': 'Foo'}),
-    #         {'bar': 'Example - big E', 'baz': 'WL', 'qux': 'Nothing'})
-
-    #     self.assertRedirects(
-    #         response,
-    #         reverse(
-    #             'index',
-    #             kwargs={'app_name': 'tests', 'model_name': 'Foo'}),
-    #         status_code=302,
-    #         target_status_code=200)
-
-    # def test_udpate_view(self):
-    #     """Tests for update view"""
-    #     for verb in ('get', 'post'):
-    #         response = getattr(self.client, verb)(reverse(
-    #             'update',
-    #             kwargs={
-    #                 'app_name': 'tests',
-    #                 'model_name': 'Foo',
-    #                 'pk': self.foo.id
-    #             }))
-
-    #         self.assertEqual(response.context['form']._meta.model, Foo)
-
-    #     response = self.client.post(reverse(
-    #         'update',
-    #         kwargs={
-    #             'app_name': 'tests',
-    #             'model_name': 'Foo',
-    #             'pk': self.foo.id
-    #         }),
-    #         {'bar': 'Example', 'baz': 'WL', 'qux': 'Nothing'})
-
-    #     self.assertRedirects(
-    #         response,
-    #         reverse(
-    #             'index',
-    #             kwargs={'app_name': 'tests', 'model_name': 'Foo'}),
-    #         status_code=302,
-    #         target_status_code=200)
