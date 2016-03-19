@@ -181,6 +181,18 @@ class CoreTests(TestCase):
             'update', kwargs=request_args),
             {'grault': 'Example - big E', 'thud': 23, 'finish': 'Finish'})
 
+        response = self.client.get(reverse(
+            'view',
+            kwargs=request_args))
+
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post(reverse(
+            'delete',
+            kwargs=request_args))
+
+        self.assertEqual(Corge.objects.all().count(), 0)
+
     def test_rollback(self):
         """Tests rollback feature"""
         request_args = {
@@ -283,37 +295,3 @@ class CoreTests(TestCase):
         request = Request.objects.all().latest('id')
         final_task = request.tasks.latest('id')
         self.assertEqual(final_task.flow_ref_key, 'foo_activity')
-
-
-    # def test_list_view(self):
-    #     """Tests for list view"""
-    #     response = self.client.get(reverse(
-    #         'index',
-    #         kwargs={'app_name': 'tests', 'model_name': 'Foo'}))
-
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertQuerysetEqual(
-    #         response.context['objects'],
-    #         [repr(self.foo)])
-
-    # def test_delete_view(self):
-    #     """Tests for delete view"""
-    #     response = self.client.post(reverse(
-    #         'delete',
-    #         kwargs={
-    #             'app_name': 'tests',
-    #             'model_name': 'Foo',
-    #             'pk': self.foo.id
-    #         }))
-
-    #     self.assertRedirects(
-    #         response,
-    #         reverse(
-    #             'index',
-    #             kwargs={'app_name': 'tests', 'model_name': 'Foo'}),
-    #         status_code=302,
-    #         target_status_code=200)
-
-    #     count = Foo.objects.filter(id=self.foo.id).count()
-
-    #     self.assertEqual(count, 0)
