@@ -2,4 +2,4 @@
 
 
 def foo_to_corge(self):
-    return True
+    return self.bar == 'Example'
