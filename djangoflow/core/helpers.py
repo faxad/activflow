@@ -27,7 +27,7 @@ def flow_config(module):
 
 
 def get_request_params(what, request=None, **kwargs):
-    """Returns provided argument value"""
+    """Returns requested argument value"""
     args = {'app_name': 1, 'model_name': 2, 'pk': 4}
 
     try:

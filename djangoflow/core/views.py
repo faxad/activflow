@@ -1,4 +1,4 @@
-"""Generic views for CRUD operations"""
+"""Generic workflow engine views"""
 
 from django.apps import apps
 from django.contrib.auth.decorators import login_required
@@ -25,11 +25,8 @@ from djangoflow.core.mixins import AccessDeniedMixin
 
 @login_required
 def workflows(request):
-    """Discovers workflows"""
-    return render(
-        request,
-        'index.html',
-        {'workflows': WORKFLOW_APPS})
+    """Lists down registred workflows"""
+    return render(request, 'index.html', {'workflows': WORKFLOW_APPS})
 
 
 class WorkflowDetail(LoginRequiredMixin, generic.TemplateView):
@@ -51,7 +48,7 @@ class WorkflowDetail(LoginRequiredMixin, generic.TemplateView):
 
 
 class ViewActivity(AccessDeniedMixin, generic.DetailView):
-    """Displays activity details"""
+    """Generic view to display activity details"""
     template_name = 'core/detail.html'
 
     def dispatch(self, request, *args, **kwargs):
@@ -63,7 +60,7 @@ class ViewActivity(AccessDeniedMixin, generic.DetailView):
 
 
 class RollBackActivity(AccessDeniedMixin, generic.View):
-    """Rollback the task"""
+    """Rollbacks workflow task"""
     @transaction.atomic
     def post(self, request, **kwargs):
         """POST request handler for rollback"""
@@ -91,7 +88,7 @@ class DeleteActivity(generic.DeleteView):
 
 
 class CreateActivity(AccessDeniedMixin, generic.View):
-    """Creates activity instance"""
+    """Generic view to initiate activity"""
     def get(self, request, **kwargs):
         """GET request handler for Create operation"""
         form = get_form_instance(**kwargs)
@@ -131,7 +128,7 @@ class CreateActivity(AccessDeniedMixin, generic.View):
 
 
 class UpdateActivity(AccessDeniedMixin, generic.View):
-    """Updates an existing activity instance"""
+    """Generic view to update activity"""
     def get(self, request, **kwargs):
         """GET request handler for Update operation"""
         instance = get_model_instance(request, **kwargs)

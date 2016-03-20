@@ -4,7 +4,7 @@ from djangoflow.core.helpers import get_request_params
 
 
 def global_context(request):
-    """Returns the title of the model"""
+    """Sets up global template context"""
     def get_value(key): return get_request_params(key, request)
 
     return {
