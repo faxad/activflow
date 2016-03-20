@@ -13,7 +13,6 @@ class CoreTests(TestCase):
     def setUp(self, **kwargs):
         """Test Setup"""
         self.client = Client()
-
         self.submitter = Group.objects.create(name='Submitter')
         self.reviewer = Group.objects.create(name='Reviewer')
 
@@ -32,7 +31,8 @@ class CoreTests(TestCase):
     def test_available_workflows(self):
         """Tests view that lists workflows"""
         response = self.client.get(reverse('workflows'))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200,
+                         'Response did not result in success')
 
     def test_workflow_detail_view_with_no_requests(self):
         """Test to get requests for a workflow"""
@@ -40,11 +40,14 @@ class CoreTests(TestCase):
             'workflow-detail',
             kwargs={'app_name': 'tests'}))
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200,
+                         'Response did not result in success')
         self.assertQuerysetEqual(
-            response.context['instances'], [])
+            response.context['instances'], [],
+            'Response did not result in the expected '
+            'instances of the workflow')
 
-    def test_workflow_initiation_to_finish(self):
+    def test_workflow_from_init_to_finish(self):
         """Tests the entire workflow cycle"""
         request_args = {
             'app_name': 'tests',
@@ -58,8 +61,10 @@ class CoreTests(TestCase):
                 kwargs=request_args))
 
             if verb == 'get':
-                # Permission Denied
-                self.assertTrue('Permission Denied' in response.content)
+                # Access Denied
+                self.assertTrue('Access Denied' in response.content,
+                                'User has no access to initiate workflow, '
+                                'still the system did not limit')
                 # Adds user to the group with permission
                 self.submitter.user_set.add(self.john_doe)
 
@@ -67,7 +72,10 @@ class CoreTests(TestCase):
                 'create',
                 kwargs=request_args))
 
-            self.assertEqual(response.context['form']._meta.model, Foo)
+            self.assertEqual(response.context['form']._meta.model, Foo,
+                             'User has access to initiate workflow, '
+                             'still the context does not contain the '
+                             'required form instance')
 
         # Post the form with validation failure
         response = self.client.post(reverse(
@@ -75,9 +83,12 @@ class CoreTests(TestCase):
             kwargs=request_args),
             {'bar': 'example - small e', 'baz': 'WL', 'qux': 'Nothing'})
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200,
+                         'Form post did not result in success')
         # No instance gets created because form is invalid
-        self.assertEqual(Foo.objects.count(), 0)
+        self.assertEqual(Foo.objects.count(), 0,
+                         'Validation errors still result in creation '
+                         'of initial activity instance')
 
         # Post the form again without any validation failure
         response = self.client.post(reverse(
@@ -89,7 +100,9 @@ class CoreTests(TestCase):
         instance = instances.first()
 
         # Instance gets saved successfully against form submit
-        self.assertEqual(instances.count(), 1)
+        self.assertEqual(instances.count(), 1,
+                         'No validation errors, still initial activity '
+                         'instance did not get created')
 
         # Redirects the control to update form
         request_args = {
@@ -109,8 +122,6 @@ class CoreTests(TestCase):
             response = getattr(self.client, verb)(reverse(
                 'update',
                 kwargs=request_args))
-
-            self.assertEqual(response.context['form']._meta.model, Foo)
 
         # Post the form with SAVE action
         response = self.client.post(reverse(
@@ -161,7 +172,9 @@ class CoreTests(TestCase):
         instance = instances.first()
 
         # New instance for last activity gets created
-        self.assertEqual(instances.count(), 1)
+        self.assertEqual(instances.count(), 1,
+                         'Instance of final activity did not get '
+                         'created even after a successfull post')
 
         request_args = {
             'app_name': 'tests',
@@ -185,15 +198,18 @@ class CoreTests(TestCase):
             'view',
             kwargs=request_args))
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200,
+                         'Response did not result in success')
 
         response = self.client.post(reverse(
             'delete',
             kwargs=request_args))
 
-        self.assertEqual(Corge.objects.all().count(), 0)
+        self.assertEqual(Corge.objects.all().count(), 0,
+                         'Delete operation did not end up removing '
+                         'the instance')
 
-    def test_rollback(self):
+    def test_rollback_feature(self):
         """Tests rollback feature"""
         request_args = {
             'app_name': 'tests',
@@ -294,4 +310,8 @@ class CoreTests(TestCase):
 
         request = Request.objects.all().latest('id')
         final_task = request.tasks.latest('id')
-        self.assertEqual(final_task.flow_ref_key, 'foo_activity')
+
+        # Rollback result in task creation for previous activity
+        self.assertEqual(final_task.flow_ref_key, 'foo_activity',
+                         'Rollback did not create the required task '
+                         'for previous activity')
