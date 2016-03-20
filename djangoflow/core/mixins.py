@@ -26,22 +26,29 @@ class AccessDeniedMixin(LoginRequiredMixin, object):
     """Checks the permission"""
     def check(self, request, **kwargs):
         """
-        - Super user can view/update all activities
+        - Super user can perform all activities
         - Requester can view all activities
-        - Task assignee can update activity
         - TODO: Historical activities cannot be updated
+        - TODO: Entire request can be deleted
+        - Task assignee can update activity
+        - Task assignee can perform rollback
         """
         model = get_model(**kwargs)
         view = self.__class__.__name__
-        groups = list(self.request.user.groups.all())
+        user = request.user
+        groups = list(user.groups.all())
 
         if self.request.user.is_superuser:
             return
 
+        @property
+        def is_user_an_assingee():
+            model.objects.filter(task__assignee__in=groups).count() != 0
+
         def check_for_view():
             return model.objects.filter(
                 Q(task__assignee__in=groups) |
-                Q(task__request__requester=self.request.user)
+                Q(task__request__requester=user)
             ).count() != 0
 
         def check_for_create():
@@ -54,10 +61,10 @@ class AccessDeniedMixin(LoginRequiredMixin, object):
             return flow[activity]['role'] in [group.name for group in groups]
 
         def check_for_update():
-            return model.objects.filter(task__assignee__in=groups).count() != 0
+            return is_user_an_assingee
 
         def check_for_rollback():
-            return
+            return is_user_an_assingee
 
         return None if {
             'ViewActivity': check_for_view,

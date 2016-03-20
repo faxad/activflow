@@ -12,7 +12,7 @@
 <form action="{% url 'rollback' app_title entity_title object.id %}" method="POST">
   {% csrf_token %}
   <a data-toggle="modal" href="#confirmation" class="btn btn-danger {% if not object.task.is_active %} disabled {% endif %}" role="button">Delete</a>
-  <button type="submit" name="rollback" class="btn btn-warning">Rollback</button>
+  <button type="submit" name="rollback" class="btn btn-warning {% if not object.task.is_rollback_possible %} disabled {% endif %}">Rollback</button>
   <a href="{% url 'update' app_title entity_title object.id %}" class="btn btn-primary" role="button">Update</a>
 </form>
 {% with object_id=object.id|stringformat:"s" next_action="/"|add:app_title|add:"/"|add:object.title|add:"/Delete/" %}

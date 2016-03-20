@@ -143,6 +143,11 @@ class AbstractActivity(AbstractEntity):
         return True if self.title == config.FLOW[
             config.INITIAL]['model']().title else False
 
+    @property
+    def is_rollback_possible(self):
+        """Checks if the activity can be rolled back"""
+        return all([self.is_initial, self.task.is_final])
+
     def next(self):
         """Compute the next possible activities"""
         transitions = flow_config(self.module_label).FLOW[
