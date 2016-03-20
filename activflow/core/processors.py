@@ -1,6 +1,6 @@
 """Common template processors"""
 
-from djangoflow.core.helpers import get_request_params
+from activflow.core.helpers import get_request_params
 
 
 def global_context(request):

@@ -4,8 +4,8 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test import Client
 
-from djangoflow.core.models import Request
-from djangoflow.tests.models import Foo, Corge
+from activflow.core.models import Request
+from activflow.tests.models import Foo, Corge
 
 
 class CoreTests(TestCase):

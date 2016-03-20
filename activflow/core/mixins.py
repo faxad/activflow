@@ -4,8 +4,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.shortcuts import render
 
-from djangoflow.core.constants import REQUEST_IDENTIFIER
-from djangoflow.core.helpers import (
+from activflow.core.constants import REQUEST_IDENTIFIER
+from activflow.core.helpers import (
     get_model,
     flow_config,
     get_request_params

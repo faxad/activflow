@@ -10,8 +10,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views import generic
 
-from djangoflow.core.constants import WORKFLOW_APPS, REQUEST_IDENTIFIER
-from djangoflow.core.helpers import (
+from activflow.core.constants import WORKFLOW_APPS, REQUEST_IDENTIFIER
+from activflow.core.helpers import (
     get_errors,
     get_model,
     get_model_instance,
@@ -20,7 +20,7 @@ from djangoflow.core.helpers import (
     flow_config
 )
 
-from djangoflow.core.mixins import AccessDeniedMixin
+from activflow.core.mixins import AccessDeniedMixin
 
 
 @login_required

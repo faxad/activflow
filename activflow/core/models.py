@@ -8,8 +8,8 @@ from django.db.models import (
     OneToOneField,
     ForeignKey)
 
-from djangoflow.core.helpers import flow_config
-from djangoflow.core.mixins import BaseEntityMixin
+from activflow.core.helpers import flow_config
+from activflow.core.mixins import BaseEntityMixin
 
 
 class AbstractEntity(Model, BaseEntityMixin):

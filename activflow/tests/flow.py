@@ -1,7 +1,7 @@
 # flow
 
-from djangoflow.tests.models import Foo, Corge
-from djangoflow.tests.rules import foo_to_corge
+from activflow.tests.models import Foo, Corge
+from activflow.tests.rules import foo_to_corge
 
 
 FLOW = {

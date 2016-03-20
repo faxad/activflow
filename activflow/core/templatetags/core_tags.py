@@ -7,7 +7,7 @@ from collections import OrderedDict
 from django.apps import apps
 from django import template
 
-from djangoflow.core.helpers import activity_config
+from activflow.core.helpers import activity_config
 
 register = template.Library()
 

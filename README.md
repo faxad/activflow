@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/faxad/activflow.svg?branch=master)](https://travis-ci.org/faxad/activflow)
 [![Coverage Status](https://coveralls.io/repos/github/faxad/activflow/badge.svg?branch=master)](https://coveralls.io/github/faxad/activflow?branch=master)
-[![Code Health](https://landscape.io/github/faxad/djangoflow/master/landscape.svg?style=flat)](https://landscape.io/github/faxad/activflow/master)
+[![Code Health](https://landscape.io/github/faxad/activflow/master/landscape.svg?style=flat)](https://landscape.io/github/faxad/activflow/master)
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/82d97392eecb4ffab85403390f6b25af)](https://www.codacy.com/app/fawadhq/activflow)
 [![Code Issues](https://www.quantifiedcode.com/api/v1/project/2807a5b5bcdb46258ef0bcf7bb4e4d0f/badge.svg)](https://www.quantifiedcode.com/app/project/2807a5b5bcdb46258ef0bcf7bb4e4d0f)
 
@@ -30,8 +30,8 @@ WORKFLOW_APPS = ['leave_request']
 - Custom validation logic must be defined under **clean()** on the activity model
 - Custom field specific validation should be defined under **app/validator** and applied to the field as **validators** attribute
 ```python
-from djangoflow.core.models import AbstractActivity, AbstractInitialActivity
-from djangoflow.leave_request.validators import validate_initial_cap
+from activflow.core.models import AbstractActivity, AbstractInitialActivity
+from activflow.leave_request.validators import validate_initial_cap
 
 class RequestInitiation(AbstractInitialActivity):
     """Leave request details"""
@@ -61,8 +61,8 @@ class ManagementApproval(AbstractActivity):
 - Business Process flow must be defined as **FLOW** under **app/flow**
 - As a default behavior, the Role maps OTO with django Group (this can be customized by developers as per the requirements)
 ```python
-from djangoflow.leave_request.models import RequestInitiation, ManagementApproval
-from djangoflow.leave_request.rules import validate_request
+from activflow.leave_request.models import RequestInitiation, ManagementApproval
+from activflow.leave_request.rules import validate_request
 
 FLOW = {
     'initiate_request': {

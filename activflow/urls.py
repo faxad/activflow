@@ -7,5 +7,5 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^auth/', include('django.contrib.auth.urls')),
-    url(r'', include('djangoflow.core.urls')),
+    url(r'', include('activflow.core.urls')),
 ]

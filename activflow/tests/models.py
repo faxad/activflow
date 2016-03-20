@@ -5,8 +5,8 @@ from django.db.models import (
     IntegerField,
     TextField)
 
-from djangoflow.core.models import AbstractActivity, AbstractInitialActivity
-from djangoflow.tests.validators import validate_initial_cap
+from activflow.core.models import AbstractActivity, AbstractInitialActivity
+from activflow.tests.validators import validate_initial_cap
 
 
 class Foo(AbstractInitialActivity):

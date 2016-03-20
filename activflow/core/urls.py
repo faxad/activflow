@@ -3,8 +3,8 @@
 from django.conf.urls import url
 from django.views.generic import TemplateView
 
-from djangoflow.core.constants import REQUEST_IDENTIFIER
-from djangoflow.core.views import (
+from activflow.core.constants import REQUEST_IDENTIFIER
+from activflow.core.views import (
     workflows,
     WorkflowDetail,
     CreateActivity,
