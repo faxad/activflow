@@ -62,9 +62,9 @@ class CoreTests(TestCase):
 
             if verb == 'get':
                 # Access Denied
-                self.assertTrue('Access Denied' in response.content,
-                                'User has no access to initiate workflow, '
-                                'still the system did not limit')
+                self.assertFalse('form' in response.context,
+                                 'User has no access to initiate workflow, '
+                                 'still the system did not limit')
                 # Adds user to the group with permission
                 self.submitter.user_set.add(self.john_doe)
 
