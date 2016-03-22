@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load core_tags %}
 
 {% block main_content %}
 
@@ -9,7 +10,8 @@
 </ol>
 
 {% include "core/widgets/validation.html" with error_messages=error_message %}
-{% include "core/widgets/history.html" %}
+{% request_instance identifier as request %}
+{% include "core/widgets/history.html" with request=request %}
 
 <h4>Initiate {{ entity_title }}</h4>
 

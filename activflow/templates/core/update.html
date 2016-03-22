@@ -9,7 +9,7 @@
 </ol>
 
 {% include "core/widgets/validation.html" with formset=formset error_messages=error_message %}
-{% include "core/widgets/history.html" %}
+{% include "core/widgets/history.html" with request=object.task.request %}
 
 <h4>Update {{ entity_title }}</h4>
 

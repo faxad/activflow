@@ -7,7 +7,9 @@ from collections import OrderedDict
 from django.apps import apps
 from django import template
 
+from activflow.core.constants import REQUEST_IDENTIFIER
 from activflow.core.helpers import activity_config
+from activflow.core.models import Task
 
 register = template.Library()
 
@@ -43,3 +45,11 @@ def activity_title(ref, app):
     return import_module(
         '{}.flow'.format(apps.get_app_config(app).name)
     ).FLOW[ref]['model']().title
+
+
+@register.simple_tag
+def request_instance(task_identifier):
+    """Returns request instance"""
+    return Task.objects.get(
+        id=task_identifier
+    ).request if task_identifier != REQUEST_IDENTIFIER else None
