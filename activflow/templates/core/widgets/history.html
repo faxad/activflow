@@ -10,7 +10,7 @@
             {% for task in tasks %}
             {% with activity=task.activity %}
                 {% if activity %}
-                    <tr data-toggle="collapse" data-target="#req{{activity.id}}{{activity.title}}" class="active">
+                    <tr data-toggle="collapse" data-target="#{{activity.code}}" class="active">
                         <td>
                             <div class="row">
                               <div class="col-md-8"><span class=" glyphicon glyphicon glyphicon-plus"> </span> <strong>{{activity.title}}</strong> - <small>{{task.assignee.name}}</small></div>
@@ -18,7 +18,7 @@
                             </div>
                         </td>
                     </tr>
-                    <tr id="req{{activity.id}}{{activity.title}}" class="collapse">
+                    <tr id="{{activity.code}}" class="collapse">
                         <td>
                             {% include "core/widgets/readonly.html" with object=activity %}
                         </td>

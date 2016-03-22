@@ -30,6 +30,14 @@ class AbstractEntity(Model, BaseEntityMixin):
         """Returns module label"""
         return self.class_meta.app_label
 
+    @property
+    def code(self):
+        """Returns a unique code"""
+        return "{0}-{1}-{2}".format(
+            self.class_meta.app_label,
+            self.title,
+            self.id)
+
     def __unicode__(self):
         """Returns ID"""
         return str(self.id)
