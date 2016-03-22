@@ -27,10 +27,10 @@ def activity_data(context, instance, option):
     model = type(instance)
     config = activity_config(app, model.__name__)
 
-    def compute(activity_config):
+    def compute(configuration):
         """Compute fields for display"""
-        for field_name in activity_config:
-            if option in activity_config[field_name]:
+        for field_name in configuration:
+            if option in configuration[field_name]:
                 yield field_name
 
     return OrderedDict([(model().class_meta.get_field(

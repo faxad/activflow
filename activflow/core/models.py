@@ -95,12 +95,12 @@ class Task(AbstractEntity):
         self.status = 'In Progress'
         self.save()
 
-    def submit(self, module, user, next=None):
+    def submit(self, module, user, next_activity=None):
         """Submits the task"""
         config = flow_config(module)
         transitions = config.FLOW[self.flow_ref_key]['transitions']
         role = Group.objects.get(
-            name=config.FLOW[next]['role'])
+            name=config.FLOW[next_activity]['role'])
 
         self.status = 'Completed'
         self.save()
@@ -110,7 +110,7 @@ class Task(AbstractEntity):
                 request=self.request,
                 assignee=role,
                 updated_by=user,
-                flow_ref_key=next,
+                flow_ref_key=next_activity,
                 status='Not Started')
         else:
             self.request.status = 'Completed'
@@ -156,7 +156,7 @@ class AbstractActivity(AbstractEntity):
         """Checks if the activity can be rolled back"""
         return all([self.is_initial, self.task.is_final])
 
-    def next(self):
+    def next_activity(self):
         """Compute the next possible activities"""
         transitions = flow_config(self.module_label).FLOW[
             self.task.flow_ref_key]['transitions']

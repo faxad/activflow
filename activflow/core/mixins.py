@@ -43,15 +43,18 @@ class AccessDeniedMixin(LoginRequiredMixin, object):
 
         @property
         def is_user_an_assingee():
-            model.objects.filter(task__assignee__in=groups).count() != 0
+            """Checks if logged-in user is task assignee"""
+            return model.objects.filter(task__assignee__in=groups).count() != 0
 
         def check_for_view():
+            """Check for view/display operation"""
             return model.objects.filter(
                 Q(task__assignee__in=groups) |
                 Q(task__request__requester=user)
             ).count() != 0
 
         def check_for_create():
+            """Check for create/initiate operation"""
             module = get_request_params('app_name', request, **kwargs)
             flow = flow_config(module).FLOW
             initial = flow_config(module).INITIAL
@@ -61,9 +64,11 @@ class AccessDeniedMixin(LoginRequiredMixin, object):
             return flow[activity]['role'] in [group.name for group in groups]
 
         def check_for_update():
+            """Check for update/revise operation"""
             return is_user_an_assingee
 
         def check_for_rollback():
+            """Check for rollback/revert operation"""
             return is_user_an_assingee
 
         return None if {

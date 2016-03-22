@@ -49,7 +49,7 @@ def get_model(**kwargs):
     return apps.get_model(*args)
 
 
-def get_model_instance(request, **kwargs):
+def get_model_instance(**kwargs):
     """Returns model instance"""
     return get_model(**kwargs).objects.get(id=kwargs.get("pk"))
 

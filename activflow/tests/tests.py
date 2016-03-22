@@ -10,7 +10,7 @@ from activflow.tests.models import Foo, Corge
 
 class CoreTests(TestCase):
     """Core workflow engine tests"""
-    def setUp(self, **kwargs):
+    def setUp(self):
         """Test Setup"""
         self.client = Client()
         self.submitter = Group.objects.create(name='Submitter')
@@ -34,7 +34,7 @@ class CoreTests(TestCase):
         self.assertEqual(response.status_code, 200,
                          'Response did not result in success')
 
-    def test_workflow_detail_view_with_no_requests(self):
+    def test_workflow_detail_view(self):
         """Test to get requests for a workflow"""
         response = self.client.get(reverse(
             'workflow-detail',
@@ -47,7 +47,7 @@ class CoreTests(TestCase):
             'Response did not result in the expected '
             'instances of the workflow')
 
-    def test_workflow_from_init_to_finish(self):
+    def test_workflow_init_to_finish(self):
         """Tests the entire workflow cycle"""
         request_args = {
             'app_name': 'tests',
@@ -78,9 +78,11 @@ class CoreTests(TestCase):
                              'required form instance')
 
         # Post the form with validation failure
-        response = self.client.post(reverse(
-            'create',
-            kwargs=request_args),
+        response = self.client.post(
+            reverse(
+                'create',
+                kwargs=request_args
+            ),
             {'bar': 'example - small e', 'baz': 'WL', 'qux': 'Nothing'})
 
         self.assertEqual(response.status_code, 200,
@@ -91,9 +93,11 @@ class CoreTests(TestCase):
                          'of initial activity instance')
 
         # Post the form again without any validation failure
-        response = self.client.post(reverse(
-            'create',
-            kwargs=request_args),
+        response = self.client.post(
+            reverse(
+                'create',
+                kwargs=request_args
+            ),
             {'bar': 'Example - big E', 'baz': 'WL', 'qux': 'Nothing'})
 
         instances = Foo.objects.all()
@@ -124,9 +128,11 @@ class CoreTests(TestCase):
                 kwargs=request_args))
 
         # Post the form with SAVE action
-        response = self.client.post(reverse(
-            'update',
-            kwargs=request_args),
+        response = self.client.post(
+            reverse(
+                'update',
+                kwargs=request_args
+            ),
             {'bar': 'Example', 'baz': 'WL', 'qux': 'Nothing', 'save': 'Save'})
 
         # Control redirects to update after save
@@ -137,9 +143,11 @@ class CoreTests(TestCase):
                 kwargs=request_args))
 
         # Post the form with SUBMIT action (to next activity)
-        response = self.client.post(reverse(
-            'update',
-            kwargs=request_args),
+        response = self.client.post(
+            reverse(
+                'update',
+                kwargs=request_args
+            ),
             {
                 'bar': 'Example',
                 'baz': 'WL',
@@ -159,13 +167,15 @@ class CoreTests(TestCase):
         final_task = instance.task.request.tasks.latest('id')
 
         # Posts the form for last (final) activity
-        response = self.client.post(reverse(
-            'create',
-            kwargs={
-                'app_name': 'tests',
-                'model_name': 'Corge',
-                'pk': final_task.id
-                }),
+        response = self.client.post(
+            reverse(
+                'create',
+                kwargs={
+                    'app_name': 'tests',
+                    'model_name': 'Corge',
+                    'pk': final_task.id
+                    }
+            ),
             {'grault': 'Example - big E', 'thud': 23})
 
         instances = Corge.objects.all()
@@ -190,8 +200,11 @@ class CoreTests(TestCase):
             target_status_code=200)
 
         # Finish the workflow cycle
-        response = self.client.post(reverse(
-            'update', kwargs=request_args),
+        response = self.client.post(
+            reverse(
+                'update',
+                kwargs=request_args
+            ),
             {'grault': 'Example - big E', 'thud': 23, 'finish': 'Finish'})
 
         response = self.client.get(reverse(
@@ -218,9 +231,11 @@ class CoreTests(TestCase):
         }
 
         # Post the form again without any validation failure
-        response = self.client.post(reverse(
-            'create',
-            kwargs=request_args),
+        response = self.client.post(
+            reverse(
+                'create',
+                kwargs=request_args
+            ),
             {'bar': 'Example - big E', 'baz': 'WL', 'qux': 'Nothing'})
 
         instances = Foo.objects.all()
@@ -240,9 +255,11 @@ class CoreTests(TestCase):
             target_status_code=200)
 
         # Post the form with SAVE action
-        response = self.client.post(reverse(
-            'update',
-            kwargs=request_args),
+        response = self.client.post(
+            reverse(
+                'update',
+                kwargs=request_args
+            ),
             {'bar': 'Example', 'baz': 'WL', 'qux': 'Nothing', 'save': 'Save'})
 
         # Control redirects to update after save
@@ -253,9 +270,11 @@ class CoreTests(TestCase):
                 kwargs=request_args))
 
         # Post the form with SUBMIT action (to next activity)
-        response = self.client.post(reverse(
-            'update',
-            kwargs=request_args),
+        response = self.client.post(
+            reverse(
+                'update',
+                kwargs=request_args
+            ),
             {
                 'bar': 'Example',
                 'baz': 'WL',
@@ -275,13 +294,15 @@ class CoreTests(TestCase):
         final_task = instance.task.request.tasks.latest('id')
 
         # Posts the form for last (final) activity
-        response = self.client.post(reverse(
-            'create',
-            kwargs={
-                'app_name': 'tests',
-                'model_name': 'Corge',
-                'pk': final_task.id
-                }),
+        response = self.client.post(
+            reverse(
+                'create',
+                kwargs={
+                    'app_name': 'tests',
+                    'model_name': 'Corge',
+                    'pk': final_task.id
+                    }
+            ),
             {'grault': 'Example - big E', 'thud': 23})
 
         instances = Corge.objects.all()

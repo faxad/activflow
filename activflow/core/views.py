@@ -65,7 +65,7 @@ class RollBackActivity(AccessDeniedMixin, generic.View):
     def post(self, request, **kwargs):
         """POST request handler for rollback"""
         app_title = get_request_params('app_name', **kwargs)
-        instance = get_model_instance(request, **kwargs)
+        instance = get_model_instance(**kwargs)
 
         instance.task.rollback()
 
@@ -131,12 +131,12 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
     """Generic view to update activity"""
     def get(self, request, **kwargs):
         """GET request handler for Update operation"""
-        instance = get_model_instance(request, **kwargs)
+        instance = get_model_instance(**kwargs)
         form = get_form_instance(**kwargs)
         context = {
             'form': form(instance=instance),
             'object': instance,
-            'next': instance.next()
+            'next': instance.next_activity()
         }
 
         denied = self.check(request, **kwargs)
@@ -146,7 +146,7 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
     @transaction.atomic
     def post(self, request, **kwargs):
         """POST request handler for Update operation"""
-        instance = get_model_instance(request, **kwargs)
+        instance = get_model_instance(**kwargs)
         app_title = get_request_params('app_name', **kwargs)
         form = get_form_instance(
             **kwargs)(request.POST, instance=instance)
@@ -171,7 +171,7 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
             context = {
                 'form': form,
                 'object': instance,
-                'next': instance.next(),
+                'next': instance.next_activity(),
                 'error_message': get_errors(form.errors)
             }
 

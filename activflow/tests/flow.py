@@ -1,4 +1,4 @@
-# flow
+""" Test Flow Definition"""
 
 from activflow.tests.models import Foo, Corge
 from activflow.tests.rules import foo_to_corge
