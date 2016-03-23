@@ -1,20 +1,19 @@
 {% extends "base.html" %}
 {% load core_tags %}
-
-{% block title %} Workflow {% endblock %}
-
-{% block main_content %}
-
+{% block title %} ActivFlow - Workflow</title> {% endblock %}
+{% block breadcrumb %}
 <ol class="breadcrumb">
   <li><a href="{% url 'workflows' %}">Home</a></li>
   <li class="active">{{ app_title }}</li>
 </ol>
+{% endblock %}
+{% block main_content %}
 <a href="{% url 'create' app_title initial request_identifier %}" class="btn btn-primary" role="button">Initiate Request</a>
 <h3>{{ app_title }}</h3>
 {% if requests %}
 <table class="table table-bordered">
 	<tr>
-		<th><span class=" glyphicon glyphicon-menu-hamburger"></span></th>
+		<th><span class="glyphicon glyphicon-menu-hamburger"></span></th>
 		<th>ID</th>
 		<th>Status</th>
 		<th>Requester</th>
@@ -22,57 +21,56 @@
 		<th>Last Updated</th>
     </tr>
     {% for request in requests %}
-		<tr class="active">
-			<td>
-				<button class="btn btn-default btn-xs" type="button" data-toggle="collapse" data-target="#{{request.code}}">
-					View Tasks <span class="badge">{{ request.tasks.count }}</span>
-				</button>
-			</td>
-			<td>{{request.id}}</td>
-			<td>{{request.status}}</td>
-			<td>{{request.requester.username}}</td>
-			<td>{{request.creation_date}}</td>
-			<td>{{request.last_updated}}</td>
-	    </tr>
-	    {% if request.tasks %}
-		    <tr id="{{request.code}}" class="collapse">
-		    	<td colspan="6">
-				    <table class="table table-condensed">
-						<tr>
-							<th>ID</th>
-							<th>Status</th>
-							<th>Assignee</th>
-							<th>Date Assigned</th>
-							<th>Last Updated</th>
-							<th></th>
-					    </tr>
-					    {% for task in request.tasks.all %}
-							<tr>
-								<td>{{task.id}}</td>
-								<td>{{task.status}}</td>
-								<td>{{task.assignee.name}}</td>
-								<td>{{task.creation_date}}</td>
-								<td>{{task.last_updated}}</td>
-								{% activity_title task.flow_ref_key app_title as act_title %}
-								<td>
-									{% with identifier=task.activity|default:None %}
-									<a class="btn btn-primary btn-xs {% if not task.activity %} disabled {% endif %}" href="{% url 'view' app_title act_title identifier %}">View</a>
-									<a class="btn btn-primary btn-xs {% if task.activity %} disabled {% endif %}" href="{% url 'create' app_title act_title task.id %}">Create</a>
-									<a class="btn btn-primary btn-xs {% if not task.activity or not task.is_active %} disabled {% endif %}" href="{% url 'update' app_title act_title identifier %}">Update</a>
-									{% endwith %}
-								</td>
-						    </tr>
-					    {% endfor %}
-					</table>
-				</td>
-			</tr>
-		{% else %}
-		    <p>No objects are available.</p>
-		{% endif %}
-    {% endfor %}
+	<tr class="active">
+		<td>
+			<button class="btn btn-default btn-xs" type="button" data-toggle="collapse" data-target="#{{request.code}}">
+				View Tasks <span class="badge">{{ request.tasks.count }}</span>
+			</button>
+		</td>
+		<td>{{request.id}}</td>
+		<td>{{request.status}}</td>
+		<td>{{request.requester.username}}</td>
+		<td>{{request.creation_date}}</td>
+		<td>{{request.last_updated}}</td>
+    </tr>
+    {% if request.tasks %}
+    <tr id="{{request.code}}" class="collapse">
+    	<td colspan="6">
+		    <table class="table table-condensed">
+				<tr>
+					<th>ID</th>
+					<th>Status</th>
+					<th>Assignee</th>
+					<th>Date Assigned</th>
+					<th>Last Updated</th>
+					<th></th>
+			    </tr>
+			    {% for task in request.tasks.all %}
+				<tr>
+					<td>{{task.id}}</td>
+					<td>{{task.status}}</td>
+					<td>{{task.assignee.name}}</td>
+					<td>{{task.creation_date}}</td>
+					<td>{{task.last_updated}}</td>
+					{% activity_title task.flow_ref_key app_title as act_title %}
+					<td>
+						{% with identifier=task.activity|default:None %}
+						<a class="btn btn-primary btn-xs {% if not task.activity %} disabled {% endif %}" href="{% url 'view' app_title act_title identifier %}">View</a>
+						<a class="btn btn-primary btn-xs {% if task.activity %} disabled {% endif %}" href="{% url 'create' app_title act_title task.id %}">Create</a>
+						<a class="btn btn-primary btn-xs {% if not task.activity or not task.is_active %} disabled {% endif %}" href="{% url 'update' app_title act_title identifier %}">Update</a>
+						{% endwith %}
+					</td>
+			    </tr>
+			    {% endfor %}
+			</table>
+		</td>
+	</tr>
+	{% else %}
+	    <p>No requests are available.</p>
+	{% endif %}
+	{% endfor %}
 </table>
 {% else %}
-    <p>No objects are available.</p>
+    <p>No requests are available.</p>
 {% endif %}
 {% endblock %}
-

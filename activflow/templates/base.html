@@ -9,7 +9,7 @@
     <meta name="author" content="">
     <link rel="icon" href="../../favicon.ico">
 
-    <title>Starter Template for Bootstrap</title>
+    {% block title %}{% endblock %}
 
     <!-- Bootstrap core CSS -->
     <link href="/static/css/bootstrap.min.css" rel="stylesheet">
@@ -29,7 +29,6 @@
   </head>
 
   <body>
-
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container">
         <div class="navbar-header">
@@ -48,12 +47,6 @@
         </li>
             <li><a href="#about">About</a></li>
             <li><a href="#contact">Contact</a></li>
-            <form class="navbar-form navbar-left" role="search" method="get" action="/search">
-              <div class="form-group">
-                <input id="id_q" name="q" type="text" class="form-control" placeholder="Search">
-              </div>
-              <button type="submit" class="btn btn-default">Submit</button>
-            </form>
           </ul>
           {% if user.is_authenticated %}
           <p class="navbar-text pull-right">Logged in as <a href="/auth/logout/?next=/auth/login/">{{ user.username }}</a></p>
@@ -65,16 +58,13 @@
     </nav>
 
     <div class="container">
-
       <div class="starter-template">
         </br></br>
         </br></br>
-        {% block main_content %}
-        {% endblock %}
+        {% block breadcrumb %}{% endblock %}
+        {% block main_content %}{% endblock %}
       </div>
-
     </div><!-- /.container -->
-
 
     <!-- Bootstrap core JavaScript
     ================================================== -->

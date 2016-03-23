@@ -1,18 +1,16 @@
 {% extends "base.html" %}
-
-{% block main_content %}
-
+{% block title %} <title>ActivFlow - Update</title> {% endblock %}
+{% block breadcrumb %}
 <ol class="breadcrumb">
   <li><a href="{% url 'workflows' %}">Home</a></li>
   <li><a href="{% url 'workflow-detail' app_title %}">{{ entity_title }}</a></li>
   <li class="active">Update</li>
 </ol>
-
-{% include "core/widgets/validation.html" with formset=formset error_messages=error_message %}
+{% endblock %}
+{% block main_content %}
+{% include "core/widgets/validation.html" with error_messages=error_message %}
 {% include "core/widgets/history.html" with request=object.task.request %}
-
 <h4>Update {{ entity_title }}</h4>
-
 <form action="{% url 'update' app_title entity_title object.id %}" method="post" class="form-horizontal">
     {% include 'core/widgets/form.html' %}
 </form>

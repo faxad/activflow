@@ -1,8 +1,12 @@
 {% extends "base.html" %}
-
+{% block title %} <title>ActivFlow - Access Denied</title> {% endblock %}
+{% block breadcrumb %}
+<ol class="breadcrumb">
+  	<li><a href="{% url 'workflows' %}">Home</a></li>
+	<li class="active">Denied</li>
+</ol>
+{% endblock %}
 {% block main_content %}
-
 <h4>Access Denied!</h4>
-
 {% endblock %}
 

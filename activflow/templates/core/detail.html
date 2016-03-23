@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 {% load core_tags %}
-
-{% block main_content %}
-
+{% block title %} <title>ActivFlow - Detail</title> {% endblock %}
+{% block breadcrumb %}
 <ol class="breadcrumb">
   <li><a href="{% url 'workflows' %}">Home</a></li>
   <li><a href="{% url 'workflow-detail' app_title %}">Workflows</a></li>
   <li class="active">Detail</li>
   <li class="active">{{ object.id }}</li>
 </ol>
+{% endblock %}
+{% block main_content %}
 <form action="{% url 'rollback' app_title entity_title object.id %}" method="POST">
   {% csrf_token %}
   <a data-toggle="modal" href="#confirmation" class="btn btn-danger {% if not object.task.is_active %} disabled {% endif %}" role="button">Delete</a>

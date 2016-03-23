@@ -1,14 +1,11 @@
 {% extends "base.html" %}
-{% load core_tags %}
-
-{% block title %} Index {% endblock %}
-
-{% block main_content %}
-
+{% block title %} <title>ActivFlow - Workflows</title> {% endblock %}
+{% block breadcrumb %}
 <ol class="breadcrumb">
-  <li class="active"><a href="#">Home</a></li>
+	<li class="active"><a href="#">Home</a></li>
 </ol>
-<ul>
+{% endblock %}
+{% block main_content %}
 <h3>Workflows</h3>
 <ul>
 	{% for app in workflows %}

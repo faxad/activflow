@@ -1,20 +1,18 @@
 {% extends "base.html" %}
 {% load core_tags %}
-
-{% block main_content %}
-
+{% block title %} <title>ActivFlow - Create</title> {% endblock %}
+{% block breadcrumb %}
 <ol class="breadcrumb">
   <li><a href="{% url 'workflows' %}">Home</a></li>
   <li><a href="{% url 'workflow-detail' app_title %}">{{ entity_title }}</a></li>
   <li class="active">Initiate Activity</li>
 </ol>
-
+{% endblock %}
+{% block main_content %}
 {% include "core/widgets/validation.html" with error_messages=error_message %}
 {% request_instance identifier as request %}
 {% include "core/widgets/history.html" with request=request %}
-
 <h4>Initiate {{ entity_title }}</h4>
-
 <form action="{% url 'create' app_title entity_title identifier %}" method="post" class="form-horizontal">
     {% include 'core/widgets/form.html' %}
 </form>
