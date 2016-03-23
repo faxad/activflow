@@ -28,10 +28,12 @@ class AccessDeniedMixin(LoginRequiredMixin, object):
         """
         - Super user can perform all activities
         - Requester can view all activities
-        - TODO: Historical activities cannot be updated
-        - TODO: Entire request can be deleted
+        - Assignee can view all assigned activities
         - Task assignee can update activity
         - Task assignee can perform rollback
+        - Assignee for initial activity can create new request
+        - TODO: Historical activities cannot be updated
+        - TODO: Entire request can be deleted
         """
         model = get_model(**kwargs)
         view = self.__class__.__name__
@@ -42,38 +44,43 @@ class AccessDeniedMixin(LoginRequiredMixin, object):
             return
 
         @property
-        def is_user_an_assingee():
+        def assignee_check():
             """Checks if logged-in user is task assignee"""
-            return model.objects.filter(task__assignee__in=groups).count() != 0
+            return model.objects.filter(task__assignee__in=groups).count() == 0
 
         def check_for_view():
             """Check for view/display operation"""
             return model.objects.filter(
                 Q(task__assignee__in=groups) |
                 Q(task__request__requester=user)
-            ).count() != 0
+            ).count() == 0
 
         def check_for_create():
             """Check for create/initiate operation"""
             module = get_request_params('app_name', request, **kwargs)
             flow = flow_config(module).FLOW
             initial = flow_config(module).INITIAL
-            activity = initial if get_request_params(
-                'pk', request, **kwargs
-            ) == REQUEST_IDENTIFIER else self.task.flow_ref_key
-            return flow[activity]['role'] in [group.name for group in groups]
+            identifier = get_request_params(
+                'pk', request, **kwargs)
+
+            activity = initial if identifier == REQUEST_IDENTIFIER \
+                else self.task.flow_ref_key
+
+            return flow[activity]['role'] not in [
+                group.name for group in groups]
 
         def check_for_update():
             """Check for update/revise operation"""
-            return is_user_an_assingee
+            return assignee_check
 
         def check_for_rollback():
             """Check for rollback/revert operation"""
-            return is_user_an_assingee
+            return assignee_check
 
-        return None if {
-            'ViewActivity': check_for_view,
-            'CreateActivity': check_for_create,
-            'UpdateActivity': check_for_update,
-            'RollBackActivity': check_for_rollback,
-        }.get(view)() else render(request, 'core/denied.html')
+        return render(
+            request, 'core/denied.html') if {
+                'ViewActivity': check_for_view,
+                'CreateActivity': check_for_create,
+                'UpdateActivity': check_for_update,
+                'RollBackActivity': check_for_rollback,
+        }.get(view)() else None
