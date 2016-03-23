@@ -3,7 +3,6 @@
 from django.apps import apps
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.db import transaction
 from django.http import HttpResponseRedirect
@@ -21,6 +20,7 @@ from activflow.core.helpers import (
 )
 
 from activflow.core.mixins import AccessDeniedMixin
+from activflow.core.models import get_workflows_requests
 
 
 @login_required
@@ -38,9 +38,7 @@ class WorkflowDetail(LoginRequiredMixin, generic.TemplateView):
         app_title = get_request_params('app_name', **kwargs)
         config = flow_config(app_title)
         model = config.FLOW[config.INITIAL]['model']().title
-        content_type = ContentType.objects.get_for_model(
-            apps.get_model(app_title, model))
-        context['instances'] = content_type.get_all_objects_for_this_type()
+        context['requests'] = get_workflows_requests(app_title)
         context['request_identifier'] = REQUEST_IDENTIFIER
         context['initial'] = model
 

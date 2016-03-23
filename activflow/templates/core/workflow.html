@@ -11,7 +11,7 @@
 </ol>
 <a href="{% url 'create' app_title initial request_identifier %}" class="btn btn-primary" role="button">Initiate Request</a>
 <h3>{{ app_title }}</h3>
-{% if instances %}
+{% if requests %}
 <table class="table table-bordered">
 	<tr>
 		<th><span class=" glyphicon glyphicon-menu-hamburger"></span></th>
@@ -21,22 +21,21 @@
 		<th>Created</th>
 		<th>Last Updated</th>
     </tr>
-    {% for instance in instances %}
-    {% if not instance.task.status == 'Rolled Back'%}
+    {% for request in requests %}
 		<tr class="active">
 			<td>
-				<button class="btn btn-default btn-xs" type="button" data-toggle="collapse" data-target="#{{instance.code}}">
-					View Tasks <span class="badge">{{ instance.task.request.tasks.count }}</span>
+				<button class="btn btn-default btn-xs" type="button" data-toggle="collapse" data-target="#{{request.code}}">
+					View Tasks <span class="badge">{{ request.tasks.count }}</span>
 				</button>
 			</td>
-			<td>{{instance.task.request.id}}</td>
-			<td>{{instance.task.request.status}}</td>
-			<td>{{instance.task.request.requester.username}}</td>
-			<td>{{instance.task.request.creation_date}}</td>
-			<td>{{instance.task.request.last_updated}}</td>
+			<td>{{request.id}}</td>
+			<td>{{request.status}}</td>
+			<td>{{request.requester.username}}</td>
+			<td>{{request.creation_date}}</td>
+			<td>{{request.last_updated}}</td>
 	    </tr>
-	    {% if instance.task.request.tasks %}
-		    <tr id="{{instance.code}}" class="collapse">
+	    {% if request.tasks %}
+		    <tr id="{{request.code}}" class="collapse">
 		    	<td colspan="6">
 				    <table class="table table-condensed">
 						<tr>
@@ -47,7 +46,7 @@
 							<th>Last Updated</th>
 							<th></th>
 					    </tr>
-					    {% for task in instance.task.request.tasks.all %}
+					    {% for task in request.tasks.all %}
 							<tr>
 								<td>{{task.id}}</td>
 								<td>{{task.status}}</td>
@@ -70,7 +69,6 @@
 		{% else %}
 		    <p>No objects are available.</p>
 		{% endif %}
-	{% endif %}
     {% endfor %}
 </table>
 {% else %}

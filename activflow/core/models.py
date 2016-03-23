@@ -210,3 +210,8 @@ class AbstractInitialActivity(AbstractActivity):
 
         self.task = task
         self.save()
+
+
+def get_workflows_requests(module):
+    """Returns all requests for specified workflow"""
+    return Request.objects.filter(module_ref=module)

@@ -43,7 +43,7 @@ class CoreTests(TestCase):
         self.assertEqual(response.status_code, 200,
                          'Response did not result in success')
         self.assertQuerysetEqual(
-            response.context['instances'], [],
+            response.context['requests'], [],
             'Response did not result in the expected '
             'instances of the workflow')
 
