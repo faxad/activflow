@@ -22,3 +22,6 @@ FLOW = {
 }
 
 INITIAL = 'foo_activity'
+
+TITLE = 'Test Workflow'
+DESCRIPTION = 'Description of workflow goes here'

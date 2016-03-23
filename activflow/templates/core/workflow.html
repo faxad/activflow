@@ -1,23 +1,32 @@
 {% extends "base.html" %}
 {% load core_tags %}
-{% block title %} ActivFlow - Workflow</title> {% endblock %}
+{% block title %} <title>ActivFlow - Workflow</title> {% endblock %}
 {% block breadcrumb %}
 <ol class="breadcrumb">
   <li><a href="{% url 'workflows' %}">Home</a></li>
-  <li class="active">{{ app_title }}</li>
+  <li class="active">{{workflow_title}}</li>
 </ol>
 {% endblock %}
 {% block main_content %}
-<a href="{% url 'create' app_title initial request_identifier %}" class="btn btn-primary" role="button"><span class="glyphicon glyphicon glyphicon-edit"></span> Initiate Request</a>
-<h3>{{ app_title }}</h3>
+<div class="row">
+  <div class="col-md-9 col-md-push-3">
+    <blockquote class="blockquote-reverse">
+		<h6><strong>{{workflow_title}}</strong></h6>
+		<h6><i>{{description}}</i></h6>
+	</blockquote>
+  </div>
+  <div class="col-md-3 col-md-pull-9">
+    <a href="{% url 'create' app_title initial request_identifier %}" class="btn btn-primary" role="button"><span class="glyphicon glyphicon glyphicon-edit"></span> Initiate Request</a>
+  </div>
+</div>
 {% if requests %}
 <table class="table table-bordered">
 	<tr>
 		<th><span class="glyphicon glyphicon-menu-hamburger"></span></th>
 		<th>ID</th>
 		<th>Status</th>
-
 		<th>Requester</th>
+		<th>Subject</th>
 		<th>Created</th>
 		<th>Last Updated</th>
     </tr>
@@ -31,12 +40,13 @@
 		<td>{{request.id}}</td>
 		<td>{{request.status}}</td>
 		<td>{{request.requester.username}}</td>
+		<td>{{request.tasks.all.0.activity.subject}}</td>
 		<td>{{request.creation_date}}</td>
 		<td>{{request.last_updated}}</td>
     </tr>
     {% if request.tasks %}
     <tr id="{{request.code}}" class="collapse">
-    	<td colspan="6">
+    	<td colspan="7">
 		    <table class="table table-condensed">
 				<tr>
 					<th>ID</th>

@@ -39,6 +39,8 @@ class WorkflowDetail(LoginRequiredMixin, generic.TemplateView):
         model = config.FLOW[config.INITIAL]['model']().title
         context['requests'] = get_workflows_requests(app_title)
         context['request_identifier'] = REQUEST_IDENTIFIER
+        context['workflow_title'] = config.TITLE
+        context['description'] = config.DESCRIPTION
         context['initial'] = model
 
         return context
