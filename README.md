@@ -7,8 +7,15 @@
 [![Code Issues](https://www.quantifiedcode.com/api/v1/project/767844efa40e45e9b6e7689e37464272/badge.svg)](https://www.quantifiedcode.com/app/project/767844efa40e45e9b6e7689e37464272)
 
 ### Introduction
-**ActivFlow** is a generic, light-weight and extensible workflow engine developed to automate complex Business Process operations.
-Business flow is mapped as Activities and Transitions
+**ActivFlow** is a generic, light-weight and extensible workflow engine for agile development and automation of complex Business Process operations.
+
+Developers can emphasize towards mapping the Business Process model as ActivFlow workflow without having to worry about implementing the core workflow processing logic. The generic implementation of the workflow engine manages the automation of the Business Processes from start to finish as per the defined configuration.
+
+What defines an ActivFlow workflow?
+- Business Process flow mapped as ActivFlow configuration
+- Definition of data that needs to be captured for each activity (state)
+- Business Roles mapped to workflow activities
+- Rules for transitioning between activities
 
 ### Technology Stack
 - Python 2.7x, 3.4x, 3.5x
@@ -25,8 +32,9 @@ WORKFLOW_APPS = ['leave_request']
 ```
 
 #### Step 2: Activity Configuration
-- Activities (States/Nodes) are represented as django models
-- Model representing initial Activity, and the following Activities must take **AbstractInitialActivity** and **AbstractActivity** as base respectively
+- Activities (States/Nodes) are represented as Django models
+- **AbstractInitialActivity** should be the base for the initial activity
+- **AbstractActivity** should be the base for all other activities
 - Custom validation logic must be defined under **clean()** on the activity model
 - Custom field specific validation should be defined under **app/validator** and applied to the field as **validators** attribute
 ```python
@@ -57,7 +65,7 @@ class ManagementApproval(AbstractActivity):
 ```
 #### Step 3: Flow Definition
 - A flow is represented by collection of Activities (States/Nodes) connected using Transitions (Edges)
-- Rules are applied on transitions to allow transition from one activity to another provided the condition satisfies
+- Rules are applied on transitions to allow switching from one activity to another provided the condition satisfies
 - Business Process flow must be defined as **FLOW** under **app/flow**
 - As a default behavior, the Role maps OTO with django Group (this can be customized by developers as per the requirements)
 ```python
@@ -84,7 +92,7 @@ FLOW = {
 INITIAL = 'initiate_request'
 ```
 #### Step 4: Business Rules
-- Rules and conditions that apply to the transitions must be defined under **app/rules**
+- Transition rules and conditions must be defined under **app/rules**
 ```python
 def validate_request(self):
     return self.reason == 'Emergency'
@@ -92,7 +100,7 @@ def validate_request(self):
 
 #### Step 5: Configure Field Visibility
 - Include **config.py** in the workflow app and define **ACTIVITY_CONFIG** as Nested Ordered Dictionary
-- Define for each activity model the visbility of fields for display on templates and forms 
+- Define for each activity model the visibility of fields for display on templates and forms 
     - **create:** field will appear on activity create form
     - **update:** field will be available for activity update operation
     - **display:** available for display in activity detail view
@@ -119,4 +127,5 @@ ACTIVITY_CONFIG = odict([
 ```
 
 #### Step 6: Access/Permission Configuration
-**AccessDeniedMixin** under **core/mixins** can be customized to control the access as required
+The logic for restricting the access is defined as **AccessDeniedMixin** under **core/mixins**
+This can be customized by the developer based on the requirements
