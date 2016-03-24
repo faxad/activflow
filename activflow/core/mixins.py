@@ -11,15 +11,7 @@ from activflow.core.helpers import (
     get_request_params
 )
 
-
-class BaseEntityMixin(object):
-    """Properties and methods that apply to all
-    models defined under core
-    """
-    @property
-    def title(self):
-        """Returns entity title"""
-        return self.__class__.__name__
+from activflow.core.models import Task
 
 
 class AccessDeniedMixin(LoginRequiredMixin, object):
@@ -29,11 +21,16 @@ class AccessDeniedMixin(LoginRequiredMixin, object):
         - Super user can perform all activities
         - Requester can view all activities
         - Assignee can view all assigned activities
-        - Task assignee can update activity
-        - Task assignee can perform rollback
-        - Assignee for initial activity can create new request
-        - TODO: Historical activities cannot be updated
+        - Assignee can initiate activity operation
+        - Assignee can update activity details
+        - Assignee can perform rollback
+        - Historical activities cannot be updated
         - TODO: Entire request can be deleted
+        - TODO: Only active/current task can be rolled back
+
+
+        *assignee: Users who belong to a Group configured to play
+         a specific role in the Business Process
         """
         model = get_model(**kwargs)
         view = self.__class__.__name__
@@ -64,14 +61,17 @@ class AccessDeniedMixin(LoginRequiredMixin, object):
                 'pk', request, **kwargs)
 
             activity = initial if identifier == REQUEST_IDENTIFIER \
-                else self.task.flow_ref_key
+                else Task.objects.get(id=identifier).flow_ref_key
 
             return flow[activity]['role'] not in [
                 group.name for group in groups]
 
         def check_for_update():
             """Check for update/revise operation"""
-            return assignee_check
+            return any([
+                assignee_check,
+                not self.task.can_revise_activity
+            ])
 
         def check_for_rollback():
             """Check for rollback/revert operation"""

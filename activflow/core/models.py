@@ -9,10 +9,9 @@ from django.db.models import (
     ForeignKey)
 
 from activflow.core.helpers import flow_config
-from activflow.core.mixins import BaseEntityMixin
 
 
-class AbstractEntity(Model, BaseEntityMixin):
+class AbstractEntity(Model):
     """Common attributes for all models"""
     creation_date = DateTimeField('Creation Date', auto_now_add=True)
     last_updated = DateTimeField('Last Updated', auto_now=True)
@@ -24,6 +23,11 @@ class AbstractEntity(Model, BaseEntityMixin):
     def class_meta(self):
         """Returns class meta"""
         return self._meta
+
+    @property
+    def title(self):
+        """Returns entity title"""
+        return self.__class__.__name__
 
     @property
     def module_label(self):
@@ -76,6 +80,21 @@ class Task(AbstractEntity):
     def is_active(self):
         """Checks if the current task is active / most recent"""
         return self == self.request.tasks.latest('id')
+
+    @property
+    def can_view_activity(self):
+        """Checks if activity can be viewed"""
+        return self.activity
+
+    @property
+    def can_initiate_activity(self):
+        """Checks if new activity can be initiated"""
+        return not self.activity
+
+    @property
+    def can_revise_activity(self):
+        """Checks if activity can be revised"""
+        return all([self.activity, self.is_active])
 
     @property
     def is_final(self):
