@@ -97,6 +97,11 @@ class Task(AbstractEntity):
         return all([self.activity, self.is_active])
 
     @property
+    def can_rollback(self):
+        """Checks if activity can be rolled back"""
+        return True  # TODO: Handle condition
+
+    @property
     def is_final(self):
         """Checks if the current task is final / end task"""
         flow = flow_config(
@@ -170,15 +175,11 @@ class AbstractActivity(AbstractEntity):
         return True if self.title == config.FLOW[
             config.INITIAL]['model']().title else False
 
-    @property
-    def is_rollback_possible(self):
-        """Checks if the activity can be rolled back"""
-        return all([self.is_initial, self.task.is_final])
-
     def next_activity(self):
         """Compute the next possible activities"""
         transitions = flow_config(self.module_label).FLOW[
             self.task.flow_ref_key]['transitions']
+
         if transitions:
             return [transition for transition in
                     transitions if transitions[transition](self)]
@@ -205,6 +206,7 @@ class AbstractActivity(AbstractEntity):
 
 class AbstractInitialActivity(AbstractActivity):
     """Common attributes for initial activity"""
+    subject = CharField(verbose_name="Subject", max_length=70)
 
     class Meta:
         abstract = True
@@ -234,3 +236,8 @@ class AbstractInitialActivity(AbstractActivity):
 def get_workflows_requests(module):
     """Returns all requests for specified workflow"""
     return Request.objects.filter(module_ref=module)
+
+
+def get_task(identifier):
+    """Returns task instance"""
+    return Task.objects.get(id=identifier)

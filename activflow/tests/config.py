@@ -5,6 +5,7 @@ from collections import OrderedDict as odict
 
 ACTIVITY_CONFIG = odict([
     ('Foo', odict([
+        ('subject', ['create', 'update', 'display']),
         ('bar', ['create', 'update', 'display']),
         ('baz', ['create', 'update', 'display']),
         ('qux', ['create', 'update', 'display']),

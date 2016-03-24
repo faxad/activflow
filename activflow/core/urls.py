@@ -43,7 +43,7 @@ urlpatterns = [
         name='delete'
     ),
     url(
-        r'^(?P<app_name>\w+)/(?P<model_name>\w+)/RollBack/(?P<pk>\d+)/$',
+        r'^(?P<app_name>\w+)/RollBack/(?P<pk>\d+)/$',
         RollBackActivity.as_view(),
         name='rollback'
     ),

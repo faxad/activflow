@@ -8,7 +8,7 @@
 </ol>
 {% endblock %}
 {% block main_content %}
-<a href="{% url 'create' app_title initial request_identifier %}" class="btn btn-primary" role="button">Initiate Request</a>
+<a href="{% url 'create' app_title initial request_identifier %}" class="btn btn-primary" role="button"><span class="glyphicon glyphicon glyphicon-edit"></span> Initiate Request</a>
 <h3>{{ app_title }}</h3>
 {% if requests %}
 <table class="table table-bordered">
@@ -16,6 +16,7 @@
 		<th><span class="glyphicon glyphicon-menu-hamburger"></span></th>
 		<th>ID</th>
 		<th>Status</th>
+
 		<th>Requester</th>
 		<th>Created</th>
 		<th>Last Updated</th>
@@ -55,9 +56,13 @@
 					{% activity_title task.flow_ref_key app_title as act_title %}
 					<td>
 						{% with identifier=task.activity|default:None %}
-						<a class="btn btn-primary btn-xs {% if not task.can_view_activity %} disabled {% endif %}" href="{% url 'view' app_title act_title identifier %}">View</a>
-						<a class="btn btn-primary btn-xs {% if not task.can_initiate_activity %} disabled {% endif %}" href="{% url 'create' app_title act_title task.id %}">Create</a>
-						<a class="btn btn-primary btn-xs {% if not task.can_revise_activity %} disabled {% endif %}" href="{% url 'update' app_title act_title identifier %}">Update</a>
+						<a class="btn btn-info btn-xs {% if not task.can_view_activity %} disabled {% endif %}" href="{% url 'view' app_title act_title identifier %}"><span class="glyphicon glyphicon glyphicon-check"></span> View</a>
+						<a class="btn btn-success btn-xs {% if not task.can_initiate_activity %} disabled {% endif %}" href="{% url 'create' app_title act_title task.id %}"><span class="glyphicon glyphicon glyphicon-pencil"></span> Create</a>
+						<a class="btn btn-primary btn-xs {% if not task.can_revise_activity %} disabled {% endif %}" href="{% url 'update' app_title act_title identifier %}"><span class="glyphicon glyphicon glyphicon-edit"></span> Update</a>
+						<form style="display:inline" action="{% url 'rollback' app_title task.id %}" method="POST">
+						  {% csrf_token %}
+						  <button type="submit" name="rollback" class="btn btn-warning btn-xs {% if not task.can_rollback %} disabled {% endif %}"><span class="glyphicon glyphicon glyphicon-repeat"></span> Rollback</button>
+						</form>
 						{% endwith %}
 					</td>
 			    </tr>

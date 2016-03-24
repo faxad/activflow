@@ -83,7 +83,12 @@ class CoreTests(TestCase):
                 'create',
                 kwargs=request_args
             ),
-            {'bar': 'example - small e', 'baz': 'WL', 'qux': 'Nothing'})
+            {
+                'subject': 'test',
+                'bar': 'example - small e',
+                'baz': 'WL',
+                'qux': 'Nothing'
+            })
 
         self.assertEqual(response.status_code, 200,
                          'Form post did not result in success')
@@ -98,7 +103,12 @@ class CoreTests(TestCase):
                 'create',
                 kwargs=request_args
             ),
-            {'bar': 'Example - big E', 'baz': 'WL', 'qux': 'Nothing'})
+            {
+                'subject': 'test',
+                'bar': 'Example - small e',
+                'baz': 'WL',
+                'qux': 'Nothing'
+            })
 
         instances = Foo.objects.all()
         instance = instances.first()
@@ -133,7 +143,13 @@ class CoreTests(TestCase):
                 'update',
                 kwargs=request_args
             ),
-            {'bar': 'Example', 'baz': 'WL', 'qux': 'Nothing', 'save': 'Save'})
+            {
+                'subject': 'test',
+                'bar': 'Example - small e',
+                'baz': 'WL',
+                'qux': 'Nothing',
+                'save': 'Save'
+            })
 
         # Control redirects to update after save
         self.assertRedirects(
@@ -149,6 +165,7 @@ class CoreTests(TestCase):
                 kwargs=request_args
             ),
             {
+                'subject': 'test',
                 'bar': 'Example',
                 'baz': 'WL',
                 'qux': 'Nothing',
@@ -230,13 +247,18 @@ class CoreTests(TestCase):
             'pk': 'Initial'
         }
 
-        # Post the form again without any validation failure
+        # Post the form  without any validation failure
         response = self.client.post(
             reverse(
                 'create',
                 kwargs=request_args
             ),
-            {'bar': 'Example - big E', 'baz': 'WL', 'qux': 'Nothing'})
+            {
+                'subject': 'test',
+                'bar': 'Example',
+                'baz': 'WL',
+                'qux': 'Nothing',
+            })
 
         instances = Foo.objects.all()
         instance = instances.first()
@@ -260,7 +282,13 @@ class CoreTests(TestCase):
                 'update',
                 kwargs=request_args
             ),
-            {'bar': 'Example', 'baz': 'WL', 'qux': 'Nothing', 'save': 'Save'})
+            {
+                'subject': 'test',
+                'bar': 'Example',
+                'baz': 'WL',
+                'qux': 'Nothing',
+                'save': 'Save'
+            })
 
         # Control redirects to update after save
         self.assertRedirects(
@@ -276,6 +304,7 @@ class CoreTests(TestCase):
                 kwargs=request_args
             ),
             {
+                'subject': 'test',
                 'bar': 'Example',
                 'baz': 'WL',
                 'qux': 'Nothing',
@@ -325,8 +354,7 @@ class CoreTests(TestCase):
             'rollback',
             kwargs={
                 'app_name': 'tests',
-                'model_name': 'Corge',
-                'pk': instance.id
+                'pk': instance.task.id
             }))
 
         request = Request.objects.all().latest('id')

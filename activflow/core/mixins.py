@@ -23,11 +23,8 @@ class AccessDeniedMixin(LoginRequiredMixin, object):
         - Assignee can view all assigned activities
         - Assignee can initiate activity operation
         - Assignee can update activity details
-        - Assignee can perform rollback
         - Historical activities cannot be updated
         - TODO: Entire request can be deleted
-        - TODO: Only active/current task can be rolled back
-
 
         *assignee: Users who belong to a Group configured to play
          a specific role in the Business Process
@@ -70,17 +67,13 @@ class AccessDeniedMixin(LoginRequiredMixin, object):
             """Check for update/revise operation"""
             return any([
                 assignee_check,
-                not self.task.can_revise_activity
+                not self.task.can_revise_activity if hasattr(
+                    self, 'task') else False
             ])
-
-        def check_for_rollback():
-            """Check for rollback/revert operation"""
-            return assignee_check
 
         return render(
             request, 'core/denied.html') if {
                 'ViewActivity': check_for_view,
                 'CreateActivity': check_for_create,
                 'UpdateActivity': check_for_update,
-                'RollBackActivity': check_for_rollback,
         }.get(view)() else None

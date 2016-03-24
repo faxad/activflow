@@ -19,7 +19,7 @@ from activflow.core.helpers import (
 )
 
 from activflow.core.mixins import AccessDeniedMixin
-from activflow.core.models import get_workflows_requests
+from activflow.core.models import get_workflows_requests, get_task
 
 
 @login_required
@@ -56,18 +56,16 @@ class ViewActivity(AccessDeniedMixin, generic.DetailView):
             request, *args, **kwargs)
 
 
-class RollBackActivity(AccessDeniedMixin, generic.View):
+class RollBackActivity(generic.View):
     """Rollbacks workflow task"""
     @transaction.atomic
     def post(self, request, **kwargs):
         """POST request handler for rollback"""
         app_title = get_request_params('app_name', **kwargs)
-        instance = get_model_instance(**kwargs)
+        identifier = get_request_params('pk', **kwargs)
+        get_task(identifier).rollback()
 
-        instance.task.rollback()
-
-        denied = self.check(request, **kwargs)
-        return denied if denied else HttpResponseRedirect(
+        return HttpResponseRedirect(
             reverse('workflow-detail', args=[app_title]))
 
 
