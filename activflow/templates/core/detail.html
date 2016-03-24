@@ -10,12 +10,20 @@
 </ol>
 {% endblock %}
 {% block main_content %}
-  <a data-toggle="modal" href="#confirmation" class="btn btn-danger {% if not object.task.is_active %} disabled {% endif %}" role="button">Delete</a>
-  <a href="{% url 'update' app_title entity_title object.id %}" class="btn btn-primary {% if not object.task.activity or not object.task.is_active %} disabled {% endif %}" role="button">Update</a>
+<div class="row">
+  <div class="col-md-9 col-md-push-3">
+    <blockquote class="blockquote-reverse">
+		<h6><strong>{{activity_title}}</strong></h6>
+		<h6><i>Detail</i></h6>
+	</blockquote>
+  </div>
+  <div class="col-md-3 col-md-pull-9">
+	<a data-toggle="modal" href="#confirmation" class="btn btn-danger {% if not object.task.is_active %} disabled {% endif %}" role="button">Delete</a>
+	  <a href="{% url 'update' app_title entity_title object.id %}" class="btn btn-primary {% if not object.task.activity or not object.task.is_active %} disabled {% endif %}" role="button">Update</a>
+  </div>
+</div>
 {% with object_id=object.id|stringformat:"s" next_action="/"|add:app_title|add:"/"|add:object.title|add:"/Delete/" %}
     {% include "core/widgets/confirmation.html" with message="Are you sure you want to delete?" title="Confirmation" action=next_action|add:object_id %}
 {% endwith %}
-<br></br>
-<h4> {{ object.title }} Detail </h4>
 {% include "core/widgets/readonly.html" %}
 {% endblock %}
