@@ -12,7 +12,7 @@
 {% include "core/widgets/validation.html" with error_messages=error_message %}
 {% request_instance identifier as request %}
 {% include "core/widgets/history.html" with request=request %}
-<h4>Initiate {{ entity_title }}</h4>
+<p class="text-right"><i><strong>{{activity_title}}</strong> - Initiate</i></p>
 <form action="{% url 'create' app_title entity_title identifier %}" method="post" class="form-horizontal">
     {% include 'core/widgets/form.html' %}
 </form>

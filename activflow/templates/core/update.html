@@ -10,7 +10,7 @@
 {% block main_content %}
 {% include "core/widgets/validation.html" with error_messages=error_message %}
 {% include "core/widgets/history.html" with request=object.task.request %}
-<h4>Update {{ entity_title }}</h4>
+<p class="text-right"><i><strong>{{activity_title}}</strong> - Revise</i></p>
 <form action="{% url 'update' app_title entity_title object.id %}" method="post" class="form-horizontal">
     {% include 'core/widgets/form.html' %}
 </form>
