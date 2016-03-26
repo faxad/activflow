@@ -24,7 +24,7 @@ from activflow.core.models import get_workflows_requests, get_task
 
 @login_required
 def workflows(request):
-    """Lists down registred workflows"""
+    """Lists down registered workflows"""
     return render(request, 'index.html', {'workflows': WORKFLOW_APPS})
 
 
@@ -33,6 +33,7 @@ class WorkflowDetail(LoginRequiredMixin, generic.TemplateView):
     template_name = 'core/workflow.html'
 
     def get_context_data(self, **kwargs):
+        """Retrieve context data<"""
         context = super(WorkflowDetail, self).get_context_data(**kwargs)
         app_title = get_request_params('app_name', **kwargs)
         config = flow_config(app_title)
