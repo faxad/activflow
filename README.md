@@ -17,6 +17,8 @@ What defines an ActivFlow workflow?
 - Business Roles mapped to workflow activities
 - Rules for transitioning between activities
 
+![alt tag](https://cloud.githubusercontent.com/assets/6130967/14062046/b055de98-f3a2-11e5-9d13-e74e4a9252f7.png)
+
 ### Technology Stack
 - Python 2.7x, 3.4x, 3.5x
 - Django 1.9x
