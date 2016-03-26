@@ -67,8 +67,8 @@
 					<td>
 						{% with identifier=task.activity|default:None %}
 						<a class="btn btn-info btn-xs {% if not task.can_view_activity %} disabled {% endif %}" href="{% url 'view' app_title act_title identifier %}"><span class="glyphicon glyphicon glyphicon-check"></span> View</a>
-						<a class="btn btn-success btn-xs {% if not task.can_initiate_activity %} disabled {% endif %}" href="{% url 'create' app_title act_title task.id %}"><span class="glyphicon glyphicon glyphicon-pencil"></span> Create</a>
-						<a class="btn btn-primary btn-xs {% if not task.can_revise_activity %} disabled {% endif %}" href="{% url 'update' app_title act_title identifier %}"><span class="glyphicon glyphicon glyphicon-edit"></span> Update</a>
+						<a class="btn btn-success btn-xs {% if not task.can_initiate_activity %} disabled {% endif %}" href="{% url 'create' app_title act_title task.id %}"><span class="glyphicon glyphicon glyphicon-pencil"></span> Initiate</a>
+						<a class="btn btn-primary btn-xs {% if not task.can_revise_activity %} disabled {% endif %}" href="{% url 'update' app_title act_title identifier %}"><span class="glyphicon glyphicon glyphicon-edit"></span> Revise</a>
 						<form style="display:inline" action="{% url 'rollback' app_title task.id %}" method="POST">
 						  {% csrf_token %}
 						  <button type="submit" name="rollback" class="btn btn-warning btn-xs {% if not task.can_rollback %} disabled {% endif %}"><span class="glyphicon glyphicon glyphicon-repeat"></span> Rollback</button>

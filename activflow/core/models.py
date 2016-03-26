@@ -99,7 +99,9 @@ class Task(AbstractEntity):
     @property
     def can_rollback(self):
         """Checks if activity can be rolled back"""
-        return True  # TODO: Handle condition
+        return not any([
+            self.activity.is_initial,
+            self.status == 'Completed'])
 
     @property
     def is_final(self):
