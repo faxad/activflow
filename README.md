@@ -98,8 +98,8 @@ def validate_request(self):
     return self.reason == 'Emergency'
 ```
 
-#### Step 5: Configure Field Visibility
-- Include **config.py** in the workflow app and define **ACTIVITY_CONFIG** as Nested Ordered Dictionary
+#### Step 5: Configure Field Visibility (Optional)
+- Include **config.py** in the workflow app and define **ACTIVITY_CONFIG** as Nested Ordered Dictionary if you want to have more control over what gets displayed.
 - Define for each activity model the visibility of fields for display on templates and forms 
     - **create:** field will appear on activity create form
     - **update:** field will be available for activity update operation
@@ -109,6 +109,7 @@ from collections import OrderedDict as odict
 
 ACTIVITY_CONFIG = odict([
     ('RequestInitiation', odict([
+        ('subject', ['create', 'update', 'display']),
         ('employee_name', ['create', 'update', 'display']),
         ('from', ['create', 'update', 'display']),
         ('to', ['create', 'update', 'display']),
@@ -126,6 +127,6 @@ ACTIVITY_CONFIG = odict([
 
 ```
 
-#### Step 6: Access/Permission Configuration
+#### Step 6: Access/Permission Configuration (Optional)
 The logic for restricting the access is defined as **AccessDeniedMixin** under **core/mixins**
 This can be customized by the developer based on the requirements

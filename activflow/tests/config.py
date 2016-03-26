@@ -12,10 +12,12 @@ ACTIVITY_CONFIG = odict([
         ('creation_date', ['display']),
         ('last_updated', ['display'])
     ])),
-    ('Corge', odict([
-        ('grault', ['create', 'update', 'display']),
-        ('thud', ['create', 'update', 'display']),
-        ('creation_date', ['display']),
-        ('last_updated', ['display'])
-    ])),
+    # ('Corge', odict([
+    #     ('grault', ['create', 'update', 'display']),
+    #     ('thud', ['create', 'update', 'display']),
+    #     ('creation_date', ['display']),
+    #     ('last_updated', ['display'])
+    # ])),
 ])
+
+#  config for Corge commented out to demonstrate that config is optional

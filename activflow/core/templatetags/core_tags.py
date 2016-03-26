@@ -25,7 +25,16 @@ def activity_data(context, instance, option):
     """Returns activity data as in field/value pair"""
     app = context['app_title']
     model = type(instance)
-    config = activity_config(app, model.__name__)
+
+    try:
+        config = activity_config(app, model.__name__)
+    except KeyError:
+        fields = [field for field in [
+            (field.name, field.verbose_name) for field in instance.class_meta.
+            get_fields()] if field[0] not in ['id', 'task', 'task_id']]
+
+        return {field[1]: getattr(
+            instance, field[0]) for field in fields}
 
     def compute(configuration):
         """Compute fields for display"""

@@ -58,10 +58,18 @@ def get_form_instance(**kwargs):
     """Returns form instance"""
     callee = type(inspect.currentframe().f_back.f_locals['self']).__name__
     operation = 'create' if 'Create' in callee else 'update'
-    field_config = activity_config(*[get_request_params(
-        key, **kwargs) for key in ('app_name', 'model_name')])
-    fields = [field for field in field_config
-              if operation in field_config[field]]
+
+    try:
+        field_config = activity_config(*[get_request_params(
+            key, **kwargs) for key in ('app_name', 'model_name')])
+        fields = [field for field in field_config
+                  if operation in field_config[field]]
+        print fields
+    except KeyError:
+        fields = [field for field in [
+            field.name for field in get_model(**kwargs)().class_meta.
+            get_fields()] if field not in [
+                'id', 'task', 'task_id', 'last_updated', 'creation_date']]
 
     return modelform_factory(get_model(**kwargs), fields=fields)
 
