@@ -132,3 +132,9 @@ ACTIVITY_CONFIG = odict([
 #### Step 6: Access/Permission Configuration (Optional)
 The logic for restricting the access is defined as **AccessDeniedMixin** under **core/mixins**
 This can be customized by the developer based on the requirements
+
+#### Demo Instructions
+Execute the below command to configure ActivFlow for demo purpose
+```
+python demo.py
+```
