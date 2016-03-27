@@ -20,7 +20,7 @@ def global_context(request):
         activity_title = flow[
             [identifier for identifier in flow if flow[identifier][
                 'model']().title == activity_identifier][0]]['name']
-    except (IndexError, LookupError):
+    except (IndexError, LookupError, ImportError):
         activity_title = None
 
     return {
