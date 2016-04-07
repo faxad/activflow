@@ -8,7 +8,10 @@ from django.db.models import (
     OneToOneField,
     ForeignKey)
 
-from activflow.core.helpers import flow_config
+from activflow.core.helpers import (
+    flow_config,
+    transition_config
+)
 
 
 class AbstractEntity(Model):
@@ -82,6 +85,20 @@ class Task(AbstractEntity):
         return self == self.request.tasks.latest('id')
 
     @property
+    def is_final(self):
+        """Checks if the current task is final / end task"""
+        transitions = transition_config(
+            self.request.module_ref, self.activity_ref)
+
+        return not transitions
+
+    @property
+    def previous(self):
+        """Returns previous task"""
+        return Task.objects.filter(
+            request=self.request, id__lt=self.id).latest('id')
+
+    @property
     def can_view_activity(self):
         """Checks if activity can be viewed"""
         return self.activity
@@ -103,19 +120,6 @@ class Task(AbstractEntity):
             self.activity.is_initial,
             self.status == 'Completed'])
 
-    @property
-    def is_final(self):
-        """Checks if the current task is final / end task"""
-        flow = flow_config(
-            self.request.module_ref).FLOW
-        return not flow[self.activity_ref]['transitions']
-
-    @property
-    def previous(self):
-        """Returns previous task"""
-        return Task.objects.filter(
-            request=self.request, id__lt=self.id).latest('id')
-
     def initiate(self):
         """Initializes the task"""
         self.status = 'In Progress'
@@ -124,7 +128,7 @@ class Task(AbstractEntity):
     def submit(self, module, user, next_activity=None):
         """Submits the task"""
         config = flow_config(module)
-        transitions = config.FLOW[self.activity_ref]['transitions']
+        transitions = transition_config(module, self.activity_ref)
         role = Group.objects.get(
             name=config.FLOW[next_activity]['role'])
 
@@ -179,20 +183,18 @@ class AbstractActivity(AbstractEntity):
 
     def next_activity(self):
         """Compute the next possible activities"""
-        transitions = flow_config(self.module_label).FLOW[
-            self.task.activity_ref]['transitions']
+        transitions = transition_config(
+            self.module_label, self.task.activity_ref)
 
-        if transitions:
-            return [transition for transition in
-                    transitions if transitions[transition](self)]
-        else:
-            return None
+        return [transition for transition in
+                transitions if transitions[transition](
+                    self)] if transitions else None
 
     def validate_rule(self, identifier):
         """Validates the rule for the current
         transition"""
-        transitions = flow_config(self.module_label).FLOW[
-            self.task.activity_ref]['transitions']
+        transitions = transition_config(
+            self.module_label, self.task.activity_ref)
 
         return transitions[identifier](self)
 

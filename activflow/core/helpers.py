@@ -23,6 +23,13 @@ def flow_config(module):
         '{}.flow'.format(apps.get_app_config(module).name))
 
 
+def transition_config(module, activity):
+    """Returns all possible transitions
+    for a given workflow module and activity
+    """
+    return flow_config(
+        module).FLOW[activity]['transitions']
+
 # Request Helpers
 
 
