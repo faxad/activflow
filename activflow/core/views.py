@@ -144,6 +144,7 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
     @transaction.atomic
     def post(self, request, **kwargs):
         """POST request handler for Update operation"""
+        redirect_to_update = False
         instance = get_model_instance(**kwargs)
         app_title = get_request_params('app_name', **kwargs)
         form = get_form_instance(
@@ -153,18 +154,26 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
             form.save()
 
             if 'save' in request.POST:
+                redirect_to_update = True
                 instance.update()
-                return HttpResponseRedirect(
-                    reverse('update', args=(
-                        app_title, instance.title, instance.id)))
+
             elif 'finish' in request.POST:
                 instance.finish()
             else:
-                instance.task.submit(
-                    app_title, self.request.user, request.POST['submit'])
+                next = request.POST['submit']
+                if not instance.validate_rule(next):
+                    redirect_to_update = True
+                else:
+                    instance.task.submit(
+                        app_title, self.request.user, next)
 
-            return HttpResponseRedirect(
-                reverse('workflow-detail', args=[app_title]))
+            if redirect_to_update:
+                return HttpResponseRedirect(
+                    reverse('update', args=(
+                        app_title, instance.title, instance.id)))
+            else:
+                return HttpResponseRedirect(
+                    reverse('workflow-detail', args=[app_title]))
         else:
             context = {
                 'form': form,

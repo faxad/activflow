@@ -17,7 +17,7 @@ install:
 
 # command to run tests
 script:
-  - coverage run --source='.' --omit='*wsgi.py' manage.py test activflow.tests
+  - coverage run --source='.' --omit='demo.py,*wsgi.py' manage.py test activflow.tests
 
 after_success:
   - coveralls

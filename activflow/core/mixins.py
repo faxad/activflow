@@ -37,7 +37,6 @@ class AccessDeniedMixin(LoginRequiredMixin, object):
         if self.request.user.is_superuser:
             return
 
-        @property
         def assignee_check():
             """Checks if logged-in user is task assignee"""
             return model.objects.filter(task__assignee__in=groups).count() == 0
@@ -66,7 +65,7 @@ class AccessDeniedMixin(LoginRequiredMixin, object):
         def check_for_update():
             """Check for update/revise operation"""
             return any([
-                assignee_check,
+                assignee_check(),
                 not self.task.can_revise_activity if hasattr(
                     self, 'task') else False
             ])

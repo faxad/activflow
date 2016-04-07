@@ -188,6 +188,14 @@ class AbstractActivity(AbstractEntity):
         else:
             return None
 
+    def validate_rule(self, identifier):
+        """Validates the rule for the current
+        transition"""
+        transitions = flow_config(self.module_label).FLOW[
+            self.task.flow_ref_key]['transitions']
+
+        return transitions[identifier](self)
+
     def assign_task(self, identifier):
         """Link activity with task"""
         self.task = Task.objects.get(id=identifier)
