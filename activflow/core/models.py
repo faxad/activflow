@@ -19,7 +19,7 @@ class AbstractEntity(Model):
     creation_date = DateTimeField('Creation Date', auto_now_add=True)
     last_updated = DateTimeField('Last Updated', auto_now=True)
 
-    class Meta:
+    class Meta(object):
         abstract = True
 
     @property
@@ -171,7 +171,7 @@ class AbstractActivity(AbstractEntity):
     """Common attributes for all activities"""
     task = OneToOneField(Task)
 
-    class Meta:
+    class Meta(object):
         abstract = True
 
     @property
@@ -220,7 +220,7 @@ class AbstractInitialActivity(AbstractActivity):
     """Common attributes for initial activity"""
     subject = CharField(verbose_name="Subject", max_length=70)
 
-    class Meta:
+    class Meta(object):
         abstract = True
 
     def initiate_request(self, user, module):

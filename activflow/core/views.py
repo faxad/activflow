@@ -160,12 +160,12 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
             elif 'finish' in request.POST:
                 instance.finish()
             else:
-                next = request.POST['submit']
-                if not instance.validate_rule(next):
+                next_activity = request.POST['submit']
+                if not instance.validate_rule(next_activity):
                     redirect_to_update = True
                 else:
                     instance.task.submit(
-                        app_title, self.request.user, next)
+                        app_title, self.request.user, next_activity)
 
             if redirect_to_update:
                 return HttpResponseRedirect(
