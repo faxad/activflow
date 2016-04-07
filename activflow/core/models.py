@@ -62,7 +62,7 @@ class Task(AbstractEntity):
     request = ForeignKey(Request, related_name='tasks')
     assignee = ForeignKey(Group)
     updated_by = ForeignKey(User)
-    flow_ref_key = CharField(max_length=100)
+    activity_ref = CharField(max_length=100)
     status = CharField(verbose_name="Status", max_length=30, choices=(
         ('Not Started', 'Not Started'),
         ('In Progress', 'In Progress'),
@@ -74,7 +74,7 @@ class Task(AbstractEntity):
         """Returns the activity associated with the task"""
         flow = flow_config(self.request.module_ref).FLOW
         return getattr(
-            self, flow[self.flow_ref_key]['model']().title.lower(), None)
+            self, flow[self.activity_ref]['model']().title.lower(), None)
 
     @property
     def is_active(self):
@@ -108,7 +108,7 @@ class Task(AbstractEntity):
         """Checks if the current task is final / end task"""
         flow = flow_config(
             self.request.module_ref).FLOW
-        return not flow[self.flow_ref_key]['transitions']
+        return not flow[self.activity_ref]['transitions']
 
     @property
     def previous(self):
@@ -124,7 +124,7 @@ class Task(AbstractEntity):
     def submit(self, module, user, next_activity=None):
         """Submits the task"""
         config = flow_config(module)
-        transitions = config.FLOW[self.flow_ref_key]['transitions']
+        transitions = config.FLOW[self.activity_ref]['transitions']
         role = Group.objects.get(
             name=config.FLOW[next_activity]['role'])
 
@@ -136,7 +136,7 @@ class Task(AbstractEntity):
                 request=self.request,
                 assignee=role,
                 updated_by=user,
-                flow_ref_key=next_activity,
+                activity_ref=next_activity,
                 status='Not Started')
         else:
             self.request.status = 'Completed'
@@ -180,7 +180,7 @@ class AbstractActivity(AbstractEntity):
     def next_activity(self):
         """Compute the next possible activities"""
         transitions = flow_config(self.module_label).FLOW[
-            self.task.flow_ref_key]['transitions']
+            self.task.activity_ref]['transitions']
 
         if transitions:
             return [transition for transition in
@@ -192,7 +192,7 @@ class AbstractActivity(AbstractEntity):
         """Validates the rule for the current
         transition"""
         transitions = flow_config(self.module_label).FLOW[
-            self.task.flow_ref_key]['transitions']
+            self.task.activity_ref]['transitions']
 
         return transitions[identifier](self)
 
@@ -236,7 +236,7 @@ class AbstractInitialActivity(AbstractActivity):
             request=request,
             assignee=role,
             updated_by=user,
-            flow_ref_key=config.INITIAL,
+            activity_ref=config.INITIAL,
             status='In Progress')
 
         self.task = task

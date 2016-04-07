@@ -57,7 +57,7 @@ class AccessDeniedMixin(LoginRequiredMixin, object):
                 'pk', request, **kwargs)
 
             activity = initial if identifier == REQUEST_IDENTIFIER \
-                else Task.objects.get(id=identifier).flow_ref_key
+                else Task.objects.get(id=identifier).activity_ref
 
             return flow[activity]['role'] not in [
                 group.name for group in groups]

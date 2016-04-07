@@ -63,7 +63,7 @@
 					<td>{{task.assignee.name}}</td>
 					<td>{{task.creation_date}}</td>
 					<td>{{task.last_updated}}</td>
-					{% activity_title task.flow_ref_key app_title as act_title %}
+					{% activity_title task.activity_ref app_title as act_title %}
 					<td>
 						{% with identifier=task.activity|default:None %}
 						<a class="btn btn-info btn-xs {% if not task.can_view_activity %} disabled {% endif %}" href="{% url 'view' app_title act_title identifier %}"><span class="glyphicon glyphicon glyphicon-check"></span> View</a>

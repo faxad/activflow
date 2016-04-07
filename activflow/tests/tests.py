@@ -361,6 +361,6 @@ class CoreTests(TestCase):
         final_task = request.tasks.latest('id')
 
         # Rollback result in task creation for previous activity
-        self.assertEqual(final_task.flow_ref_key, 'foo_activity',
+        self.assertEqual(final_task.activity_ref, 'foo_activity',
                          'Rollback did not create the required task '
                          'for previous activity')
