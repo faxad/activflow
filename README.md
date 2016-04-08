@@ -9,13 +9,13 @@
 ### Introduction
 **ActivFlow** is a generic, light-weight and extensible workflow engine for agile development and automation of complex Business Process operations.
 
-Developers can emphasize towards mapping the Business Process model as ActivFlow workflow without having to worry about implementing the core workflow processing logic. The generic implementation of the workflow engine manages the automation of the Business Processes from start to finish as per the defined flow.
+Developers can emphasize towards mapping the Business Process model as ActivFlow workflow without having to worry about implementing the core workflow processing logic. The generic implementation of the workflow engine manages the automation of the Business Processes from start to finish in accordance with the defined flow.
 
-What defines an ActivFlow workflow?
+What is an ActivFlow workflow?
 - Business Process flow mapped as ActivFlow configuration
-- Definition of data that needs to be captured for each activity (state)
+- Definition of data to be captured for each activity (state)
 - Business Roles mapped to workflow activities
-- Rules for transitioning between activities
+- Rules applied on transitions between activities
 
 ![alt tag](https://cloud.githubusercontent.com/assets/6130967/14062046/b055de98-f3a2-11e5-9d13-e74e4a9252f7.png)
 
@@ -100,7 +100,7 @@ def validate_request(self):
 ```
 
 #### Step 5: Configure Field Visibility (Optional)
-- Include **config.py** in the workflow app and define **ACTIVITY_CONFIG** as Nested Ordered Dictionary if you want to have more control over what gets displayed on the UI
+- Include **config.py** in the workflow app and define **ACTIVITY_CONFIG** as Nested Ordered Dictionary to have more control over what gets displayed on the UI.
 - Define for each activity model, the visibility of fields, for display on templates and forms 
     - **create:** field will appear on activity create/initiate form
     - **update:** field will be available for activity update/revise operation
@@ -118,25 +118,18 @@ ACTIVITY_CONFIG = odict([
         ('creation_date', ['display']),
         ('last_updated', ['display'])
     ])),
-    ('ManagementApproval', odict([
-        ('approval_status', ['create', 'update', 'display']),
-        ('remarks', ['create', 'update', 'display']),
-        ('creation_date', ['display']),
-        ('last_updated', ['display'])
-    ])),
+    ...
+    ...
 ])
 
 ```
 
 #### Step 6: Access/Permission Configuration (Optional)
-The core logic to restrict the access is defined as **AccessDeniedMixin** under **core/mixins**
-This can be customized by the developer based on the requirements
+The core logic to restrict access is defined as **AccessDeniedMixin** under **core/mixins** which developers can customize depending on the requirements
 
 #### Demo Instructions
 Execute the below command to configure ActivFlow for demo purpose
 ```
 python demo.py
-
-submitter: john.doe/12345
-reviewer: jane.smith/12345
 ```
+**Submitter:** john.doe/12345, **Reviewer:** jane.smith/12345
