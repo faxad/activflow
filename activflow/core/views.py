@@ -59,7 +59,7 @@ class ViewActivity(AccessDeniedMixin, generic.DetailView):
             request, *args, **kwargs)
 
 
-class RollBackActivity(generic.View):
+class RollBackActivity(LoginRequiredMixin, generic.View):
     """Rollbacks workflow task"""
     @transaction.atomic
     def post(self, request, **kwargs):
@@ -72,7 +72,7 @@ class RollBackActivity(generic.View):
             reverse('workflow-detail', args=[app_title]))
 
 
-class DeleteActivity(generic.DeleteView):
+class DeleteActivity(LoginRequiredMixin, generic.DeleteView):
     """Deletes activity instance"""
     def dispatch(self, request, *args, **kwargs):
         """Overriding dispatch on DeleteView"""
@@ -156,7 +156,6 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
             if 'save' in request.POST:
                 redirect_to_update = True
                 instance.update()
-
             elif 'finish' in request.POST:
                 instance.finish()
             else:
@@ -167,12 +166,10 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
                     instance.task.submit(
                         app_title, self.request.user, next_activity)
 
-            if redirect_to_update:
-                return HttpResponseRedirect(
-                    reverse('update', args=(
-                        app_title, instance.title, instance.id)))
-            else:
-                return HttpResponseRedirect(
+            return HttpResponseRedirect(
+                reverse('update', args=(
+                    app_title, instance.title, instance.id))
+            ) if redirect_to_update else HttpResponseRedirect(
                     reverse('workflow-detail', args=[app_title]))
         else:
             context = {

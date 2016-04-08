@@ -6,6 +6,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = SETTINGS
 
 
 def main():
+    """Entry Point"""
     print ('Setting Up demo...')
     django.setup()
     os.system('sudo rm db.sqlite3')

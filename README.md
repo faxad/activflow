@@ -9,7 +9,7 @@
 ### Introduction
 **ActivFlow** is a generic, light-weight and extensible workflow engine for agile development and automation of complex Business Process operations.
 
-Developers can emphasize towards mapping the Business Process model as ActivFlow workflow without having to worry about implementing the core workflow processing logic. The generic implementation of the workflow engine manages the automation of the Business Processes from start to finish as per the defined configuration.
+Developers can emphasize towards mapping the Business Process model as ActivFlow workflow without having to worry about implementing the core workflow processing logic. The generic implementation of the workflow engine manages the automation of the Business Processes from start to finish as per the defined flow.
 
 What defines an ActivFlow workflow?
 - Business Process flow mapped as ActivFlow configuration
@@ -35,10 +35,9 @@ WORKFLOW_APPS = ['leave_request']
 
 #### Step 2: Activity Configuration
 - Activities (States/Nodes) are represented as Django models
-- **AbstractInitialActivity** should be the base for the initial activity
-- **AbstractActivity** should be the base for all other activities
+- Activity must inherit from **AbstractInitialActivity**/**AbstractActivity** respectively
 - Custom validation logic must be defined under **clean()** on the activity model
-- Custom field specific validation should be defined under **app/validator** and applied to the field as **validators** attribute
+- Custom field specific validation should go under **app/validator** and applied to the field as **validators** attribute
 ```python
 from activflow.core.models import AbstractActivity, AbstractInitialActivity
 from activflow.leave_request.validators import validate_initial_cap
@@ -67,9 +66,9 @@ class ManagementApproval(AbstractActivity):
 ```
 #### Step 3: Flow Definition
 - A flow is represented by collection of Activities (States/Nodes) connected using Transitions (Edges)
-- Rules are applied on transitions to allow switching from one activity to another provided the condition satisfies
+- Rules are applied on transitions to allow routing between activities, provided, the condition satisfies
 - Business Process flow must be defined as **FLOW** under **app/flow**
-- As a default behavior, the Role maps OTO with django Group (this can be customized by developers as per the requirements)
+- As a default behavior, the Role maps OTO with django Group (developers, feel free to customize)
 ```python
 from activflow.leave_request.models import RequestInitiation, ManagementApproval
 from activflow.leave_request.rules import validate_request
@@ -101,10 +100,10 @@ def validate_request(self):
 ```
 
 #### Step 5: Configure Field Visibility (Optional)
-- Include **config.py** in the workflow app and define **ACTIVITY_CONFIG** as Nested Ordered Dictionary if you want to have more control over what gets displayed.
-- Define for each activity model the visibility of fields for display on templates and forms 
-    - **create:** field will appear on activity create form
-    - **update:** field will be available for activity update operation
+- Include **config.py** in the workflow app and define **ACTIVITY_CONFIG** as Nested Ordered Dictionary if you want to have more control over what gets displayed on the UI
+- Define for each activity model, the visibility of fields, for display on templates and forms 
+    - **create:** field will appear on activity create/initiate form
+    - **update:** field will be available for activity update/revise operation
     - **display:** available for display in activity detail view
 ```python
 from collections import OrderedDict as odict
@@ -130,11 +129,14 @@ ACTIVITY_CONFIG = odict([
 ```
 
 #### Step 6: Access/Permission Configuration (Optional)
-The logic for restricting the access is defined as **AccessDeniedMixin** under **core/mixins**
+The core logic to restrict the access is defined as **AccessDeniedMixin** under **core/mixins**
 This can be customized by the developer based on the requirements
 
 #### Demo Instructions
 Execute the below command to configure ActivFlow for demo purpose
 ```
 python demo.py
+
+submitter: john.doe/12345
+reviewer: jane.smith/12345
 ```
