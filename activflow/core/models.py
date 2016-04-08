@@ -8,10 +8,13 @@ from django.db.models import (
     OneToOneField,
     ForeignKey)
 
+from activflow.core.constants import (
+    REQUEST_STATUS,
+    TASK_STATUS)
+
 from activflow.core.helpers import (
     flow_config,
-    transition_config
-)
+    transition_config)
 
 
 class AbstractEntity(Model):
@@ -54,10 +57,8 @@ class Request(AbstractEntity):
     """Defines the workflow request"""
     requester = ForeignKey(User, related_name='requests')
     module_ref = CharField(max_length=100)
-    status = CharField(verbose_name="Status", max_length=30, choices=(
-        ('Initiated', 'Initiated'),
-        ('Withdrawn', 'Withdrawn'),
-        ('Completed', 'Completed')))
+    status = CharField(
+        verbose_name="Status", max_length=30, choices=REQUEST_STATUS)
 
 
 class Task(AbstractEntity):
@@ -66,11 +67,8 @@ class Task(AbstractEntity):
     assignee = ForeignKey(Group)
     updated_by = ForeignKey(User)
     activity_ref = CharField(max_length=100)
-    status = CharField(verbose_name="Status", max_length=30, choices=(
-        ('Not Started', 'Not Started'),
-        ('In Progress', 'In Progress'),
-        ('Rolled Back', 'Rolled Back'),
-        ('Completed', 'Completed')))
+    status = CharField(
+        verbose_name="Status", max_length=30, choices=TASK_STATUS)
 
     @property
     def activity(self):
