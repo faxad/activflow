@@ -1,5 +1,7 @@
 # activflow
 
+[![Join the chat at https://gitter.im/faxad/ActivFlow](https://badges.gitter.im/faxad/ActivFlow.svg)](https://gitter.im/faxad/ActivFlow?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Build Status](https://travis-ci.org/faxad/ActivFlow.svg?branch=master)](https://travis-ci.org/faxad/ActivFlow)
 [![Coverage Status](https://coveralls.io/repos/github/faxad/ActivFlow/badge.svg?branch=master)](https://coveralls.io/github/faxad/ActivFlow?branch=master)
 [![Code Health](https://landscape.io/github/faxad/ActivFlow/master/landscape.svg?style=flat)](https://landscape.io/github/faxad/ActivFlow/master)
