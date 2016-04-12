@@ -8,7 +8,11 @@ from django.apps import apps
 from django import template
 
 from activflow.core.constants import REQUEST_IDENTIFIER
-from activflow.core.helpers import activity_config
+from activflow.core.helpers import (
+    activity_config,
+    wysiwyg_config
+)
+
 from activflow.core.models import Task
 
 register = template.Library()
@@ -46,6 +50,18 @@ def activity_data(context, instance, option):
         field_name).verbose_name, getattr(
             instance, field_name)) for field_name in itertools.islice(
                 compute(config), len(config))])
+
+
+@register.assignment_tag(takes_context=True)
+def wysiwyg_form_fields(context):
+    """Returns activity data as in field/value pair"""
+    app = context['app_title']
+    model = context['entity_title']
+
+    try:
+        return wysiwyg_config(app, model)
+    except (KeyError, AttributeError):
+        return None
 
 
 @register.simple_tag

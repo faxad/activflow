@@ -4,7 +4,7 @@
     {% for name, value in entity_instance.items %}
     <tr>
         <th>{{ name }}</th>
-        <td>{{ value }}</td>
+        <td>{{ value|safe }}</td>
     </tr>
     {% endfor %}
 </table>

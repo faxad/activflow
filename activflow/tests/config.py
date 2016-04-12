@@ -21,3 +21,9 @@ ACTIVITY_CONFIG = odict([
 ])
 
 #  config for Corge commented out to demonstrate that config is optional
+
+# field configuration for WYSIWYG editor
+
+WYSIWYG_CONFIG = {
+    'Foo': ['qux']
+}

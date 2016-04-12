@@ -8,6 +8,10 @@
     </div>
 </fieldset>
 {% endfor %}
+{% wysiwyg_form_fields as wysuwyg_fields %}
+{% for wysuwyg_field in wysuwyg_fields %}
+    <script type="text/javascript">CKEDITOR.replace('id_{{wysuwyg_field}}')</script>
+{% endfor %}
 <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
         <input type="submit" value="Save" name="save" class="btn btn-success" />

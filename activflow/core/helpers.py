@@ -9,12 +9,17 @@ from django.forms.models import modelform_factory
 
 # Configuration Loaders
 
-def activity_config(module, model):
-    """Returns activity configuration"""
+def workflow_config(module):
+    """Returns workflow configuration"""
     return import_module(
         '{}.config'.format(
-            apps.get_app_config(module).name)
-    ).ACTIVITY_CONFIG[model]
+            apps.get_app_config(module).name))
+
+
+def activity_config(module, model):
+    """Returns activity configuration"""
+    return workflow_config(
+        module).ACTIVITY_CONFIG[model]
 
 
 def flow_config(module):
@@ -29,6 +34,13 @@ def transition_config(module, activity):
     """
     return flow_config(
         module).FLOW[activity]['transitions']
+
+
+def wysiwyg_config(module, activity):
+    """Returns configuration for WYSIWYG editor"""
+    return workflow_config(
+        module).WYSIWYG_CONFIG[activity]
+
 
 # Request Helpers
 
