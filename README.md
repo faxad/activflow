@@ -4,7 +4,6 @@
 [![Code Health](https://landscape.io/github/faxad/ActivFlow/master/landscape.svg?style=flat)](https://landscape.io/github/faxad/ActivFlow/master)
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/f1cb2c6766cb4539ac1c3d4057996047)](https://www.codacy.com/app/fawadhq/ActivFlow)
 [![Code Issues](https://www.quantifiedcode.com/api/v1/project/767844efa40e45e9b6e7689e37464272/badge.svg)](https://www.quantifiedcode.com/app/project/767844efa40e45e9b6e7689e37464272)
-[![Join the chat at https://gitter.im/faxad/ActivFlow](https://badges.gitter.im/faxad/ActivFlow.svg)](https://gitter.im/faxad/ActivFlow?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ### Introduction
 **ActivFlow** is a generic, light-weight and extensible workflow engine for agile development and automation of complex Business Process operations.
@@ -122,6 +121,9 @@ ACTIVITY_CONFIG = odict([
     ...
 ])
 
+WYSIWYG_CONFIG = {
+    'RequestInitiation': ['reason']
+}
 ```
 
 #### Step 6: Access/Permission Configuration (Optional)
