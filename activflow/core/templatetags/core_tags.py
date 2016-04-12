@@ -73,6 +73,14 @@ def activity_title(ref, app):
 
 
 @register.simple_tag
+def activity_friendly_name(ref, app):
+    """Returns activity friendly name"""
+    return import_module(
+        '{}.flow'.format(apps.get_app_config(app).name)
+    ).FLOW[ref]['name']
+
+
+@register.simple_tag
 def request_instance(task_identifier):
     """Returns request instance"""
     return Task.objects.get(

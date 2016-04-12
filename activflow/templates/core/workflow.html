@@ -50,6 +50,7 @@
 		    <table class="table table-condensed">
 				<tr>
 					<th>ID</th>
+					<th>Activity</th>
 					<th>Status</th>
 					<th>Assignee</th>
 					<th>Date Assigned</th>
@@ -58,7 +59,9 @@
 			    </tr>
 			    {% for task in request.tasks.all %}
 				<tr>
+					{% activity_friendly_name task.activity_ref app_title as friendly_title %}
 					<td>{{task.id}}</td>
+					<td>{{friendly_title}}</td>
 					<td>{{task.status}}</td>
 					<td>{{task.assignee.name}}</td>
 					<td>{{task.creation_date}}</td>
