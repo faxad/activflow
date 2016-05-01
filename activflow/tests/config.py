@@ -27,3 +27,9 @@ ACTIVITY_CONFIG = odict([
 WYSIWYG_CONFIG = {
     'Foo': ['qux']
 }
+
+# custom form registration
+
+FORM_CONFIG = {
+    'Foo': 'CustomForm'
+}

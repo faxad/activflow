@@ -42,6 +42,11 @@ def wysiwyg_config(module, activity):
         module).WYSIWYG_CONFIG[activity]
 
 
+def form_config(module, activity):
+    """Returns custom form configuration"""
+    return workflow_config(
+        module).FORM_CONFIG[activity]
+
 # Request Helpers
 
 
@@ -73,11 +78,22 @@ def get_model_instance(**kwargs):
     return get_model(**kwargs).objects.get(id=kwargs.get("pk"))
 
 
+def get_custom_form(**kwargs):
+    """Returns custom form instance"""
+    try:
+        args = [get_request_params(
+            key, **kwargs) for key in ('app_name', 'model_name')]
+        config = form_config(*args)
+        return getattr(import_module(
+            '{}.forms'.format(apps.get_app_config(args[0]).name)), config)
+    except (AttributeError, KeyError):
+        return None
+
+
 def get_form_instance(**kwargs):
     """Returns form instance"""
     callee = type(inspect.currentframe().f_back.f_locals['self']).__name__
     operation = 'create' if 'Create' in callee else 'update'
-
     try:
         field_config = activity_config(*[get_request_params(
             key, **kwargs) for key in ('app_name', 'model_name')])
@@ -88,8 +104,13 @@ def get_form_instance(**kwargs):
             field.name for field in get_model(**kwargs)().class_meta.
             get_fields()) if field not in [
                 'id', 'task', 'task_id', 'last_updated', 'creation_date']]
+    arguments = {'fields': fields}
+    custom_form = get_custom_form(**kwargs)
 
-    return modelform_factory(get_model(**kwargs), fields=fields)
+    if custom_form:
+        arguments['form'] = custom_form
+
+    return modelform_factory(get_model(**kwargs), **arguments)
 
 
 def get_errors(form_errors):
