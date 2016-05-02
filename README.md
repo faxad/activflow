@@ -98,7 +98,7 @@ def validate_request(self):
     return self.reason == 'Emergency'
 ```
 
-#### Step 5: Configure Field Visibility (Optional)
+#### Step 5: Configure Field Visibility & Custom Forms (Optional)
 - Include **config.py** in the workflow app and define **ACTIVITY_CONFIG** as Nested Ordered Dictionary to have more control over what gets displayed on the UI.
 - Define for each activity model, the visibility of fields, for display on templates and forms 
     - **create:** field will appear on activity create/initiate form
@@ -121,8 +121,16 @@ ACTIVITY_CONFIG = odict([
     ...
 ])
 
+# register fields that need WYSIWYG editor
+
 WYSIWYG_CONFIG = {
     'RequestInitiation': ['reason']
+}
+
+# register custom forms
+
+FORM_CONFIG = {
+    'RequestInitiation': 'CustomRequestForm'
 }
 ```
 
