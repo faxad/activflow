@@ -191,7 +191,7 @@ class CoreTests(TestCase):
                     'app_name': 'tests',
                     'model_name': 'Corge',
                     'pk': final_task.id
-                    }
+                }
             ),
             {'grault': 'Example - big E', 'thud': 23})
 
@@ -330,7 +330,7 @@ class CoreTests(TestCase):
                     'app_name': 'tests',
                     'model_name': 'Corge',
                     'pk': final_task.id
-                    }
+                }
             ),
             {'grault': 'Example - big E', 'thud': 23})
 

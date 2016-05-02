@@ -6,4 +6,4 @@ from django import forms
 class CustomForm(forms.ModelForm):
     """Sample Custom form"""
     bar = forms.CharField(
-        max_length=6, widget=forms.TextInput)
+        max_length=17, widget=forms.TextInput)
