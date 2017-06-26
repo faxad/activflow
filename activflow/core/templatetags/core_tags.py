@@ -31,7 +31,7 @@ def activity_data(context, instance, option):
     model = type(instance)
 
     try:
-        config = activity_config(app, model.__name__)
+        config = activity_config(app, model.__name__)['Fields']
     except KeyError:
         fields = [field for field in (
             (field.name, field.verbose_name) for field in instance.class_meta.

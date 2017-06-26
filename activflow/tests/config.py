@@ -5,19 +5,25 @@ from collections import OrderedDict as odict
 
 ACTIVITY_CONFIG = odict([
     ('Foo', odict([
-        ('subject', ['create', 'update', 'display']),
-        ('bar', ['create', 'update', 'display']),
-        ('baz', ['create', 'update', 'display']),
-        ('qux', ['create', 'update', 'display']),
-        ('creation_date', ['display']),
-        ('last_updated', ['display'])
+        ('Fields', odict([
+            ('subject', ['create', 'update', 'display']),
+            ('bar', ['create', 'update', 'display']),
+            ('baz', ['create', 'update', 'display']),
+            ('qux', ['create', 'update', 'display']),
+            ('creation_date', ['display']),
+            ('last_updated', ['display'])
+        ])),
+        ('Relations', odict([
+            ('FooLineItem', odict([
+                ('plugh', ['create', 'update', 'display']),
+                ('thud', ['create', 'update', 'display'])
+            ])),
+            ('FooMoreLineItem', odict([
+                ('plughmore', ['create', 'update', 'display']),
+                ('thudmore', ['create', 'update', 'display'])
+            ]))
+        ]))
     ])),
-    # ('Corge', odict([
-    #     ('grault', ['create', 'update', 'display']),
-    #     ('thud', ['create', 'update', 'display']),
-    #     ('creation_date', ['display']),
-    #     ('last_updated', ['display'])
-    # ])),
 ])
 
 #  config for Corge commented out to demonstrate that config is optional

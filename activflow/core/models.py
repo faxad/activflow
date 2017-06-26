@@ -167,7 +167,7 @@ class Task(AbstractEntity):
 
 class AbstractActivity(AbstractEntity):
     """Common attributes for all activities"""
-    task = OneToOneField(Task)
+    task = OneToOneField(Task, null=True)
 
     class Meta(object):
         abstract = True

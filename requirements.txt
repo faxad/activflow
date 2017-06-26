@@ -1,1 +1,1 @@
-django_extensions==1.5.9
+django_extensions==1.7.9

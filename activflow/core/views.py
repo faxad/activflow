@@ -14,6 +14,7 @@ from activflow.core.helpers import (
     get_model,
     get_model_instance,
     get_form_instance,
+    get_formset_instances,
     get_request_params,
     flow_config
 )
@@ -90,7 +91,7 @@ class CreateActivity(AccessDeniedMixin, generic.View):
     def get(self, request, **kwargs):
         """GET request handler for Create operation"""
         form = get_form_instance(**kwargs)
-        context = {'form': form}
+        context = {'form': form, 'formsets': get_formset_instances(extra=2, **kwargs)}
 
         denied = self.check(request, **kwargs)
         return denied if denied else render(
@@ -105,6 +106,11 @@ class CreateActivity(AccessDeniedMixin, generic.View):
 
         if form.is_valid():
             instance = model(**form.cleaned_data)
+            instance = form.save()
+
+            for formset in get_formset_instances(**kwargs):
+                formset = formset(request.POST, instance=instance)
+                formset.save() if formset.is_valid() else None
 
             if instance.is_initial:
                 instance.initiate_request(request.user, app_title)
@@ -131,8 +137,10 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
         """GET request handler for Update operation"""
         instance = get_model_instance(**kwargs)
         form = get_form_instance(**kwargs)
+        formsets = get_formset_instances(**kwargs)
         context = {
             'form': form(instance=instance),
+            'formsets': [formset(instance=instance) for formset in formsets],
             'object': instance,
             'next': instance.next_activity()
         }
@@ -152,6 +160,10 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
 
         if form.is_valid():
             form.save()
+
+            for formset in get_formset_instances(**kwargs):
+                formset = formset(request.POST, instance=instance)
+                formset.save() if formset.is_valid() else None
 
             if 'save' in request.POST:
                 redirect_to_update = True
