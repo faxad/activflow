@@ -91,7 +91,8 @@ class CreateActivity(AccessDeniedMixin, generic.View):
     def get(self, request, **kwargs):
         """GET request handler for Create operation"""
         form = get_form_instance(**kwargs)
-        context = {'form': form, 'formsets': get_formset_instances(extra=2, **kwargs)}
+        formsets = [formset(prefix=formset.form.__name__) for formset in get_formset_instances(extra=1, **kwargs)]
+        context = {'form': form, 'formsets': formsets}
 
         denied = self.check(request, **kwargs)
         return denied if denied else render(
@@ -109,8 +110,8 @@ class CreateActivity(AccessDeniedMixin, generic.View):
             instance = form.save()
 
             for formset in get_formset_instances(**kwargs):
-                formset = formset(request.POST, instance=instance)
-                formset.save() if formset.is_valid() else None
+                formset = formset(request.POST, instance=instance, prefix=formset.form.__name__)
+                formset.save() if formset.is_valid() else print(formset.errors)
 
             if instance.is_initial:
                 instance.initiate_request(request.user, app_title)
@@ -137,10 +138,10 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
         """GET request handler for Update operation"""
         instance = get_model_instance(**kwargs)
         form = get_form_instance(**kwargs)
-        formsets = get_formset_instances(**kwargs)
+        formsets = get_formset_instances(extra=1, **kwargs)
         context = {
             'form': form(instance=instance),
-            'formsets': [formset(instance=instance) for formset in formsets],
+            'formsets': [formset(instance=instance, prefix=formset.form.__name__) for formset in formsets],
             'object': instance,
             'next': instance.next_activity()
         }
@@ -162,8 +163,8 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
             form.save()
 
             for formset in get_formset_instances(**kwargs):
-                formset = formset(request.POST, instance=instance)
-                formset.save() if formset.is_valid() else None
+                formset = formset(request.POST, instance=instance, prefix=formset.form.__name__)
+                formset.save() if formset.is_valid() else print(formset.errors)
 
             if 'save' in request.POST:
                 redirect_to_update = True

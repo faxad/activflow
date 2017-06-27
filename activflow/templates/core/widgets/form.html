@@ -13,16 +13,27 @@
 <fieldset class="form-group">
     <label class="col-sm-2 control-label">{{ formset.form.instance.title }}:</label>
 </fieldset>
-{% for form in formset %}
 {{ formset.management_form }}
-{% for field in form %}
-<fieldset class="form-group">
-    {{ field|label_with_class:"col-sm-2 control-label" }}
-    <div class="col-sm-10">
-        {{ field }}
+  <script type="text/javascript">
+    $(function() {
+        $('#{{formset.form.instance.title}}').formset({
+            prefix: '{{formset.form.instance.title}}Form',
+            formCssClass: 'dynamic-{{formset.form.instance.title}}Form'
+        });
+    });
+  </script>
+{% for form in formset %}
+<div {% if forloop.last %} id={{formset.form.instance.title}} {% endif %}>
+    {% for field in form %}
+    <fieldset class="form-group">
+        {{ field|label_with_class:"col-sm-2 control-label" }}
+        <div class="col-sm-10">
+            {{ field }}
+        </div>
+    </fieldset>
+    {% endfor %}
     </div>
-</fieldset>
-{% endfor %}
+
 {% endfor %}
 {% endfor %}
 
