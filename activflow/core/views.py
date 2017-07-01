@@ -108,6 +108,27 @@ class CreateActivity(AccessDeniedMixin, generic.View):
         if form.is_valid():
             instance = model(**form.cleaned_data)
             instance = form.save()
+            instruction = next(iter(filter(lambda key: 'add-' in key, request.POST)), None)
+
+            if instruction:
+                req = request.POST.copy()
+                formsets = get_formset_instances(extra=1, **kwargs)
+
+                for formset in formsets:
+                    form_title = formset.form.__name__
+                    if 'add-' + form_title.replace('Form', '') in instruction:
+                        total_forms = form_title + '-TOTAL_FORMS'
+                        req[total_forms] = int(req[total_forms]) + 1  
+   
+                formsets = [formset(
+                    req, prefix=formset.form.__name__) for formset in formsets]
+
+                context = {
+                    'form': form,
+                    'formsets': formsets,
+                }
+
+                return render(request, 'core/create.html', context)
 
             for formset in get_formset_instances(**kwargs):
                 formset = formset(request.POST, instance=instance, prefix=formset.form.__name__)
