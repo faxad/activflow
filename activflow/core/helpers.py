@@ -50,7 +50,6 @@ def form_config(module, activity):
 
 # Request Helpers
 
-
 def get_request_params(what, request=None, **kwargs):
     """Returns requested argument value"""
     args = {'app_name': 1, 'model_name': 2, 'pk': 4}
@@ -62,8 +61,7 @@ def get_request_params(what, request=None, **kwargs):
     except IndexError:
         pass
 
-
-# Model and Form Helpers
+# Model Helpers
 
 def get_app_model_as_params(**kwargs):
     """Returns a list of app and model name as params"""
@@ -81,6 +79,7 @@ def get_model_instance(**kwargs):
     """Returns model instance"""
     return get_model(**kwargs).objects.get(id=kwargs.get("pk"))
 
+# Form Helpers
 
 def get_custom_form(**kwargs):
     """Returns custom form instance"""
@@ -151,6 +150,21 @@ def get_formset_instances(extra=0, **kwargs):
         fields=related_fields[relation],
         extra=extra
     ) for relation in related_fields]
+
+
+def get_formsets_after_add(request, instruction, formsets):
+    """Returns revised formsets"""
+    # req = request.POST.copy()
+    # formsets = get_formset_instances(extra=1, **kwargs)
+
+    for formset in formsets:
+        form_title = formset.form.__name__
+        if 'add-' + form_title.replace('Form', '') in instruction:
+            total_forms = form_title + '-TOTAL_FORMS'
+            request[total_forms] = int(request[total_forms]) + 1
+
+    return [formset(
+        request, prefix=formset.form.__name__) for formset in formsets]
 
 
 def get_errors(form_errors):
