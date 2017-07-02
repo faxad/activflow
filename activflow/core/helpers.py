@@ -103,7 +103,7 @@ def get_form_fields(operation, field_config):
     return [field for field in field_config if operation in field_config[field]]
 
 
-def get_form_instance(**kwargs):
+def get_form(**kwargs):
     """Returns form instance"""
     callee = type(inspect.currentframe().f_back.f_locals['self']).__name__
     operation = 'create' if 'Create' in callee else 'update'
@@ -125,13 +125,11 @@ def get_form_instance(**kwargs):
     return modelform_factory(get_model(**kwargs), **arguments)
 
 
-def get_formset_instances(extra=0, **kwargs):
-    """Returns a list of formset instances"""    
-    callee = type(inspect.currentframe().f_back.f_locals['self']).__name__
-    operation = 'create' if 'Create' in callee else 'update'
-
+def get_formsets(what, extra=0, **kwargs):
+    """Returns a list of formset instances"""
     related_fields = {}
-    relation_config = get_form_config(callee, 'Relations', **kwargs)
+    relation_config = get_form_config(what, 'Relations', **kwargs)
+    operation = 'create' if 'Create' in what else 'update'
 
     for relation in relation_config:
         field_config = relation_config[relation]
@@ -152,10 +150,10 @@ def get_formset_instances(extra=0, **kwargs):
     ) for relation in related_fields]
 
 
-def get_formsets_after_add(request, instruction, formsets):
+def get_updated_formsets(who, request, instruction, **kwargs):
     """Returns revised formsets"""
-    # req = request.POST.copy()
-    # formsets = get_formset_instances(extra=1, **kwargs)
+    request = request.POST.copy()
+    formsets = get_formsets(who, **kwargs)
 
     for formset in formsets:
         form_title = formset.form.__name__
@@ -165,3 +163,17 @@ def get_formsets_after_add(request, instruction, formsets):
 
     return [formset(
         request, prefix=formset.form.__name__) for formset in formsets]
+
+
+def validate_save_formsets(formsets, instance, request, **kwargs):
+    errors = ''
+
+    for formset in formsets:
+        formset = formset(request.POST, instance=instance, prefix=formset.form.__name__)
+        if formset.is_valid():
+            formset.save()
+        else:
+            for error in formset.errors:
+                errors = errors + str(error)
+
+    return errors if errors else None

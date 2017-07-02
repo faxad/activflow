@@ -12,10 +12,11 @@ from activflow.core.constants import WORKFLOW_APPS, REQUEST_IDENTIFIER
 from activflow.core.helpers import (
     get_model,
     get_model_instance,
-    get_form_instance,
-    get_formset_instances,
+    get_form,
+    get_formsets,
     get_request_params,
-    get_formsets_after_add,
+    get_updated_formsets,
+    validate_save_formsets,
     flow_config
 )
 
@@ -90,8 +91,9 @@ class CreateActivity(AccessDeniedMixin, generic.View):
     """Generic view to initiate activity"""
     def get(self, request, **kwargs):
         """GET request handler for Create operation"""
-        form = get_form_instance(**kwargs)
-        formsets = [formset(prefix=formset.form.__name__) for formset in get_formset_instances(extra=1, **kwargs)]
+        form = get_form(**kwargs)
+        formsets = [formset(prefix=formset.form.__name__) for formset in get_formsets(
+            self.__class__.__name__, extra=1, **kwargs)]
         context = {'form': form, 'formsets': formsets}
 
         denied = self.check(request, **kwargs)
@@ -101,8 +103,10 @@ class CreateActivity(AccessDeniedMixin, generic.View):
     @transaction.atomic
     def post(self, request, **kwargs):
         """POST request handler for Create operation"""
+        operation = self.__class__.__name__
         model = get_model(**kwargs)
-        form = get_form_instance(**kwargs)(request.POST)
+        form = get_form(**kwargs)(request.POST)
+        formsets = get_formsets(operation, **kwargs)
         app_title = get_request_params('app_name', **kwargs)
 
         if form.is_valid():
@@ -111,9 +115,8 @@ class CreateActivity(AccessDeniedMixin, generic.View):
             instruction = next(iter(filter(lambda key: 'add-' in key, request.POST)), None)
 
             if instruction:
-                req = request.POST.copy()
-                formsets = get_formset_instances(**kwargs)
-                formsets = get_formsets_after_add(req, instruction, formsets)
+                formsets = get_updated_formsets(
+                    operation, request, instruction, **kwargs)
 
                 context = {
                     'form': form,
@@ -122,20 +125,18 @@ class CreateActivity(AccessDeniedMixin, generic.View):
 
                 return render(request, 'core/create.html', context)
 
-            errors = ''
-
-            for formset in get_formset_instances(**kwargs):
-                formset = formset(request.POST, instance=instance, prefix=formset.form.__name__)
-                if formset.is_valid():
-                    formset.save()
-                else:
-                    for error in formset.errors:
-                        errors = errors + str(error)
-
+            errors = validate_save_formsets(
+                formsets,
+                instance,
+                request,
+                **kwargs
+            )
+                
             if errors:
                 context = {
                     'form': form,
-                    'formsets': [formset(request.POST, prefix=formset.form.__name__) for formset in get_formset_instances(**kwargs)],
+                    'formsets': [formset(
+                        request.POST, prefix=formset.form.__name__) for formset in formsets],
                     'error_message': errors
                 }
 
@@ -154,7 +155,8 @@ class CreateActivity(AccessDeniedMixin, generic.View):
         else:
             context = {
                 'form': form,
-                'formsets': [formset(request.POST, prefix=formset.form.__name__) for formset in get_formset_instances(**kwargs)],
+                'formsets': [formset(
+                    request.POST, prefix=formset.form.__name__) for formset in formsets],
                 'error_message': form.errors
             }
 
@@ -166,11 +168,12 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
     def get(self, request, **kwargs):
         """GET request handler for Update operation"""
         instance = get_model_instance(**kwargs)
-        form = get_form_instance(**kwargs)
-        formsets = get_formset_instances(**kwargs)
+        form = get_form(**kwargs)
+        formsets = get_formsets(self.__class__.__name__, **kwargs)
         context = {
             'form': form(instance=instance),
-            'formsets': [formset(instance=instance, prefix=formset.form.__name__) for formset in formsets],
+            'formsets': [formset(
+                instance=instance, prefix=formset.form.__name__) for formset in formsets],
             'object': instance,
             'next': instance.next_activity()
         }
@@ -182,21 +185,19 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
     @transaction.atomic
     def post(self, request, **kwargs):
         """POST request handler for Update operation"""
+        operation = self.__class__.__name__
         redirect_to_update = False
         instance = get_model_instance(**kwargs)
         app_title = get_request_params('app_name', **kwargs)
-        form = get_form_instance(
-            **kwargs)(request.POST, instance=instance)
+        form = get_form(**kwargs)(request.POST, instance=instance)
+        formsets = get_formsets(operation, **kwargs)
 
         if form.is_valid():
             form.save()
-
             instruction = next(iter(filter(lambda key: 'add-' in key, request.POST)), None)
 
             if instruction:
-                req = request.POST.copy()
-                formsets = get_formset_instances(**kwargs)
-                formsets = get_formsets_after_add(req, instruction, formsets)
+                formsets = get_updated_formsets(operation, request, instruction, **kwargs)
 
                 context = {
                     'object': instance,
@@ -206,21 +207,19 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
 
                 return render(request, 'core/update.html', context)
 
-            errors = ''
-
-            for formset in get_formset_instances(**kwargs):
-                formset = formset(request.POST, instance=instance, prefix=formset.form.__name__)
-                if formset.is_valid():
-                    formset.save()
-                else:
-                    for error in formset.errors:
-                        errors = errors + str(error)
+            errors = validate_save_formsets(
+                formsets,
+                instance,
+                request,
+                **kwargs
+            )
 
             if errors:
                 context = {
                     'object': instance,
                     'form': form,
-                    'formsets': [formset(request.POST, prefix=formset.form.__name__) for formset in get_formset_instances(**kwargs)],
+                    'formsets': [formset(
+                        request.POST, prefix=formset.form.__name__) for formset in formsets],
                     'error_message': errors
                 }
 
@@ -248,7 +247,8 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
         else:
             context = {
                 'form': form,
-                'formsets': [formset(request.POST, prefix=formset.form.__name__) for formset in get_formset_instances(**kwargs)],
+                'formsets': [formset(
+                    request.POST, prefix=formset.form.__name__) for formset in formsets],
                 'object': instance,
                 'next': instance.next_activity(),
                 'error_message': form.errors
