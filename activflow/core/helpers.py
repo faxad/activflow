@@ -165,14 +165,3 @@ def get_formsets_after_add(request, instruction, formsets):
 
     return [formset(
         request, prefix=formset.form.__name__) for formset in formsets]
-
-
-def get_errors(form_errors):
-    """Returns compiled form errors"""
-    error_list = []
-    errors = form_errors.as_data().copy()
-    errors = [error_list.append(
-        e + ': ' + str(
-            list(errors[e][0])[0])) for e in errors]
-
-    return list(set(error_list))

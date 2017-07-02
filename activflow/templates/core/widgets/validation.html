@@ -5,9 +5,7 @@
   </div>
   <div class="panel-body">
     {% if error_messages %}
-        {% for message in error_messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
+    {{ error_messages|safe }}
     {% endif %}
   </div>
 </div>

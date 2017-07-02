@@ -10,7 +10,6 @@ from django.views import generic
 
 from activflow.core.constants import WORKFLOW_APPS, REQUEST_IDENTIFIER
 from activflow.core.helpers import (
-    get_errors,
     get_model,
     get_model_instance,
     get_form_instance,
@@ -113,7 +112,7 @@ class CreateActivity(AccessDeniedMixin, generic.View):
 
             if instruction:
                 req = request.POST.copy()
-                formsets = get_formset_instances(extra=1, **kwargs)
+                formsets = get_formset_instances(**kwargs)
                 formsets = get_formsets_after_add(req, instruction, formsets)
 
                 context = {
@@ -123,9 +122,24 @@ class CreateActivity(AccessDeniedMixin, generic.View):
 
                 return render(request, 'core/create.html', context)
 
+            errors = ''
+
             for formset in get_formset_instances(**kwargs):
                 formset = formset(request.POST, instance=instance, prefix=formset.form.__name__)
-                formset.save() if formset.is_valid() else print(formset.errors)
+                if formset.is_valid():
+                    formset.save()
+                else:
+                    for error in formset.errors:
+                        errors = errors + str(error)
+
+            if errors:
+                context = {
+                    'form': form,
+                    'formsets': [formset(request.POST, prefix=formset.form.__name__) for formset in get_formset_instances(**kwargs)],
+                    'error_message': errors
+                }
+
+                return render(request, 'core/create.html', context)
 
             if instance.is_initial:
                 instance.initiate_request(request.user, app_title)
@@ -140,7 +154,8 @@ class CreateActivity(AccessDeniedMixin, generic.View):
         else:
             context = {
                 'form': form,
-                'error_message': get_errors(form.errors)
+                'formsets': [formset(request.POST, prefix=formset.form.__name__) for formset in get_formset_instances(**kwargs)],
+                'error_message': form.errors
             }
 
             return render(request, 'core/create.html', context)
@@ -152,7 +167,7 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
         """GET request handler for Update operation"""
         instance = get_model_instance(**kwargs)
         form = get_form_instance(**kwargs)
-        formsets = get_formset_instances(extra=1, **kwargs)
+        formsets = get_formset_instances(**kwargs)
         context = {
             'form': form(instance=instance),
             'formsets': [formset(instance=instance, prefix=formset.form.__name__) for formset in formsets],
@@ -180,7 +195,7 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
 
             if instruction:
                 req = request.POST.copy()
-                formsets = get_formset_instances(extra=1, **kwargs)
+                formsets = get_formset_instances(**kwargs)
                 formsets = get_formsets_after_add(req, instruction, formsets)
 
                 context = {
@@ -191,9 +206,26 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
 
                 return render(request, 'core/update.html', context)
 
+            errors = ''
+
             for formset in get_formset_instances(**kwargs):
                 formset = formset(request.POST, instance=instance, prefix=formset.form.__name__)
-                formset.save() if formset.is_valid() else print(formset.errors)
+                if formset.is_valid():
+                    formset.save()
+                else:
+                    for error in formset.errors:
+                        errors = errors + str(error)
+
+            if errors:
+                context = {
+                    'object': instance,
+                    'form': form,
+                    'formsets': [formset(request.POST, prefix=formset.form.__name__) for formset in get_formset_instances(**kwargs)],
+                    'error_message': errors
+                }
+
+                return render(request, 'core/update.html', context)
+
 
             if 'save' in request.POST:
                 redirect_to_update = True
@@ -216,9 +248,10 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
         else:
             context = {
                 'form': form,
+                'formsets': [formset(request.POST, prefix=formset.form.__name__) for formset in get_formset_instances(**kwargs)],
                 'object': instance,
                 'next': instance.next_activity(),
-                'error_message': get_errors(form.errors)
+                'error_message': form.errors
             }
 
             return render(request, 'core/update.html', context)
