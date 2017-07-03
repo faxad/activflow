@@ -15,8 +15,6 @@ from activflow.core.helpers import (
     get_form,
     get_formsets,
     get_request_params,
-    get_updated_formsets,
-    validate_save_formsets,
     flow_config
 )
 
@@ -112,34 +110,10 @@ class CreateActivity(AccessDeniedMixin, generic.View):
         if form.is_valid():
             instance = model(**form.cleaned_data)
             instance = form.save()
-            instruction = next(iter(filter(lambda key: 'add-' in key, request.POST)), None)
-
-            if instruction:
-                formsets = get_updated_formsets(
-                    operation, request, instruction, **kwargs)
-
-                context = {
-                    'form': form,
-                    'formsets': formsets,
-                }
-
-                return render(request, 'core/create.html', context)
-
-            errors = validate_save_formsets(
-                formsets,
-                instance,
-                request,
-                **kwargs
-            )
-                
-            if errors:
-                context = {
-                    'form': form,
-                    'formsets': [formset(
-                        request.POST, prefix=formset.form.__name__) for formset in formsets],
-                    'error_message': errors
-                }
-
+            context = FormsetHandler(
+                operation, request, instance, form, formsets).handle(**kwargs)
+            
+            if context:
                 return render(request, 'core/create.html', context)
 
             if instance.is_initial:
@@ -194,37 +168,11 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
 
         if form.is_valid():
             form.save()
-            instruction = next(iter(filter(lambda key: 'add-' in key, request.POST)), None)
+            context = FormsetHandler(
+                operation, request, instance, form, formsets).handle(**kwargs)
 
-            if instruction:
-                formsets = get_updated_formsets(operation, request, instruction, **kwargs)
-
-                context = {
-                    'object': instance,
-                    'form': form,
-                    'formsets': formsets,
-                }
-
+            if context:
                 return render(request, 'core/update.html', context)
-
-            errors = validate_save_formsets(
-                formsets,
-                instance,
-                request,
-                **kwargs
-            )
-
-            if errors:
-                context = {
-                    'object': instance,
-                    'form': form,
-                    'formsets': [formset(
-                        request.POST, prefix=formset.form.__name__) for formset in formsets],
-                    'error_message': errors
-                }
-
-                return render(request, 'core/update.html', context)
-
 
             if 'save' in request.POST:
                 redirect_to_update = True
@@ -255,3 +203,75 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
             }
 
             return render(request, 'core/update.html', context)
+
+# Handlers
+
+class FormsetHandler:
+    """Formsets Manager"""
+    def __init__(self, operation, request, instance, form, formsets):
+        """Initializes FormsetHandler"""
+        self.instance = instance
+        self.request = request
+        self.operation = operation
+        self.form = form
+        self.formsets = formsets
+ 
+    def handle(self, **kwargs):
+        """Adds, validates and persist formsets"""
+        instruction = next(iter(filter(
+            lambda key: 'add-' in key, self.request.POST)), None)
+
+        # Handle adding related instance
+
+        if instruction:
+            request = self.request.POST.copy()
+            formsets = get_formsets(self.operation, **kwargs)
+
+            for formset in formsets:
+                form_title = formset.form.__name__
+                if 'add-' + form_title.replace('Form', '') in instruction:
+                    total_forms = form_title + '-TOTAL_FORMS'
+                    request[total_forms] = int(request[total_forms]) + 1
+
+            formsets = [formset(
+                request, prefix=formset.form.__name__) for formset in formsets]
+
+
+            context = {
+                'object': self.instance,
+                'form': self.form,
+                'formsets': formsets,
+            }
+
+            return context
+
+        # Validate and save formsets
+
+        errors = ''
+
+        for formset in self.formsets:
+            formset = formset(
+                self.request.POST,
+                instance=self.instance,
+                prefix=formset.form.__name__
+            )
+            if formset.is_valid():
+                formset.save()
+            else:
+                for error in formset.errors:
+                    errors = errors + str(error)
+
+        if errors:
+            context = {
+                'object': self.instance,
+                'form': self.form,
+                'formsets': [formset(
+                    self.request.POST,
+                    prefix=formset.form.__name__
+                ) for formset in self.formsets],
+                'error_message': errors
+            }
+
+            return context
+        else:
+            return

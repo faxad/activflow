@@ -148,32 +148,3 @@ def get_formsets(what, extra=0, **kwargs):
         fields=related_fields[relation],
         extra=extra
     ) for relation in related_fields]
-
-
-def get_updated_formsets(who, request, instruction, **kwargs):
-    """Returns revised formsets"""
-    request = request.POST.copy()
-    formsets = get_formsets(who, **kwargs)
-
-    for formset in formsets:
-        form_title = formset.form.__name__
-        if 'add-' + form_title.replace('Form', '') in instruction:
-            total_forms = form_title + '-TOTAL_FORMS'
-            request[total_forms] = int(request[total_forms]) + 1
-
-    return [formset(
-        request, prefix=formset.form.__name__) for formset in formsets]
-
-
-def validate_save_formsets(formsets, instance, request, **kwargs):
-    errors = ''
-
-    for formset in formsets:
-        formset = formset(request.POST, instance=instance, prefix=formset.form.__name__)
-        if formset.is_valid():
-            formset.save()
-        else:
-            for error in formset.errors:
-                errors = errors + str(error)
-
-    return errors if errors else None
