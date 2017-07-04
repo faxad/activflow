@@ -107,7 +107,19 @@ class CoreTests(TestCase):
                 'subject': 'test',
                 'bar': 'Example - small e',
                 'baz': 'WL',
-                'qux': 'Nothing'
+                'qux': 'Nothing',
+                'FooLineItemForm-0-plugh': 'Abc',
+                'FooLineItemForm-0-thud': 'GR',
+                'FooLineItemForm-TOTAL_FORMS': 1,
+                'FooLineItemForm-INITIAL_FORMS': 0,
+                'FooLineItemForm-MIN_NUM_FORMS': 0,
+                'FooLineItemForm-MAX_NUM_FORMS': 1000,
+                'FooMoreLineItemForm-0-plughmore': 'Abc',
+                'FooMoreLineItemForm-0-thudmore': 'GR',
+                'FooMoreLineItemForm-TOTAL_FORMS': 1,
+                'FooMoreLineItemForm-INITIAL_FORMS': 0,
+                'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
+                'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
             })
 
         instances = Foo.objects.all()
@@ -148,7 +160,19 @@ class CoreTests(TestCase):
                 'bar': 'Example - small e',
                 'baz': 'WL',
                 'qux': 'Nothing',
-                'save': 'Save'
+                'save': 'Save',
+                'FooLineItemForm-0-plugh': 'Abc',
+                'FooLineItemForm-0-thud': 'GR',
+                'FooLineItemForm-TOTAL_FORMS': 1,
+                'FooLineItemForm-INITIAL_FORMS': 0,
+                'FooLineItemForm-MIN_NUM_FORMS': 0,
+                'FooLineItemForm-MAX_NUM_FORMS': 1000,
+                'FooMoreLineItemForm-0-plughmore': 'Abc',
+                'FooMoreLineItemForm-0-thudmore': 'GR',
+                'FooMoreLineItemForm-TOTAL_FORMS': 1,
+                'FooMoreLineItemForm-INITIAL_FORMS': 0,
+                'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
+                'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
             })
 
         # Control redirects to update after save
@@ -169,7 +193,19 @@ class CoreTests(TestCase):
                 'bar': 'Example',
                 'baz': 'WL',
                 'qux': 'Nothing',
-                'submit': 'corge_activity'
+                'submit': 'corge_activity',
+                'FooLineItemForm-0-plugh': 'Abc',
+                'FooLineItemForm-0-thud': 'GR',
+                'FooLineItemForm-TOTAL_FORMS': 1,
+                'FooLineItemForm-INITIAL_FORMS': 0,
+                'FooLineItemForm-MIN_NUM_FORMS': 0,
+                'FooLineItemForm-MAX_NUM_FORMS': 1000,
+                'FooMoreLineItemForm-0-plughmore': 'Abc',
+                'FooMoreLineItemForm-0-thudmore': 'GR',
+                'FooMoreLineItemForm-TOTAL_FORMS': 1,
+                'FooMoreLineItemForm-INITIAL_FORMS': 0,
+                'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
+                'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
             })
 
         # Control redirects to workflow detail
@@ -193,7 +229,22 @@ class CoreTests(TestCase):
                     'pk': final_task.id
                 }
             ),
-            {'grault': 'Example - big E', 'thud': 23})
+            {
+                'grault': 'Example - big E',
+                'thud': 23,
+                'FooLineItemForm-0-plugh': 'Abc',
+                'FooLineItemForm-0-thud': 'GR',
+                'FooLineItemForm-TOTAL_FORMS': 1,
+                'FooLineItemForm-INITIAL_FORMS': 0,
+                'FooLineItemForm-MIN_NUM_FORMS': 0,
+                'FooLineItemForm-MAX_NUM_FORMS': 1000,
+                'FooMoreLineItemForm-0-plughmore': 'Abc',
+                'FooMoreLineItemForm-0-thudmore': 'GR',
+                'FooMoreLineItemForm-TOTAL_FORMS': 1,
+                'FooMoreLineItemForm-INITIAL_FORMS': 0,
+                'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
+                'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
+            })
 
         instances = Corge.objects.all()
         instance = instances.first()
@@ -258,6 +309,18 @@ class CoreTests(TestCase):
                 'bar': 'Example',
                 'baz': 'WL',
                 'qux': 'Nothing',
+                'FooLineItemForm-0-plugh': 'Abc',
+                'FooLineItemForm-0-thud': 'GR',
+                'FooLineItemForm-TOTAL_FORMS': 1,
+                'FooLineItemForm-INITIAL_FORMS': 0,
+                'FooLineItemForm-MIN_NUM_FORMS': 0,
+                'FooLineItemForm-MAX_NUM_FORMS': 1000,
+                'FooMoreLineItemForm-0-plughmore': 'Abc',
+                'FooMoreLineItemForm-0-thudmore': 'GR',
+                'FooMoreLineItemForm-TOTAL_FORMS': 1,
+                'FooMoreLineItemForm-INITIAL_FORMS': 0,
+                'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
+                'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
             })
 
         instances = Foo.objects.all()
@@ -287,7 +350,19 @@ class CoreTests(TestCase):
                 'bar': 'Example',
                 'baz': 'WL',
                 'qux': 'Nothing',
-                'save': 'Save'
+                'save': 'Save',
+                'FooLineItemForm-0-plugh': 'Abc',
+                'FooLineItemForm-0-thud': 'GR',
+                'FooLineItemForm-TOTAL_FORMS': 1,
+                'FooLineItemForm-INITIAL_FORMS': 0,
+                'FooLineItemForm-MIN_NUM_FORMS': 0,
+                'FooLineItemForm-MAX_NUM_FORMS': 1000,
+                'FooMoreLineItemForm-0-plughmore': 'Abc',
+                'FooMoreLineItemForm-0-thudmore': 'GR',
+                'FooMoreLineItemForm-TOTAL_FORMS': 1,
+                'FooMoreLineItemForm-INITIAL_FORMS': 0,
+                'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
+                'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
             })
 
         # Control redirects to update after save
@@ -308,7 +383,19 @@ class CoreTests(TestCase):
                 'bar': 'Example',
                 'baz': 'WL',
                 'qux': 'Nothing',
-                'submit': 'corge_activity'
+                'submit': 'corge_activity',
+                'FooLineItemForm-0-plugh': 'Abc',
+                'FooLineItemForm-0-thud': 'GR',
+                'FooLineItemForm-TOTAL_FORMS': 1,
+                'FooLineItemForm-INITIAL_FORMS': 0,
+                'FooLineItemForm-MIN_NUM_FORMS': 0,
+                'FooLineItemForm-MAX_NUM_FORMS': 1000,
+                'FooMoreLineItemForm-0-plughmore': 'Abc',
+                'FooMoreLineItemForm-0-thudmore': 'GR',
+                'FooMoreLineItemForm-TOTAL_FORMS': 1,
+                'FooMoreLineItemForm-INITIAL_FORMS': 0,
+                'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
+                'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
             })
 
         # Control redirects to workflow detail

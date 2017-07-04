@@ -127,24 +127,27 @@ def get_form(**kwargs):
 
 def get_formsets(what, extra=0, **kwargs):
     """Returns a list of formset instances"""
-    related_fields = {}
-    relation_config = get_form_config(what, 'Relations', **kwargs)
-    operation = 'create' if 'Create' in what else 'update'
+    try:
+        related_fields = {}
+        relation_config = get_form_config(what, 'Relations', **kwargs)
+        operation = 'create' if 'Create' in what else 'update'
 
-    for relation in relation_config:
-        field_config = relation_config[relation]
-        related_fields[relation] = get_form_fields(operation, field_config)
+        for relation in relation_config:
+            field_config = relation_config[relation]
+            related_fields[relation] = get_form_fields(operation, field_config)
 
-    def get_related_model(relation):
-        args = get_app_model_as_params(**kwargs)
-        args.pop()
-        args.append(relation)
+        def get_related_model(relation):
+            args = get_app_model_as_params(**kwargs)
+            args.pop()
+            args.append(relation)
 
-        return apps.get_model(*args)
+            return apps.get_model(*args)
 
-    return [inlineformset_factory(
-        get_model(**kwargs),
-        get_related_model(relation),
-        fields=related_fields[relation],
-        extra=extra
-    ) for relation in related_fields]
+        return [inlineformset_factory(
+            get_model(**kwargs),
+            get_related_model(relation),
+            fields=related_fields[relation],
+            extra=extra
+        ) for relation in related_fields]
+    except KeyError:
+        return []
