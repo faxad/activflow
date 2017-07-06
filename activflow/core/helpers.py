@@ -79,6 +79,18 @@ def get_model_instance(**kwargs):
     """Returns model instance"""
     return get_model(**kwargs).objects.get(id=kwargs.get("pk"))
 
+def get_fk(instances, model):
+    """Returns foreign key field"""
+    fields = []
+    for field in instances[0]._meta.fields:
+        if field.get_internal_type() == 'ForeignKey':
+            fields.append(field)
+    
+    for field in fields:
+        if field.related_model == model:
+            return field.name
+
+
 # Form Helpers
 
 def get_custom_form(**kwargs):

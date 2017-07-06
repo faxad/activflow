@@ -15,7 +15,8 @@ from activflow.core.helpers import (
     get_form,
     get_formsets,
     get_request_params,
-    flow_config
+    flow_config,
+    get_fk
 )
 
 from activflow.core.mixins import AccessDeniedMixin
@@ -102,39 +103,29 @@ class CreateActivity(AccessDeniedMixin, generic.View):
     def post(self, request, **kwargs):
         """POST request handler for Create operation"""
         operation = self.__class__.__name__
-        model = get_model(**kwargs)
+        instance = None
         form = get_form(**kwargs)(request.POST)
         formsets = get_formsets(operation, **kwargs)
         app_title = get_request_params('app_name', **kwargs)
 
-        if form.is_valid():
-            instance = model(**form.cleaned_data)
-            instance = form.save()
-            context = FormsetHandler(
-                operation, request, instance, form, formsets).handle(**kwargs)
-            
-            if context:
-                return render(request, 'core/create.html', context)
-
-            if instance.is_initial:
-                instance.initiate_request(request.user, app_title)
-            else:
-                instance.assign_task(
-                    get_request_params('pk', **kwargs))
-                instance.task.initiate()
-
-            return HttpResponseRedirect(
-                reverse('update', args=(
-                    app_title, instance.title, instance.id)))
-        else:
-            context = {
-                'form': form,
-                'formsets': [formset(
-                    request.POST, prefix=formset.form.__name__) for formset in formsets],
-                'error_message': form.errors
-            }
-
+        (result, context) = FormHandler(
+            operation, request, form, formsets).handle(**kwargs)
+        
+        if not result:
             return render(request, 'core/create.html', context)
+        else:
+            instance = context
+
+        if instance.is_initial:
+            instance.initiate_request(request.user, app_title)
+        else:
+            instance.assign_task(
+                get_request_params('pk', **kwargs))
+            instance.task.initiate()
+
+        return HttpResponseRedirect(
+            reverse('update', args=(
+                app_title, instance.title, instance.id)))
 
 
 class UpdateActivity(AccessDeniedMixin, generic.View):
@@ -147,7 +138,9 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
         context = {
             'form': form(instance=instance),
             'formsets': [formset(
-                instance=instance, prefix=formset.form.__name__) for formset in formsets],
+                instance=instance,
+                prefix=formset.form.__name__
+            ) for formset in formsets],
             'object': instance,
             'next': instance.next_activity()
         }
@@ -166,50 +159,37 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
         form = get_form(**kwargs)(request.POST, instance=instance)
         formsets = get_formsets(operation, **kwargs)
 
-        if form.is_valid():
-            form.save()
-            context = FormsetHandler(
-                operation, request, instance, form, formsets).handle(**kwargs)
+        (result, context) = FormHandler(
+            operation, request, form, formsets, instance).handle(**kwargs)
 
-            if context:
-                return render(request, 'core/update.html', context)
-
-            if 'save' in request.POST:
-                redirect_to_update = True
-                instance.update()
-            elif 'finish' in request.POST:
-                instance.finish()
-            else:
-                next_activity = request.POST['submit']
-                if not instance.validate_rule(next_activity):
-                    redirect_to_update = True
-                else:
-                    instance.task.submit(
-                        app_title, self.request.user, next_activity)
-
-            return HttpResponseRedirect(
-                reverse('update', args=(
-                    app_title, instance.title, instance.id))
-            ) if redirect_to_update else HttpResponseRedirect(
-                    reverse('workflow-detail', args=[app_title]))
-        else:
-            context = {
-                'form': form,
-                'formsets': [formset(
-                    request.POST, prefix=formset.form.__name__) for formset in formsets],
-                'object': instance,
-                'next': instance.next_activity(),
-                'error_message': form.errors
-            }
-
+        if not result:
             return render(request, 'core/update.html', context)
+
+        if 'save' in request.POST:
+            redirect_to_update = True
+            instance.update()
+        elif 'finish' in request.POST:
+            instance.finish()
+        else:
+            next_activity = request.POST['submit']
+            if not instance.validate_rule(next_activity):
+                redirect_to_update = True
+            else:
+                instance.task.submit(
+                    app_title, self.request.user, next_activity)
+
+        return HttpResponseRedirect(
+            reverse('update', args=(
+                app_title, instance.title, instance.id))
+        ) if redirect_to_update else HttpResponseRedirect(
+                reverse('workflow-detail', args=[app_title]))
 
 # Handlers
 
-class FormsetHandler:
-    """Formsets Manager"""
-    def __init__(self, operation, request, instance, form, formsets):
-        """Initializes FormsetHandler"""
+class FormHandler:
+    """Form and Formsets Manager"""
+    def __init__(self, operation, request, form, formsets, instance=None):
+        """Initializes FormHandler"""
         self.instance = instance
         self.request = request
         self.operation = operation
@@ -236,42 +216,61 @@ class FormsetHandler:
             formsets = [formset(
                 request, prefix=formset.form.__name__) for formset in formsets]
 
-
             context = {
-                'object': self.instance,
                 'form': self.form,
                 'formsets': formsets,
             }
 
-            return context
+            if self.instance:
+                context['object'] = self.instance
 
-        # Validate and save formsets
+            return (False, context)
+        
+        # Validate and save form/formsets
 
-        errors = ''
+        formsets = []
 
         for formset in self.formsets:
-            formset = formset(
+            formsets.append(formset(
                 self.request.POST,
-                instance=self.instance,
+                instance=self.instance, # None for create operation
                 prefix=formset.form.__name__
-            )
-            if formset.is_valid():
-                formset.save()
-            else:
+            ))
+
+        if self.form.is_valid() and all([formset.is_valid() for formset in formsets]):
+            # form
+            instance = None
+            model = get_model(**kwargs)
+            instance = self.form.save()
+            # formsets
+            for formset in formsets:
+                if not self.instance: # create operation
+                    objects = formset.save(commit=False)
+                    fk = get_fk(objects, model)
+                    for object in objects:
+                        setattr(object, fk, instance)
+                        object.save()
+                else: # update operation
+                    formset.save()
+            return (True, instance)
+        else:
+            errors = ''
+
+            for formset in formsets:
                 for error in formset.errors:
                     errors = errors + str(error)
 
-        if errors:
             context = {
-                'object': self.instance,
                 'form': self.form,
                 'formsets': [formset(
                     self.request.POST,
                     prefix=formset.form.__name__
                 ) for formset in self.formsets],
-                'error_message': errors
+                'error_message': errors + str(self.form.errors)
             }
 
-            return context
-        else:
-            return
+            if self.instance:
+                context['object'] = self.instance
+                context['next'] = self.instance.next_activity()
+            
+            return (False, context)

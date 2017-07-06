@@ -58,7 +58,21 @@ class CoreTests(TestCase):
         for verb in ('get', 'post'):
             response = getattr(self.client, verb)(reverse(
                 'create',
-                kwargs=request_args))
+                kwargs=request_args),
+                {
+                    'FooLineItemForm-0-plugh': '',
+                    'FooLineItemForm-0-thud': '',
+                    'FooLineItemForm-TOTAL_FORMS': 1,
+                    'FooLineItemForm-INITIAL_FORMS': 0,
+                    'FooLineItemForm-MIN_NUM_FORMS': 0,
+                    'FooLineItemForm-MAX_NUM_FORMS': 1000,
+                    'FooMoreLineItemForm-0-plughmore': '',
+                    'FooMoreLineItemForm-0-thudmore': '',
+                    'FooMoreLineItemForm-TOTAL_FORMS': 1,
+                    'FooMoreLineItemForm-INITIAL_FORMS': 0,
+                    'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
+                    'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
+                })
 
             if verb == 'get':
                 # Access Denied
@@ -70,7 +84,21 @@ class CoreTests(TestCase):
 
             response = getattr(self.client, verb)(reverse(
                 'create',
-                kwargs=request_args))
+                kwargs=request_args),
+                {
+                    'FooLineItemForm-0-plugh': '',
+                    'FooLineItemForm-0-thud': '',
+                    'FooLineItemForm-TOTAL_FORMS': 1,
+                    'FooLineItemForm-INITIAL_FORMS': 0,
+                    'FooLineItemForm-MIN_NUM_FORMS': 0,
+                    'FooLineItemForm-MAX_NUM_FORMS': 1000,
+                    'FooMoreLineItemForm-0-plughmore': '',
+                    'FooMoreLineItemForm-0-thudmore': '',
+                    'FooMoreLineItemForm-TOTAL_FORMS': 1,
+                    'FooMoreLineItemForm-INITIAL_FORMS': 0,
+                    'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
+                    'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
+                })
 
             self.assertEqual(response.context['form']._meta.model, Foo,
                              'User has access to initiate workflow, '
@@ -87,7 +115,19 @@ class CoreTests(TestCase):
                 'subject': 'test',
                 'bar': 'example - small e',
                 'baz': 'WL',
-                'qux': 'Nothing'
+                'qux': 'Nothing',
+                'FooLineItemForm-0-plugh': '',
+                'FooLineItemForm-0-thud': '',
+                'FooLineItemForm-TOTAL_FORMS': 1,
+                'FooLineItemForm-INITIAL_FORMS': 0,
+                'FooLineItemForm-MIN_NUM_FORMS': 0,
+                'FooLineItemForm-MAX_NUM_FORMS': 1000,
+                'FooMoreLineItemForm-0-plughmore': '',
+                'FooMoreLineItemForm-0-thudmore': '',
+                'FooMoreLineItemForm-TOTAL_FORMS': 1,
+                'FooMoreLineItemForm-INITIAL_FORMS': 0,
+                'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
+                'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
             })
 
         self.assertEqual(response.status_code, 200,
@@ -96,6 +136,60 @@ class CoreTests(TestCase):
         self.assertEqual(Foo.objects.count(), 0,
                          'Validation errors still result in creation '
                          'of initial activity instance')
+
+        # Post the form for adding related instance
+        response = self.client.post(
+            reverse(
+                'create',
+                kwargs=request_args
+            ),
+            {
+                'subject': 'test',
+                'bar': 'Example - small e',
+                'baz': 'WL',
+                'qux': 'Nothing',
+                'add-FooLineItem': 'Add',
+                'FooLineItemForm-0-plugh': '',
+                'FooLineItemForm-0-thud': '',
+                'FooLineItemForm-TOTAL_FORMS': 1,
+                'FooLineItemForm-INITIAL_FORMS': 0,
+                'FooLineItemForm-MIN_NUM_FORMS': 0,
+                'FooLineItemForm-MAX_NUM_FORMS': 1000,
+                'FooMoreLineItemForm-0-plughmore': '',
+                'FooMoreLineItemForm-0-thudmore': '',
+                'FooMoreLineItemForm-TOTAL_FORMS': 1,
+                'FooMoreLineItemForm-INITIAL_FORMS': 0,
+                'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
+                'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
+            })
+    
+        response = self.client.post(
+            reverse(
+                'create',
+                kwargs=request_args
+            ),
+            {
+                'subject': 'test',
+                'bar': 'Example - small e',
+                'baz': 'WL',
+                'qux': 'Nothing',
+                'add-FooLineItem': 'Add',
+                'FooLineItemForm-0-plugh': 'Abc',
+                'FooLineItemForm-0-thud': 'GR',
+                'FooLineItemForm-TOTAL_FORMS': 1,
+                'FooLineItemForm-INITIAL_FORMS': 0,
+                'FooLineItemForm-MIN_NUM_FORMS': 0,
+                'FooLineItemForm-MAX_NUM_FORMS': 1000,
+                'FooMoreLineItemForm-0-plughmore': 'Abc',
+                'FooMoreLineItemForm-0-thudmore': 'GR',
+                'FooMoreLineItemForm-TOTAL_FORMS': 1,
+                'FooMoreLineItemForm-INITIAL_FORMS': 0,
+                'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
+                'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
+            })
+
+        self.assertEqual(response.status_code, 200,
+                         'Form post did not result in success')
 
         # Post the form again without any validation failure
         response = self.client.post(
@@ -110,7 +204,9 @@ class CoreTests(TestCase):
                 'qux': 'Nothing',
                 'FooLineItemForm-0-plugh': 'Abc',
                 'FooLineItemForm-0-thud': 'GR',
-                'FooLineItemForm-TOTAL_FORMS': 1,
+                'FooLineItemForm-1-plugh': 'Abc',
+                'FooLineItemForm-1-thud': 'GR',
+                'FooLineItemForm-TOTAL_FORMS': 2,
                 'FooLineItemForm-INITIAL_FORMS': 0,
                 'FooLineItemForm-MIN_NUM_FORMS': 0,
                 'FooLineItemForm-MAX_NUM_FORMS': 1000,
@@ -147,7 +243,21 @@ class CoreTests(TestCase):
         for verb in ('get', 'post'):
             response = getattr(self.client, verb)(reverse(
                 'update',
-                kwargs=request_args))
+                kwargs=request_args),
+                {
+                    'FooLineItemForm-0-plugh': '',
+                    'FooLineItemForm-0-thud': '',
+                    'FooLineItemForm-TOTAL_FORMS': 1,
+                    'FooLineItemForm-INITIAL_FORMS': 0,
+                    'FooLineItemForm-MIN_NUM_FORMS': 0,
+                    'FooLineItemForm-MAX_NUM_FORMS': 1000,
+                    'FooMoreLineItemForm-0-plughmore': '',
+                    'FooMoreLineItemForm-0-thudmore': '',
+                    'FooMoreLineItemForm-TOTAL_FORMS': 1,
+                    'FooMoreLineItemForm-INITIAL_FORMS': 0,
+                    'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
+                    'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
+                })
 
         # Post the form with SAVE action
         response = self.client.post(
@@ -163,7 +273,9 @@ class CoreTests(TestCase):
                 'save': 'Save',
                 'FooLineItemForm-0-plugh': 'Abc',
                 'FooLineItemForm-0-thud': 'GR',
-                'FooLineItemForm-TOTAL_FORMS': 1,
+                'FooLineItemForm-1-plugh': 'Abc',
+                'FooLineItemForm-1-thud': 'GR',
+                'FooLineItemForm-TOTAL_FORMS': 2,
                 'FooLineItemForm-INITIAL_FORMS': 0,
                 'FooLineItemForm-MIN_NUM_FORMS': 0,
                 'FooLineItemForm-MAX_NUM_FORMS': 1000,
@@ -196,7 +308,9 @@ class CoreTests(TestCase):
                 'submit': 'corge_activity',
                 'FooLineItemForm-0-plugh': 'Abc',
                 'FooLineItemForm-0-thud': 'GR',
-                'FooLineItemForm-TOTAL_FORMS': 1,
+                'FooLineItemForm-1-plugh': 'Abc',
+                'FooLineItemForm-1-thud': 'GR',
+                'FooLineItemForm-TOTAL_FORMS': 2,
                 'FooLineItemForm-INITIAL_FORMS': 0,
                 'FooLineItemForm-MIN_NUM_FORMS': 0,
                 'FooLineItemForm-MAX_NUM_FORMS': 1000,
@@ -234,7 +348,9 @@ class CoreTests(TestCase):
                 'thud': 23,
                 'FooLineItemForm-0-plugh': 'Abc',
                 'FooLineItemForm-0-thud': 'GR',
-                'FooLineItemForm-TOTAL_FORMS': 1,
+                'FooLineItemForm-1-plugh': 'Abc',
+                'FooLineItemForm-1-thud': 'GR',
+                'FooLineItemForm-TOTAL_FORMS': 2,
                 'FooLineItemForm-INITIAL_FORMS': 0,
                 'FooLineItemForm-MIN_NUM_FORMS': 0,
                 'FooLineItemForm-MAX_NUM_FORMS': 1000,
