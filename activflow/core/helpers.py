@@ -150,6 +150,7 @@ def get_formsets(what, extra=0, **kwargs):
             related_fields[relation] = get_form_fields(operation, field_config)
 
         def get_related_model(relation):
+            """Returns related model"""
             args = get_app_model_as_params(**kwargs)
             args.pop()
             args.append(relation)

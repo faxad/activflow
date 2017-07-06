@@ -195,7 +195,7 @@ class FormHandler(object):
         self.operation = operation
         self.form = form
         self.formsets = formsets
- 
+
     def handle(self, **kwargs):
         """Adds, validates and persist formsets"""
         instruction = next(iter(filter(
@@ -237,7 +237,7 @@ class FormHandler(object):
                 prefix=formset.form.__name__
             ))
 
-        if self.form.is_valid() and all([formset.is_valid() for formset in formsets]):
+        if self.form.is_valid() and all(formset.is_valid() for formset in formsets):
             # form
             instance = self.form.save()
             # formsets
