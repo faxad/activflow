@@ -110,7 +110,7 @@ class CreateActivity(AccessDeniedMixin, generic.View):
 
         (result, context) = FormHandler(
             operation, request, form, formsets).handle(**kwargs)
-        
+
         if not result:
             return render(request, 'core/create.html', context)
         else:
@@ -186,7 +186,7 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
 
 # Handlers
 
-class FormHandler:
+class FormHandler(object):
     """Form and Formsets Manager"""
     def __init__(self, operation, request, form, formsets, instance=None):
         """Initializes FormHandler"""
@@ -239,17 +239,15 @@ class FormHandler:
 
         if self.form.is_valid() and all([formset.is_valid() for formset in formsets]):
             # form
-            instance = None
-            model = get_model(**kwargs)
             instance = self.form.save()
             # formsets
             for formset in formsets:
                 if not self.instance: # create operation
                     objects = formset.save(commit=False)
-                    fk = get_fk(objects, model)
-                    for object in objects:
-                        setattr(object, fk, instance)
-                        object.save()
+                    fk = get_fk(objects, **kwargs)
+                    for obj in objects:
+                        setattr(obj, fk, instance)
+                        obj.save()
                 else: # update operation
                     formset.save()
             return (True, instance)

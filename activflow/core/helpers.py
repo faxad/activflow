@@ -79,13 +79,14 @@ def get_model_instance(**kwargs):
     """Returns model instance"""
     return get_model(**kwargs).objects.get(id=kwargs.get("pk"))
 
-def get_fk(instances, model):
+def get_fk(instances, **kwargs):
     """Returns foreign key field"""
     fields = []
+    model = get_model(**kwargs)
     for field in instances[0]._meta.fields:
         if field.get_internal_type() == 'ForeignKey':
             fields.append(field)
-    
+
     for field in fields:
         if field.related_model == model:
             return field.name
@@ -104,7 +105,7 @@ def get_custom_form(**kwargs):
         return None
 
 
-def get_form_config(callee, what, **kwargs):
+def get_form_config(what, **kwargs):
     """Returns form config"""
     args = get_app_model_as_params(**kwargs)
     return activity_config(*args)[what]
@@ -121,7 +122,7 @@ def get_form(**kwargs):
     operation = 'create' if 'Create' in callee else 'update'
 
     try:
-        config = get_form_config(callee, 'Fields', **kwargs)
+        config = get_form_config('Fields', **kwargs)
         fields = get_form_fields(operation, config)
     except KeyError:
         fields = [field for field in (
@@ -141,7 +142,7 @@ def get_formsets(what, extra=0, **kwargs):
     """Returns a list of formset instances"""
     try:
         related_fields = {}
-        relation_config = get_form_config(what, 'Relations', **kwargs)
+        relation_config = get_form_config('Relations', **kwargs)
         operation = 'create' if 'Create' in what else 'update'
 
         for relation in relation_config:

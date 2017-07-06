@@ -162,7 +162,7 @@ class CoreTests(TestCase):
                 'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
                 'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
             })
-    
+
         response = self.client.post(
             reverse(
                 'create',
