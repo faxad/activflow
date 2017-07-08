@@ -7,7 +7,11 @@ from django.db.models import (
     IntegerField,
     TextField)
 
-from activflow.core.models import AbstractActivity, AbstractInitialActivity
+from activflow.core.models import (
+    AbstractEntity,
+    AbstractActivity,
+    AbstractInitialActivity)
+
 from activflow.tests.validators import validate_initial_cap
 
 
@@ -22,7 +26,7 @@ class Foo(AbstractInitialActivity):
         """Custom validation logic should go here"""
         pass
 
-class FooLineItem(models.Model):
+class FooLineItem(AbstractEntity):
     """Sample representation of Foo Line Item"""
     foo = ForeignKey(Foo, related_name="lines")
     plugh = CharField("Plugh", max_length=200, validators=[validate_initial_cap])
@@ -38,7 +42,7 @@ class FooLineItem(models.Model):
         """Custom validation logic should go here"""
         pass
 
-class FooMoreLineItem(models.Model):
+class FooMoreLineItem(AbstractEntity):
     """Sample representation of FooMore Line Item"""
     foo = ForeignKey(Foo, related_name="morelines")
     plughmore = CharField("Plughmore", max_length=200, validators=[validate_initial_cap])

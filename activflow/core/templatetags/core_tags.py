@@ -25,20 +25,10 @@ def label_with_class(value, arg):
 
 
 @register.assignment_tag(takes_context=True)
-def activity_data(context, instance, option):
+def activity_data(context, instance, option, _type):
     """Returns activity data as in field/value pair"""
     app = context['app_title']
     model = type(instance)
-
-    try:
-        config = activity_config(app, model.__name__)['Fields']
-    except KeyError:
-        fields = [field for field in (
-            (field.name, field.verbose_name) for field in instance.class_meta.
-            get_fields()) if field[0] not in ['id', 'task', 'task_id']]
-
-        return {field[1]: getattr(
-            instance, field[0]) for field in fields}
 
     def compute(configuration):
         """Compute fields for display"""
@@ -46,10 +36,39 @@ def activity_data(context, instance, option):
             if option in configuration[field_name]:
                 yield field_name
 
-    return OrderedDict([(model().class_meta.get_field(
-        field_name).verbose_name, getattr(
-            instance, field_name)) for field_name in itertools.islice(
-                compute(config), len(config))])
+    def get_field_value_pairs(model, instance, config):
+        """Returns field/value pairs"""
+        return OrderedDict([(model().class_meta.get_field(
+            field_name).verbose_name, getattr(
+                instance, field_name)) for field_name in itertools.islice(
+                    compute(config), len(config))])
+
+    if _type == 'model':
+        try:
+            field_config = activity_config(app, model.__name__)['Fields']
+            return get_field_value_pairs(model, instance, field_config)
+        except KeyError:
+            fields = [field for field in (
+                (field.name, field.verbose_name) for field in instance.class_meta.
+                get_fields()) if field[0] not in ['id', 'task', 'task_id']]
+            return {field[1]: getattr(
+                instance, field[0]) for field in fields}
+    else:
+        try:
+            related_model_fields = {} 
+            relation_config = activity_config(app, model.__name__)['Relations']
+            for relation in relation_config:
+                related_model = apps.get_model(app, relation)
+                for field in related_model._meta.fields:
+                    if field.get_internal_type() == 'ForeignKey' and field.related_model == model:
+                        instances = related_model.objects.filter(
+                            **{ field.name: instance })
+                        related_model_fields[relation] = [get_field_value_pairs(
+                            related_model, instance, relation_config[relation]) for instance in instances]
+                        break
+            return related_model_fields
+        except KeyError:
+            pass # TODO: handle case where no explicit configuration is specified
 
 
 @register.assignment_tag(takes_context=True)

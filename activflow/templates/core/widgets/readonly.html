@@ -1,6 +1,6 @@
 {% load core_tags %}
 <table class="table table-condensed">
-    {% activity_data object 'display' as entity_instance %}
+    {% activity_data object 'display' 'model' as entity_instance %}
     {% for name, value in entity_instance.items %}
     <tr>
         <th>{{ name }}</th>
@@ -8,3 +8,19 @@
     </tr>
     {% endfor %}
 </table>
+{% activity_data object 'display' 'relation' as related_instance %}
+{% for name, value in related_instance.items %}
+<blockquote>
+  <p>{{ name }}</p>
+</blockquote>
+{% for relation in value %}
+<table class="table table-condensed">
+    {% for name, value in relation.items %}
+    <tr>
+        <th>{{ name }}</th>
+        <td>{{ value|safe }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endfor %}
+{% endfor %}

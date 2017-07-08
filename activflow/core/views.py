@@ -225,7 +225,7 @@ class FormHandler(object):
                 context['object'] = self.instance
 
             return (False, context)
-        
+
         # Validate and save form/formsets
 
         formsets = []
