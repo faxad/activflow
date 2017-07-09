@@ -43,32 +43,40 @@ def activity_data(context, instance, option, _type):
                 instance, field_name)) for field_name in itertools.islice(
                     compute(config), len(config))])
 
+    def get_all_fields(instance, exclude=[]):
+        """Returns all fields on the model"""
+        fields = [field for field in (
+            (field.name, field.verbose_name) for field in instance.class_meta.
+            get_fields()) if field[0] not in ['id', 'task', 'task_id'] + exclude]
+        return {field[1]: getattr(
+            instance, field[0]) for field in fields}
+
     if _type == 'model':
         try:
             field_config = activity_config(app, model.__name__)['Fields']
             return get_field_value_pairs(model, instance, field_config)
         except KeyError:
-            fields = [field for field in (
-                (field.name, field.verbose_name) for field in instance.class_meta.
-                get_fields()) if field[0] not in ['id', 'task', 'task_id']]
-            return {field[1]: getattr(
-                instance, field[0]) for field in fields}
+            return get_all_fields(instance)
     else:
-        try:
-            related_model_fields = {} 
-            relation_config = activity_config(app, model.__name__)['Relations']
-            for relation in relation_config:
-                related_model = apps.get_model(app, relation)
-                for field in related_model._meta.fields:
-                    if field.get_internal_type() == 'ForeignKey' and field.related_model == model:
-                        instances = related_model.objects.filter(
-                            **{ field.name: instance })
-                        related_model_fields[relation] = [get_field_value_pairs(
-                            related_model, instance, relation_config[relation]) for instance in instances]
-                        break
-            return related_model_fields
-        except KeyError:
-            pass # TODO: handle case where no explicit configuration is specified
+        related_model_fields = {}
+        for relation in model._meta.related_objects:
+            related_model = relation.related_model
+            for field in related_model._meta.fields:
+                if field.get_internal_type() == 'ForeignKey' and field.related_model == model:
+                    instances = related_model.objects.filter(
+                        **{ field.name: instance })
+                    try:
+                        field_config = activity_config(
+                            app, model.__name__)['Relations'][related_model.__name__]
+                        relatd_items_detail = [get_field_value_pairs(
+                            related_model, instance, field_config) for instance in instances]
+                    except KeyError:
+                        relatd_items_detail = []
+                        for inst in instances:
+                            relatd_items_detail.append(
+                                get_all_fields(inst, exclude=[field.name]))
+            related_model_fields[related_model.__name__] = relatd_items_detail
+        return related_model_fields
 
 
 @register.assignment_tag(takes_context=True)
