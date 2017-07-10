@@ -48,7 +48,9 @@ def form_config(module, activity):
     return workflow_config(
         module).FORM_CONFIG[activity]
 
+
 # Request Helpers
+
 
 def get_request_params(what, request=None, **kwargs):
     """Returns requested argument value"""
@@ -61,7 +63,9 @@ def get_request_params(what, request=None, **kwargs):
     except IndexError:
         pass
 
+
 # Model Helpers
+
 
 def get_app_model_as_params(**kwargs):
     """Returns a list of app and model name as params"""
@@ -78,6 +82,7 @@ def get_model(**kwargs):
 def get_model_instance(**kwargs):
     """Returns model instance"""
     return get_model(**kwargs).objects.get(id=kwargs.get("pk"))
+
 
 def get_fk(instances, **kwargs):
     """Returns foreign key field"""
@@ -113,7 +118,8 @@ def get_form_config(what, **kwargs):
 
 def get_form_fields(operation, field_config):
     """Returns form fields"""
-    return [field for field in field_config if operation in field_config[field]]
+    return [field for field in field_config if (
+        operation in field_config[field])]
 
 
 def get_form(**kwargs):

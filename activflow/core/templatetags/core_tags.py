@@ -30,46 +30,62 @@ def activity_data(context, instance, option, _type):
     app = context['app_title']
     model = type(instance)
 
-    def compute(configuration):
-        """Compute fields for display"""
+    def filter(configuration):
+        """Filter fields to display based on configuration"""
         for field_name in configuration:
             if option in configuration[field_name]:
                 yield field_name
 
-    def get_field_value_pairs(model, instance, config):
-        """Returns field/value pairs"""
-        return OrderedDict([(model().class_meta.get_field(
-            field_name).verbose_name, getattr(
-                instance, field_name)) for field_name in itertools.islice(
-                    compute(config), len(config))])
+    def get_fields_from_config(model, instance, config):
+        """Returns field/value pairs from configuration"""
+        return OrderedDict([
+            (
+                model().class_meta.get_field(field_name).verbose_name,
+                getattr(instance, field_name)
+            )
+            for field_name in itertools.islice(filter(config), len(config))
+        ])
 
-    def get_all_fields(instance, exclude=[]):
-        """Returns all fields on the model"""
+    def get_all_fields(instance, exclude=None):
+        """Returns all field/value pairs on the model"""
+        exclude = exclude or []
         fields = [field for field in (
-            (field.name, field.verbose_name) for field in instance.class_meta.
-            get_fields()) if field[0] not in ['id', 'task', 'task_id'] + exclude]
+            (
+                field.name,
+                field.verbose_name
+            ) for field in instance.class_meta.get_fields()
+        ) if field[0] not in ['id', 'task', 'task_id'] + exclude]
         return {field[1]: getattr(
             instance, field[0]) for field in fields}
 
     if _type == 'model':
         try:
-            field_config = activity_config(app, model.__name__)['Fields']
-            return get_field_value_pairs(model, instance, field_config)
+            field_config = activity_config(
+                app, model.__name__)['Fields']
+            return get_fields_from_config(model, instance, field_config)
         except KeyError:
             return get_all_fields(instance)
     else:
         related_model_fields = {}
-        for relation in model._meta.related_objects:
+        for relation in model.class_meta.related_objects:
             related_model = relation.related_model
-            for field in related_model._meta.fields:
-                if field.get_internal_type() == 'ForeignKey' and field.related_model == model:
+            for field in related_model.class_meta.fields:
+                if all([
+                    field.get_internal_type() == 'ForeignKey',
+                    field.related_model == model]
+                ):
                     instances = related_model.objects.filter(
-                        **{ field.name: instance })
+                        **{field.name: instance})
                     try:
                         field_config = activity_config(
-                            app, model.__name__)['Relations'][related_model.__name__]
-                        relatd_items_detail = [get_field_value_pairs(
-                            related_model, instance, field_config) for instance in instances]
+                            app,
+                            model.__name__
+                        )['Relations'][related_model.__name__]
+                        relatd_items_detail = [get_fields_from_config(
+                            related_model,
+                            inst,
+                            field_config
+                        ) for inst in instances]
                     except KeyError:
                         relatd_items_detail = []
                         for inst in instances:
@@ -88,7 +104,7 @@ def wysiwyg_form_fields(context):
     try:
         return wysiwyg_config(app, model)
     except (KeyError, AttributeError):
-        return None
+        return
 
 
 @register.simple_tag

@@ -1,6 +1,5 @@
 """Model definition for test workflow"""
 
-from django.db import models
 from django.db.models import (
     CharField,
     ForeignKey,
@@ -26,10 +25,12 @@ class Foo(AbstractInitialActivity):
         """Custom validation logic should go here"""
         pass
 
+
 class FooLineItem(AbstractEntity):
     """Sample representation of Foo Line Item"""
     foo = ForeignKey(Foo, related_name="lines")
-    plugh = CharField("Plugh", max_length=200, validators=[validate_initial_cap])
+    plugh = CharField(
+        "Plugh", max_length=200, validators=[validate_initial_cap])
     thud = CharField(verbose_name="Thud", max_length=30, choices=(
         ('GR', 'Grault'), ('GA', 'Garply')))
 
@@ -42,10 +43,12 @@ class FooLineItem(AbstractEntity):
         """Custom validation logic should go here"""
         pass
 
+
 class FooMoreLineItem(AbstractEntity):
     """Sample representation of FooMore Line Item"""
     foo = ForeignKey(Foo, related_name="morelines")
-    plughmore = CharField("Plughmore", max_length=200, validators=[validate_initial_cap])
+    plughmore = CharField(
+        "Plughmore", max_length=200, validators=[validate_initial_cap])
     thudmore = CharField(verbose_name="Thudmore", max_length=30, choices=(
         ('GR', 'Grault'), ('GA', 'Garply')))
 
@@ -57,6 +60,7 @@ class FooMoreLineItem(AbstractEntity):
     def clean(self):
         """Custom validation logic should go here"""
         pass
+
 
 class Corge(AbstractActivity):
     """Sample representation of Corge activity"""

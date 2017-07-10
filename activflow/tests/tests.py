@@ -56,9 +56,11 @@ class CoreTests(TestCase):
         }
 
         for verb in ('get', 'post'):
-            response = getattr(self.client, verb)(reverse(
-                'create',
-                kwargs=request_args),
+            response = getattr(self.client, verb)(
+                reverse(
+                    'create',
+                    kwargs=request_args
+                ),
                 {
                     'FooLineItemForm-0-plugh': '',
                     'FooLineItemForm-0-thud': '',
@@ -72,7 +74,8 @@ class CoreTests(TestCase):
                     'FooMoreLineItemForm-INITIAL_FORMS': 0,
                     'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
                     'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
-                })
+                }
+            )
 
             if verb == 'get':
                 # Access Denied
@@ -82,9 +85,10 @@ class CoreTests(TestCase):
                 # Adds user to the group with permission
                 self.submitter.user_set.add(self.john_doe)
 
-            response = getattr(self.client, verb)(reverse(
-                'create',
-                kwargs=request_args),
+            response = getattr(self.client, verb)(
+                reverse(
+                    'create',
+                    kwargs=request_args),
                 {
                     'FooLineItemForm-0-plugh': '',
                     'FooLineItemForm-0-thud': '',
@@ -98,7 +102,8 @@ class CoreTests(TestCase):
                     'FooMoreLineItemForm-INITIAL_FORMS': 0,
                     'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
                     'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
-                })
+                }
+            )
 
             self.assertEqual(response.context['form']._meta.model, Foo,
                              'User has access to initiate workflow, '
@@ -128,7 +133,8 @@ class CoreTests(TestCase):
                 'FooMoreLineItemForm-INITIAL_FORMS': 0,
                 'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
                 'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
-            })
+            }
+        )
 
         self.assertEqual(response.status_code, 200,
                          'Form post did not result in success')
@@ -161,7 +167,8 @@ class CoreTests(TestCase):
                 'FooMoreLineItemForm-INITIAL_FORMS': 0,
                 'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
                 'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
-            })
+            }
+        )
 
         response = self.client.post(
             reverse(
@@ -186,7 +193,8 @@ class CoreTests(TestCase):
                 'FooMoreLineItemForm-INITIAL_FORMS': 0,
                 'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
                 'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
-            })
+            }
+        )
 
         self.assertEqual(response.status_code, 200,
                          'Form post did not result in success')
@@ -216,7 +224,8 @@ class CoreTests(TestCase):
                 'FooMoreLineItemForm-INITIAL_FORMS': 0,
                 'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
                 'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
-            })
+            }
+        )
 
         instances = Foo.objects.all()
         instance = instances.first()
@@ -241,9 +250,10 @@ class CoreTests(TestCase):
 
         # Update activity
         for verb in ('get', 'post'):
-            response = getattr(self.client, verb)(reverse(
-                'update',
-                kwargs=request_args),
+            response = getattr(self.client, verb)(
+                reverse(
+                    'update',
+                    kwargs=request_args),
                 {
                     'FooLineItemForm-0-plugh': '',
                     'FooLineItemForm-0-thud': '',
@@ -257,7 +267,8 @@ class CoreTests(TestCase):
                     'FooMoreLineItemForm-INITIAL_FORMS': 0,
                     'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
                     'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
-                })
+                }
+            )
 
         # Post the form with SAVE action
         response = self.client.post(
@@ -285,7 +296,8 @@ class CoreTests(TestCase):
                 'FooMoreLineItemForm-INITIAL_FORMS': 0,
                 'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
                 'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
-            })
+            }
+        )
 
         # Control redirects to update after save
         self.assertRedirects(
@@ -320,7 +332,8 @@ class CoreTests(TestCase):
                 'FooMoreLineItemForm-INITIAL_FORMS': 0,
                 'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
                 'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
-            })
+            }
+        )
 
         # Control redirects to workflow detail
         # self.assertRedirects(
@@ -360,7 +373,8 @@ class CoreTests(TestCase):
                 'FooMoreLineItemForm-INITIAL_FORMS': 0,
                 'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
                 'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
-            })
+            }
+        )
 
         instances = Corge.objects.all()
         instance = instances.first()
@@ -437,7 +451,8 @@ class CoreTests(TestCase):
                 'FooMoreLineItemForm-INITIAL_FORMS': 0,
                 'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
                 'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
-            })
+            }
+        )
 
         instances = Foo.objects.all()
         instance = instances.first()
@@ -479,7 +494,8 @@ class CoreTests(TestCase):
                 'FooMoreLineItemForm-INITIAL_FORMS': 0,
                 'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
                 'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
-            })
+            }
+        )
 
         # Control redirects to update after save
         self.assertRedirects(
@@ -512,7 +528,8 @@ class CoreTests(TestCase):
                 'FooMoreLineItemForm-INITIAL_FORMS': 0,
                 'FooMoreLineItemForm-MIN_NUM_FORMS': 0,
                 'FooMoreLineItemForm-MAX_NUM_FORMS': 1000
-            })
+            }
+        )
 
         # Control redirects to workflow detail
         # self.assertRedirects(
