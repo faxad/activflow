@@ -91,8 +91,9 @@ class CreateActivity(AccessDeniedMixin, generic.View):
     def get(self, request, **kwargs):
         """GET request handler for Create operation"""
         form = get_form(**kwargs)
-        formsets = [formset(prefix=formset.form.__name__) for formset in get_formsets(
-            self.__class__.__name__, extra=1, **kwargs)]
+        formsets = [formset(
+            prefix=formset.form.__name__) for formset in get_formsets(
+                self.__class__.__name__, extra=1, **kwargs)]
         context = {'form': form, 'formsets': formsets}
 
         denied = self.check(request, **kwargs)
@@ -182,9 +183,15 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
             reverse('update', args=(
                 app_title, instance.title, instance.id))
         ) if redirect_to_update else HttpResponseRedirect(
-                reverse('workflow-detail', args=[app_title]))
+            reverse(
+                'workflow-detail',
+                args=[app_title]
+            )
+        )
+
 
 # Handlers
+
 
 class FormHandler(object):
     """Form and Formsets Manager"""
@@ -196,6 +203,67 @@ class FormHandler(object):
         self.form = form
         self.formsets = formsets
 
+    def add(self, formsets, instruction):
+        """Includes an additional form in the formset(s)"""
+        request = self.request.POST.copy()
+
+        for formset in formsets:
+            form_title = formset.form.__name__
+            if 'add-' + form_title.replace('Form', '') in instruction:
+                total_forms = form_title + '-TOTAL_FORMS'
+                request[total_forms] = int(request[total_forms]) + 1
+
+        formsets = [formset(
+            request, prefix=formset.form.__name__) for formset in formsets]
+
+        context = {
+            'form': self.form,
+            'formsets': formsets,
+        }
+
+        if self.instance:
+            context['object'] = self.instance
+
+        return (False, context)
+
+    def save(self, formsets, **kwargs):
+        """Persists validated formset(s)"""
+        # form
+        instance = self.form.save()
+        # formsets
+        for formset in formsets:
+            if not self.instance:  # create operation
+                objects = formset.save(commit=False)
+                fk = get_fk(objects, **kwargs)
+                for obj in objects:
+                    setattr(obj, fk, instance)
+                    obj.save()
+            else:  # update operation
+                formset.save()
+        return (True, instance)
+
+    def report(self, formsets):
+        """Report validation errors"""
+        errors = ''
+
+        for formset in formsets:
+            for error in formset.errors:
+                errors = errors + str(error)
+
+        context = {
+            'form': self.form,
+            'formsets': [formset(
+                self.request.POST,
+                prefix=formset.form.__name__
+            ) for formset in self.formsets],
+            'error_message': errors + str(self.form.errors)
+        }
+
+        if self.instance:
+            context['object'] = self.instance
+            context['next'] = self.instance.next_activity()
+        return (False, context)
+
     def handle(self, **kwargs):
         """Adds, validates and persist formsets"""
         instruction = next(iter(filter(
@@ -204,27 +272,8 @@ class FormHandler(object):
         # Handle adding related instance
 
         if instruction:
-            request = self.request.POST.copy()
             formsets = get_formsets(self.operation, **kwargs)
-
-            for formset in formsets:
-                form_title = formset.form.__name__
-                if 'add-' + form_title.replace('Form', '') in instruction:
-                    total_forms = form_title + '-TOTAL_FORMS'
-                    request[total_forms] = int(request[total_forms]) + 1
-
-            formsets = [formset(
-                request, prefix=formset.form.__name__) for formset in formsets]
-
-            context = {
-                'form': self.form,
-                'formsets': formsets,
-            }
-
-            if self.instance:
-                context['object'] = self.instance
-
-            return (False, context)
+            return self.add(formsets, instruction)
 
         # Validate and save form/formsets
 
@@ -233,42 +282,13 @@ class FormHandler(object):
         for formset in self.formsets:
             formsets.append(formset(
                 self.request.POST,
-                instance=self.instance, # None for create operation
+                instance=self.instance,  # None for create operation
                 prefix=formset.form.__name__
             ))
 
-        if self.form.is_valid() and all(formset.is_valid() for formset in formsets):
-            # form
-            instance = self.form.save()
-            # formsets
-            for formset in formsets:
-                if not self.instance: # create operation
-                    objects = formset.save(commit=False)
-                    fk = get_fk(objects, **kwargs)
-                    for obj in objects:
-                        setattr(obj, fk, instance)
-                        obj.save()
-                else: # update operation
-                    formset.save()
-            return (True, instance)
+        if self.form.is_valid() and all(
+            formset.is_valid() for formset in formsets
+        ):
+            return self.save(formsets, **kwargs)
         else:
-            errors = ''
-
-            for formset in formsets:
-                for error in formset.errors:
-                    errors = errors + str(error)
-
-            context = {
-                'form': self.form,
-                'formsets': [formset(
-                    self.request.POST,
-                    prefix=formset.form.__name__
-                ) for formset in self.formsets],
-                'error_message': errors + str(self.form.errors)
-            }
-
-            if self.instance:
-                context['object'] = self.instance
-                context['next'] = self.instance.next_activity()
-            
-            return (False, context)
+            return self.report(formsets)
