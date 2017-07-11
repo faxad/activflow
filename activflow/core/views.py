@@ -135,7 +135,7 @@ class UpdateActivity(AccessDeniedMixin, generic.View):
         """GET request handler for Update operation"""
         instance = get_model_instance(**kwargs)
         form = get_form(**kwargs)
-        formsets = get_formsets(self.__class__.__name__, **kwargs)
+        formsets = get_formsets(self.__class__.__name__, extra=1, **kwargs)
         context = {
             'form': form(instance=instance),
             'formsets': [formset(
@@ -234,10 +234,11 @@ class FormHandler(object):
         for formset in formsets:
             if not self.instance:  # create operation
                 objects = formset.save(commit=False)
-                fk = get_fk(objects, **kwargs)
-                for obj in objects:
-                    setattr(obj, fk, instance)
-                    obj.save()
+                if objects:
+                    fk = get_fk(objects, **kwargs)
+                    for obj in objects:
+                        setattr(obj, fk, instance)
+                        obj.save()
             else:  # update operation
                 formset.save()
         return (True, instance)

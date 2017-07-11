@@ -67,9 +67,9 @@ def activity_data(context, instance, option, _type):
             return get_all_fields(instance)
     else:
         related_model_fields = {}
-        for relation in model.class_meta.related_objects:
+        for relation in model().class_meta.related_objects:
             related_model = relation.related_model
-            for field in related_model.class_meta.fields:
+            for field in related_model().class_meta.fields:
                 if all([
                     field.get_internal_type() == 'ForeignKey',
                     field.related_model == model]
