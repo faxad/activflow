@@ -16,11 +16,11 @@ What is an ActivFlow workflow?
 - Business Roles mapped to workflow activities
 - Rules applied on transitions between activities
 
-![alt tag](https://cloud.githubusercontent.com/assets/6130967/14062046/b055de98-f3a2-11e5-9d13-e74e4a9252f7.png)
+![alt tag](https://user-images.githubusercontent.com/6130967/28086399-5625a4e8-6698-11e7-8a00-ccf3180d70be.png)
 
 ### Technology Stack
-- Python 2.7x, 3.4x, 3.5x
-- Django 1.9x
+- Python 2.7x, 3.4x, 3.5x, 3.6x
+- Django 1.9x, 1.10x, 1.11x
 - Bootstrap 3.x
 
 ### Usage & Configuration
@@ -38,11 +38,11 @@ WORKFLOW_APPS = ['leave_request']
 - Custom validation logic must be defined under **clean()** on the activity model
 - Custom field specific validation should go under **app/validator** and applied to the field as **validators** attribute
 ```python
-from activflow.core.models import AbstractActivity, AbstractInitialActivity
+from activflow.core.models import AbstractActivity, AbstractInitialActivity, AbstractEntity
 from activflow.leave_request.validators import validate_initial_cap
 
-class RequestInitiation(AbstractInitialActivity):
-    """Leave request details"""
+class SampleRequest(AbstractInitialActivity):
+    """Sample leave request details"""
     employee_name = CharField("Employee", max_length=200, validators=[validate_initial_cap])
     from = DateField("From Date")
     to = DateField("To Date")
@@ -52,8 +52,18 @@ class RequestInitiation(AbstractInitialActivity):
         """Custom validation logic should go here"""
         pass
 
-class ManagementApproval(AbstractActivity):
-    """Management approval"""
+class Itinerary(AbstractEntity):
+    """Itinerary details"""
+    request = ForeignKey(RequestInitiation, related_name="itineraries")
+    destination = CharField("Destination", max_length=200)
+    date = DateField("Visit Date")
+
+    def clean(self):
+        """Custom validation logic should go here"""
+        pass
+
+class ManagementReview(AbstractActivity):
+    """Management review/approval"""
     approval_status = CharField(verbose_name="Status", max_length=3, choices=(
         ('APP', 'Approved'), ('REJ', 'Rejected')))
     remarks = TextField("Remarks")
@@ -69,27 +79,27 @@ class ManagementApproval(AbstractActivity):
 - Business Process flow must be defined as **FLOW** under **app/flow**
 - As a default behavior, the Role maps OTO with django Group (developers, feel free to customize)
 ```python
-from activflow.leave_request.models import RequestInitiation, ManagementApproval
+from activflow.leave_request.models import SampleRequest, ManagementReview
 from activflow.leave_request.rules import validate_request
 
 FLOW = {
-    'initiate_request': {
-        'name': 'Leave Request Initiation',
-        'model': RequestInitiation,
+    'sample_leave_request': {
+        'name': 'Sample Request',
+        'model': SampleRequest,
         'role': 'Submitter',
         'transitions': {
-            'management_approval': validate_request,
+            'management_review': validate_request,
         }
     },
-    'management_approval': {
-        'name': 'Management Approval',
-        'model': ManagementApproval,
+    'management_review': {
+        'name': 'Management's Review',
+        'model': ManagementReview,
         'role': 'Approver',
         'transitions': None
     }
 }
 
-INITIAL = 'initiate_request'
+INITIAL = 'sample_leave_request'
 ```
 #### Step 4: Business Rules
 - Transition rules and conditions must be defined under **app/rules**
@@ -105,17 +115,28 @@ def validate_request(self):
     - **update:** field will be available for activity update/revise operation
     - **display:** available for display in activity detail view
 ```python
-from collections import OrderedDict as odict
+from collections import OrderedDict
 
-ACTIVITY_CONFIG = odict([
-    ('RequestInitiation', odict([
-        ('subject', ['create', 'update', 'display']),
-        ('employee_name', ['create', 'update', 'display']),
-        ('from', ['create', 'update', 'display']),
-        ('to', ['create', 'update', 'display']),
-        ('reason', ['create', 'update', 'display']),
-        ('creation_date', ['display']),
-        ('last_updated', ['display'])
+
+ACTIVITY_CONFIG = OrderedDict([
+    ('Foo', OrderedDict([
+        ('Fields', OrderedDict([
+            ('subject', ['create', 'update', 'display']),
+            ('employee_name', ['create', 'update', 'display']),
+            ('from', ['create', 'update', 'display']),
+            ('to', ['create', 'update', 'display']),
+            ('reason', ['create', 'update', 'display']),
+            ('creation_date', ['display']),
+            ('last_updated', ['display'])
+        ])),
+        ('Relations', OrderedDict([
+            ('Itinerary', OrderedDict([
+                ('destination', ['create', 'update', 'display']),
+                ('date', ['create', 'update', 'display'])
+            ])),
+            ...
+            ...
+        ]))
     ])),
     ...
     ...
