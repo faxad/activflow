@@ -1,7 +1,6 @@
 # activflow
 [![Build Status](https://travis-ci.org/faxad/ActivFlow.svg?branch=master)](https://travis-ci.org/faxad/ActivFlow)
 [![Coverage Status](https://coveralls.io/repos/github/faxad/ActivFlow/badge.svg?branch=master)](https://coveralls.io/github/faxad/ActivFlow?branch=master)
-[![Code Health](https://landscape.io/github/faxad/ActivFlow/master/landscape.svg?style=flat)](https://landscape.io/github/faxad/ActivFlow/master)
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/f1cb2c6766cb4539ac1c3d4057996047)](https://www.codacy.com/app/fawadhq/ActivFlow)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Ffaxad%2FActivFlow.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Ffaxad%2FActivFlow?ref=badge_shield)
 
@@ -160,6 +159,10 @@ The core logic to restrict access is defined as **AccessDeniedMixin** under **co
 Execute the below command to configure ActivFlow for demo purpose
 ```
 python demo.py
+```
+Alternatively, launch the docker containers by simply running
+```
+docker-compose up
 ```
 **Submitter:** john.doe/12345, **Reviewer:** jane.smith/12345
 

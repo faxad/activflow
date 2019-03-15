@@ -1,7 +1,11 @@
 import os
 import django
 
-SETTINGS = 'activflow.settings'
+SETTINGS = "activflow.settings.development"
+
+if os.environ.get("ENV", None) == "staging":
+    SETTINGS = "activflow.settings.staging"
+
 os.environ['DJANGO_SETTINGS_MODULE'] = SETTINGS
 
 

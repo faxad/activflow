@@ -1,0 +1,34 @@
+version: '3'
+
+volumes:
+  static: {}
+
+services:
+  db:
+    image: postgres
+    hostname: db
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - ENV=staging
+    command: sh ./scripts/on-container-start.sh
+    hostname: activflow
+    volumes:
+      - ./:/app
+      - static:/app/activflow/static
+    expose:
+      - "8000"
+    depends_on:
+      - db
+  nginx:
+    image: nginx:latest
+    hostname: nginx
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./config/nginx:/etc/nginx/conf.d
+      - static:/static
+    depends_on:
+      - app

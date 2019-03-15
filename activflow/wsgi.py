@@ -11,6 +11,11 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "activflow.settings")
+SETTINGS = "activflow.settings.development"
+
+if os.environ.get("ENV", None) == "staging":
+    SETTINGS = "activflow.settings.staging"
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", SETTINGS)
 
 application = get_wsgi_application()

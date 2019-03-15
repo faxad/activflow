@@ -1,1 +1,4 @@
+Django==1.9
+gunicorn==19.6.0
+psycopg2==2.7.5
 django_extensions==1.7.9
