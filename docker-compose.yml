@@ -1,12 +1,11 @@
-version: '3'
-
-volumes:
-  static: {}
+version: '3.5'
 
 services:
   db:
     image: postgres
     hostname: db
+    networks:
+      activflow-net:
   app:
     build:
       context: .
@@ -15,14 +14,16 @@ services:
       - ENV=staging
     command: sh ./scripts/on-container-start.sh
     hostname: activflow
+    expose:
+      - "8000"
     volumes:
       - ./:/app
       - static:/app/activflow/static
-    expose:
-      - "8000"
+    networks:
+      activflow-net:
     depends_on:
       - db
-  nginx:
+  web:
     image: nginx:latest
     hostname: nginx
     ports:
@@ -30,5 +31,13 @@ services:
     volumes:
       - ./config/nginx:/etc/nginx/conf.d
       - static:/static
+    networks:
+      activflow-net:
     depends_on:
       - app
+
+volumes:
+  static:
+
+networks:
+  activflow-net:
