@@ -6,7 +6,8 @@ from django.db.models import (
     CharField,
     DateTimeField,
     OneToOneField,
-    ForeignKey)
+    ForeignKey,
+    CASCADE)
 
 from activflow.core.constants import (
     REQUEST_STATUS,
@@ -55,7 +56,7 @@ class AbstractEntity(Model):
 
 class Request(AbstractEntity):
     """Defines the workflow request"""
-    requester = ForeignKey(User, related_name='requests')
+    requester = ForeignKey(User, related_name='requests', on_delete=CASCADE)
     module_ref = CharField(max_length=100)
     status = CharField(
         verbose_name="Status", max_length=30, choices=REQUEST_STATUS)
@@ -63,9 +64,9 @@ class Request(AbstractEntity):
 
 class Task(AbstractEntity):
     """Defines the workflow task"""
-    request = ForeignKey(Request, related_name='tasks')
-    assignee = ForeignKey(Group)
-    updated_by = ForeignKey(User)
+    request = ForeignKey(Request, related_name='tasks', on_delete=CASCADE)
+    assignee = ForeignKey(Group, on_delete=CASCADE)
+    updated_by = ForeignKey(User, on_delete=CASCADE)
     activity_ref = CharField(max_length=100)
     status = CharField(
         verbose_name="Status", max_length=30, choices=TASK_STATUS)
@@ -167,7 +168,7 @@ class Task(AbstractEntity):
 
 class AbstractActivity(AbstractEntity):
     """Common attributes for all activities"""
-    task = OneToOneField(Task, null=True)
+    task = OneToOneField(Task, null=True, on_delete=CASCADE)
 
     class Meta(object):
         abstract = True

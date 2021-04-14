@@ -24,7 +24,7 @@ def label_with_class(value, arg):
     return value.label_tag(attrs={'class': arg})
 
 
-@register.assignment_tag(takes_context=True)
+@register.simple_tag(takes_context=True)
 def activity_data(context, instance, option, _type):
     """Returns activity data as in field/value pair"""
     app = context['app_title']
@@ -95,7 +95,7 @@ def activity_data(context, instance, option, _type):
         return related_model_fields
 
 
-@register.assignment_tag(takes_context=True)
+@register.simple_tag(takes_context=True)
 def wysiwyg_form_fields(context):
     """Returns activity data as in field/value pair"""
     app = context['app_title']

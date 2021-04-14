@@ -4,7 +4,8 @@ from django.db.models import (
     CharField,
     ForeignKey,
     IntegerField,
-    TextField)
+    TextField,
+    CASCADE)
 
 from activflow.core.models import (
     AbstractEntity,
@@ -28,7 +29,7 @@ class Foo(AbstractInitialActivity):
 
 class FooLineItem(AbstractEntity):
     """Sample representation of Foo Line Item"""
-    foo = ForeignKey(Foo, related_name="lines")
+    foo = ForeignKey(Foo, related_name="lines", on_delete=CASCADE)
     plugh = CharField(
         "Plugh", max_length=200, validators=[validate_initial_cap])
     thud = CharField(verbose_name="Thud", max_length=30, choices=(
@@ -46,7 +47,7 @@ class FooLineItem(AbstractEntity):
 
 class FooMoreLineItem(AbstractEntity):
     """Sample representation of FooMore Line Item"""
-    foo = ForeignKey(Foo, related_name="morelines")
+    foo = ForeignKey(Foo, related_name="morelines", on_delete=CASCADE)
     plughmore = CharField(
         "Plughmore", max_length=200, validators=[validate_initial_cap])
     thudmore = CharField(verbose_name="Thudmore", max_length=30, choices=(

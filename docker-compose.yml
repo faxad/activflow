@@ -4,6 +4,8 @@ services:
   db:
     image: postgres
     hostname: db
+    environment:
+      - POSTGRES_PASSWORD=password
     networks:
       activflow-net:
   app:

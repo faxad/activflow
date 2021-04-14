@@ -18,8 +18,8 @@ What is an ActivFlow workflow?
 ![alt tag](https://user-images.githubusercontent.com/6130967/28086399-5625a4e8-6698-11e7-8a00-ccf3180d70be.png)
 
 ### Technology Stack
-- Python 2.7x, 3.4x, 3.5x, 3.6x
-- Django 1.9x, 1.10x, 1.11x
+- Python 3.5+
+- Django 3.x
 - Bootstrap 3.x
 
 ### Usage & Configuration
